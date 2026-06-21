@@ -362,6 +362,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get stub_accountability_title => 'Responsabilidad';
 
   @override
+  String get settings_section_session => 'Sesión';
+
+  @override
+  String get settings_leave_session_title => 'Salir de la sesión';
+
+  @override
+  String get settings_leave_session_subtitle =>
+      'Empezar de nuevo como usuario nuevo';
+
+  @override
+  String get settings_leave_session_dialog_title => '¿Salir de la sesión?';
+
+  @override
+  String get settings_leave_session_dialog_body =>
+      'Esto borrará tu plan y tus respuestas y te llevará al inicio. La protección se desactivará.';
+
+  @override
+  String get settings_leave_session_action => 'Salir';
+
+  @override
+  String get common_cancel => 'Cancelar';
+
+  @override
   String get protection_permission_needed =>
       'Se necesita permiso para activar la Protección';
 

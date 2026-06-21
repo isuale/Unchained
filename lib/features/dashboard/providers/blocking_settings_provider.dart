@@ -56,6 +56,13 @@ class BlockingSettingsActions extends Notifier<void> {
   Future<void> setSocialMode(String mode) {
     return ref.read(blockingSettingsRepositoryProvider).setSocialMode(mode);
   }
+
+  /// Turns off the native VPN and wipes the local session so the user can
+  /// start over from the welcome screen as if newly installed.
+  Future<void> leaveSession() async {
+    await BlockingService.stop();
+    await ref.read(blockingSettingsRepositoryProvider).resetSession();
+  }
 }
 
 final blockingSettingsActionsProvider =

@@ -67,6 +67,18 @@ class BlockingSettingsRepository {
   Future<void> setActivePlan(String plan) async {
     await updateSettings(BlockingSettingsCompanion(activePlan: Value(plan)));
   }
+
+  /// Wipes the user's session so the app behaves like a fresh install:
+  /// clears the settings row back to defaults and removes the onboarding
+  /// assessment history. After this, the splash screen routes to /welcome
+  /// because [BlockingSetting.activePlan] is null again.
+  Future<void> resetSession() async {
+    await _db.delete(_db.userAssessments).go();
+    await _db.delete(_db.blockingSettings).go();
+    await _db.into(_db.blockingSettings).insert(
+          const BlockingSettingsCompanion(id: Value(1)),
+        );
+  }
 }
 
 final blockingSettingsRepositoryProvider =

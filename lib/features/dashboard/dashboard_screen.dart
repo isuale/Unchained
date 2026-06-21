@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:unchained/features/dashboard/presentation/settings_screen.dart';
 import 'package:unchained/features/dashboard/protection_dashboard_screen.dart';
 import 'package:unchained/features/dashboard/stubs/blocklist_stub.dart';
 import 'package:unchained/features/dashboard/stubs/progress_stub.dart';
-import 'package:unchained/features/dashboard/stubs/settings_stub.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -31,7 +31,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ProtectionDashboardScreen(),
           BlocklistStub(),
           ProgressStub(),
-          SettingsStub(),
+          SettingsScreen(),
         ],
       ),
       bottomNavigationBar: Theme(

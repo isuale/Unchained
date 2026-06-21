@@ -782,6 +782,48 @@ abstract class AppLocalizations {
   /// **'Responsabilidad'**
   String get stub_accountability_title;
 
+  /// No description provided for @settings_section_session.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión'**
+  String get settings_section_session;
+
+  /// No description provided for @settings_leave_session_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir de la sesión'**
+  String get settings_leave_session_title;
+
+  /// No description provided for @settings_leave_session_subtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar de nuevo como usuario nuevo'**
+  String get settings_leave_session_subtitle;
+
+  /// No description provided for @settings_leave_session_dialog_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Salir de la sesión?'**
+  String get settings_leave_session_dialog_title;
+
+  /// No description provided for @settings_leave_session_dialog_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Esto borrará tu plan y tus respuestas y te llevará al inicio. La protección se desactivará.'**
+  String get settings_leave_session_dialog_body;
+
+  /// No description provided for @settings_leave_session_action.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir'**
+  String get settings_leave_session_action;
+
+  /// No description provided for @common_cancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get common_cancel;
+
   /// No description provided for @protection_permission_needed.
   ///
   /// In es, this message translates to:
