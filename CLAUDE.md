@@ -8,6 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > Note: the parent directory of this project is a tools/SDK root (Android SDK, Flutter SDK, JDK). Run all commands below from this `unchained/` directory.
 
+> **Scope:** The user also keeps an unrelated `minecraft*` directory under `/home/isuale/dev`. It is **not** part of this project — never read, edit, search, or reference anything under a `minecraft*` path. When searching near `/home/isuale/dev`, exclude it (e.g. `rg --glob '!**/minecraft*/**'`). Stay inside the `unchained` app tree.
+
+> **Always commit:** After finishing any working feature or change, make a git commit so the user can always roll back if a function breaks. Commit only at a stable point (run codegen / `flutter analyze` first), stage specific paths, write a clear present-tense message, and commit to the current branch. Do **not** push unless asked. Then tell the user the short commit hash as their rollback point. See the `auto-commit` skill for the full procedure.
+
+> **Always summarize:** End every response that involved doing work with a short, plain-language summary of what was done (what changed, why, and what to check next). The user is learning, so keep it clear and tie it to the actual files.
+
 ## Commands
 
 ```bash
