@@ -38,7 +38,9 @@ class DashboardHeader extends StatelessWidget {
               _PlanPill(
                 plan: activePlan,
                 l: l,
-                onTap: () => context.go('/plans/all'),
+                // push (not go) so backing out of the plans screen returns
+                // to the dashboard the user came from.
+                onTap: () => context.push('/plans/all'),
               ),
             ],
           ),

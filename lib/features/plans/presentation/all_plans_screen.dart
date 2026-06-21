@@ -64,8 +64,12 @@ class AllPlansScreen extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () =>
-                      context.go(_planRouteFromId(recommendedId)),
+                  // If we were pushed on top of another screen (e.g. the
+                  // dashboard), pop back to it. Otherwise (onboarding flow,
+                  // reached via go) fall back to the recommended plan.
+                  onPressed: () => context.canPop()
+                      ? context.pop()
+                      : context.go(_planRouteFromId(recommendedId)),
                 ),
               ),
               const SizedBox(height: 16),
