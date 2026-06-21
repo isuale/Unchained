@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.VpnService
 import android.os.Build
@@ -53,6 +54,9 @@ class BlockingService : VpnService() {
     // Upstream DNS resolvers, resolved from the underlying (non-VPN) network at start,
     // with public fallbacks appended. Captured once when the tunnel comes up.
     @Volatile private var upstreamDns: List<InetAddress> = emptyList()
+    // The real network (Wi-Fi/cellular) our upstream queries must go out on. Captured
+    // before establish() so it's the actual default link, not our own VPN.
+    @Volatile private var underlyingNetwork: Network? = null
 
     companion object {
         const val TAG = "BlockingService"
@@ -142,6 +146,17 @@ class BlockingService : VpnService() {
             Log.d(TAG, "VPN already running, ignoring start")
             return
         }
+        // Resolve the underlying network + its DNS servers BEFORE establishing the VPN.
+        // Once establish() runs, ConnectivityManager.activeNetwork becomes our own VPN,
+        // and scanning *all* networks picks up resolvers from an inactive link (e.g. the
+        // cellular DNS while we're actually on Wi-Fi). Those aren't reachable on the active
+        // link, so every query to them stalls for the full socket timeout before falling
+        // through to a working server — which is why non-blocked sites were so slow.
+        val cm = getSystemService(ConnectivityManager::class.java)
+        underlyingNetwork = pickUnderlyingNetwork(cm)
+        upstreamDns = resolveUpstreamServers(cm, underlyingNetwork)
+        Log.d(TAG, "Underlying network: $underlyingNetwork, upstream DNS: ${upstreamDns.joinToString { it.hostAddress ?: "?" }}")
+
         val builder = Builder()
             .addAddress("10.0.0.2", 30)
             .addRoute("10.0.0.0", 30)
@@ -152,8 +167,6 @@ class BlockingService : VpnService() {
         vpnInterface = builder.establish()
         Log.d(TAG, "VPN interface established: ${vpnInterface != null}")
 
-        upstreamDns = resolveUpstreamServers()
-        Log.d(TAG, "Upstream DNS servers: ${upstreamDns.joinToString { it.hostAddress ?: "?" }}")
         executor = Executors.newFixedThreadPool(8)
 
         shouldRun = true
@@ -173,6 +186,7 @@ class BlockingService : VpnService() {
             Log.e(TAG, "Error closing vpnInterface", e)
         }
         vpnInterface = null
+        underlyingNetwork = null
         try {
             tunnelThread?.join(2000)
         } catch (e: InterruptedException) {
@@ -289,6 +303,9 @@ class BlockingService : VpnService() {
         origSrcPort: Int,
         dns: ByteArray,
     ) {
+        // A late upstream reply can land after the tunnel was torn down; the fd is then
+        // closed and writing throws EBADF. Skip quietly instead of logging a stack trace.
+        if (!shouldRun) return
         val responsePacket = buildIpv4UdpPacket(
             srcIp = origDstIp,    // swap src/dst
             dstIp = origSrcIp,
@@ -306,21 +323,42 @@ class BlockingService : VpnService() {
     }
 
     /**
-     * The DNS servers to forward non-blocked queries to. Prefers the resolvers of the
-     * underlying physical network (the ones this network actually permits — many routers
-     * and carriers block public resolvers like 1.1.1.1), then appends public fallbacks.
+     * Picks the real network our upstream DNS queries should go out on. Called BEFORE the
+     * VPN is established, so [ConnectivityManager.getActiveNetwork] still returns the OS's
+     * actual default link (Wi-Fi when present, otherwise cellular) rather than our VPN.
+     * Falls back to the first non-VPN network with internet if there's no active network.
      */
-    private fun resolveUpstreamServers(): List<InetAddress> {
+    private fun pickUnderlyingNetwork(cm: ConnectivityManager?): Network? {
+        if (cm == null) return null
+        val active = cm.activeNetwork
+        if (active != null) {
+            val caps = cm.getNetworkCapabilities(active)
+            if (caps != null &&
+                caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+            ) return active
+        }
+        for (network in cm.allNetworks) {
+            val caps = cm.getNetworkCapabilities(network) ?: continue
+            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) continue
+            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) continue
+            return network
+        }
+        return null
+    }
+
+    /**
+     * The DNS servers to forward non-blocked queries to. Uses the resolvers of the active
+     * underlying network only (the ones reachable on the link traffic actually flows over —
+     * pulling DNS from an inactive network, e.g. cellular while on Wi-Fi, gives unreachable
+     * servers that stall every lookup). Public fallbacks are appended last.
+     */
+    private fun resolveUpstreamServers(cm: ConnectivityManager?, network: Network?): List<InetAddress> {
         val servers = LinkedHashSet<InetAddress>()
         try {
-            val cm = getSystemService(ConnectivityManager::class.java)
-            if (cm != null) {
-                for (network in cm.allNetworks) {
-                    val caps = cm.getNetworkCapabilities(network) ?: continue
-                    // Underlying real networks only — skip our own VPN transport.
-                    if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) continue
-                    if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) continue
-                    val lp = cm.getLinkProperties(network) ?: continue
+            if (cm != null && network != null) {
+                val lp = cm.getLinkProperties(network)
+                if (lp != null) {
                     for (dns in lp.dnsServers) {
                         if (dns is Inet4Address) servers.add(dns)  // packet builder is IPv4-only
                     }
@@ -379,13 +417,18 @@ class BlockingService : VpnService() {
     }
 
     private fun forwardDnsUpstream(query: ByteArray): ByteArray {
-        val servers = upstreamDns.ifEmpty { resolveUpstreamServers() }
+        val servers = upstreamDns.ifEmpty {
+            val cm = getSystemService(ConnectivityManager::class.java)
+            resolveUpstreamServers(cm, underlyingNetwork)
+        }
+        val net = underlyingNetwork
         var lastError: Exception? = null
         for (server in servers) {
             val socket = DatagramSocket()
             try {
-                protect(socket)  // CRITICAL: send over the real network, not back through our VPN
-                socket.soTimeout = 3000
+                protect(socket)        // CRITICAL: keep this query off our own VPN
+                net?.bindSocket(socket)  // and force it out the active link (Wi-Fi/cellular)
+                socket.soTimeout = 2000
                 socket.send(DatagramPacket(query, query.size, server, 53))
                 val recv = ByteArray(4096)
                 val pkt = DatagramPacket(recv, recv.size)
