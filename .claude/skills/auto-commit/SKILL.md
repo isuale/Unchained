@@ -42,9 +42,10 @@ committing a green state.
 
 ## After committing
 
-Tell the user in one line what was committed and the short commit hash, so they know
-the rollback point exists, e.g.:
+**Always** tell the user — proactively, without waiting to be asked — in one line what was
+committed and the short commit hash, so they know the rollback point exists, e.g.:
 `Committed "Add onboarding skip button" (a1b2c3d) — you can roll back to here anytime.`
+Also state whether it was pushed (default: committed locally only, not pushed).
 
 ## Teaching note
 
