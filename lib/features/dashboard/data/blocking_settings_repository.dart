@@ -68,6 +68,15 @@ class BlockingSettingsRepository {
     await updateSettings(BlockingSettingsCompanion(activePlan: Value(plan)));
   }
 
+  /// Persists the commitment cycle and the moment its lock expires.
+  /// Pass cycle 0 / null to clear the commitment.
+  Future<void> setCommitment({required int cycle, DateTime? lockUntil}) async {
+    await updateSettings(BlockingSettingsCompanion(
+      commitmentCycle: Value(cycle),
+      commitmentLockUntil: Value(lockUntil),
+    ));
+  }
+
   /// Wipes the user's session so the app behaves like a fresh install:
   /// clears the settings row back to defaults and removes the onboarding
   /// assessment history. After this, the splash screen routes to /welcome

@@ -392,6 +392,45 @@ class AppLocalizationsEs extends AppLocalizations {
   String get protection_start_failed => 'No se pudo iniciar la Protección';
 
   @override
+  String get commitment_warning_title => 'Modo Compromiso';
+
+  @override
+  String commitment_warning_body(int days) {
+    return 'La Protección quedará ACTIVADA y NO podrás desactivarla durante $days días. Ese es el punto: te quita la decisión en un momento de debilidad. Después tendrás una pausa corta y volverá a bloquearse por aún más tiempo. ¿Estás seguro?';
+  }
+
+  @override
+  String get commitment_warning_confirm => 'Comprométeme';
+
+  @override
+  String commitment_locked_banner(int days) {
+    return 'Comprometido · quedan $days días';
+  }
+
+  @override
+  String commitment_locked_sub(String date) {
+    return 'La Protección no se puede desactivar hasta el $date';
+  }
+
+  @override
+  String commitment_break_banner(int minutes) {
+    return 'Pausa abierta · quedan $minutes min';
+  }
+
+  @override
+  String get commitment_break_sub =>
+      'Ahora puedes desactivar la protección. Se vuelve a bloquear automáticamente, esta vez por más tiempo.';
+
+  @override
+  String commitment_locked_toast(int days) {
+    return 'Bloqueado por $days días más. Te comprometiste a esto.';
+  }
+
+  @override
+  String get commitment_cannot_leave =>
+      'No puedes salir mientras la Protección está bloqueada.';
+
+  @override
   String get onboarding_continue => 'Continuar';
 
   @override

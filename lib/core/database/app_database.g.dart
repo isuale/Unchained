@@ -694,6 +694,29 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
         defaultValue: const Constant(false),
       );
+  static const VerificationMeta _commitmentCycleMeta = const VerificationMeta(
+    'commitmentCycle',
+  );
+  @override
+  late final GeneratedColumn<int> commitmentCycle = GeneratedColumn<int>(
+    'commitment_cycle',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _commitmentLockUntilMeta =
+      const VerificationMeta('commitmentLockUntil');
+  @override
+  late final GeneratedColumn<DateTime> commitmentLockUntil =
+      GeneratedColumn<DateTime>(
+        'commitment_lock_until',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _activePlanMeta = const VerificationMeta(
     'activePlan',
   );
@@ -738,6 +761,8 @@ class $BlockingSettingsTable extends BlockingSettings
     accountabilityPartnerEnabled,
     customBlockScreen,
     customWebsitesBlocklistEnabled,
+    commitmentCycle,
+    commitmentLockUntil,
     activePlan,
     updatedAt,
   ];
@@ -912,6 +937,24 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
       );
     }
+    if (data.containsKey('commitment_cycle')) {
+      context.handle(
+        _commitmentCycleMeta,
+        commitmentCycle.isAcceptableOrUnknown(
+          data['commitment_cycle']!,
+          _commitmentCycleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('commitment_lock_until')) {
+      context.handle(
+        _commitmentLockUntilMeta,
+        commitmentLockUntil.isAcceptableOrUnknown(
+          data['commitment_lock_until']!,
+          _commitmentLockUntilMeta,
+        ),
+      );
+    }
     if (data.containsKey('active_plan')) {
       context.handle(
         _activePlanMeta,
@@ -1009,6 +1052,14 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.bool,
         data['${effectivePrefix}custom_websites_blocklist_enabled'],
       )!,
+      commitmentCycle: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}commitment_cycle'],
+      )!,
+      commitmentLockUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}commitment_lock_until'],
+      ),
       activePlan: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}active_plan'],
@@ -1046,6 +1097,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final bool accountabilityPartnerEnabled;
   final bool customBlockScreen;
   final bool customWebsitesBlocklistEnabled;
+  final int commitmentCycle;
+  final DateTime? commitmentLockUntil;
   final String? activePlan;
   final DateTime updatedAt;
   const BlockingSetting({
@@ -1068,6 +1121,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     required this.accountabilityPartnerEnabled,
     required this.customBlockScreen,
     required this.customWebsitesBlocklistEnabled,
+    required this.commitmentCycle,
+    this.commitmentLockUntil,
     this.activePlan,
     required this.updatedAt,
   });
@@ -1099,6 +1154,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     map['custom_websites_blocklist_enabled'] = Variable<bool>(
       customWebsitesBlocklistEnabled,
     );
+    map['commitment_cycle'] = Variable<int>(commitmentCycle);
+    if (!nullToAbsent || commitmentLockUntil != null) {
+      map['commitment_lock_until'] = Variable<DateTime>(commitmentLockUntil);
+    }
     if (!nullToAbsent || activePlan != null) {
       map['active_plan'] = Variable<String>(activePlan);
     }
@@ -1127,6 +1186,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       accountabilityPartnerEnabled: Value(accountabilityPartnerEnabled),
       customBlockScreen: Value(customBlockScreen),
       customWebsitesBlocklistEnabled: Value(customWebsitesBlocklistEnabled),
+      commitmentCycle: Value(commitmentCycle),
+      commitmentLockUntil: commitmentLockUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(commitmentLockUntil),
       activePlan: activePlan == null && nullToAbsent
           ? const Value.absent()
           : Value(activePlan),
@@ -1173,6 +1236,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       customWebsitesBlocklistEnabled: serializer.fromJson<bool>(
         json['customWebsitesBlocklistEnabled'],
       ),
+      commitmentCycle: serializer.fromJson<int>(json['commitmentCycle']),
+      commitmentLockUntil: serializer.fromJson<DateTime?>(
+        json['commitmentLockUntil'],
+      ),
       activePlan: serializer.fromJson<String?>(json['activePlan']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -1206,6 +1273,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'customWebsitesBlocklistEnabled': serializer.toJson<bool>(
         customWebsitesBlocklistEnabled,
       ),
+      'commitmentCycle': serializer.toJson<int>(commitmentCycle),
+      'commitmentLockUntil': serializer.toJson<DateTime?>(commitmentLockUntil),
       'activePlan': serializer.toJson<String?>(activePlan),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -1231,6 +1300,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     bool? accountabilityPartnerEnabled,
     bool? customBlockScreen,
     bool? customWebsitesBlocklistEnabled,
+    int? commitmentCycle,
+    Value<DateTime?> commitmentLockUntil = const Value.absent(),
     Value<String?> activePlan = const Value.absent(),
     DateTime? updatedAt,
   }) => BlockingSetting(
@@ -1257,6 +1328,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     customBlockScreen: customBlockScreen ?? this.customBlockScreen,
     customWebsitesBlocklistEnabled:
         customWebsitesBlocklistEnabled ?? this.customWebsitesBlocklistEnabled,
+    commitmentCycle: commitmentCycle ?? this.commitmentCycle,
+    commitmentLockUntil: commitmentLockUntil.present
+        ? commitmentLockUntil.value
+        : this.commitmentLockUntil,
     activePlan: activePlan.present ? activePlan.value : this.activePlan,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -1318,6 +1393,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           data.customWebsitesBlocklistEnabled.present
           ? data.customWebsitesBlocklistEnabled.value
           : this.customWebsitesBlocklistEnabled,
+      commitmentCycle: data.commitmentCycle.present
+          ? data.commitmentCycle.value
+          : this.commitmentCycle,
+      commitmentLockUntil: data.commitmentLockUntil.present
+          ? data.commitmentLockUntil.value
+          : this.commitmentLockUntil,
       activePlan: data.activePlan.present
           ? data.activePlan.value
           : this.activePlan,
@@ -1351,6 +1432,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write(
             'customWebsitesBlocklistEnabled: $customWebsitesBlocklistEnabled, ',
           )
+          ..write('commitmentCycle: $commitmentCycle, ')
+          ..write('commitmentLockUntil: $commitmentLockUntil, ')
           ..write('activePlan: $activePlan, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1378,6 +1461,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     accountabilityPartnerEnabled,
     customBlockScreen,
     customWebsitesBlocklistEnabled,
+    commitmentCycle,
+    commitmentLockUntil,
     activePlan,
     updatedAt,
   ]);
@@ -1406,6 +1491,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.customBlockScreen == this.customBlockScreen &&
           other.customWebsitesBlocklistEnabled ==
               this.customWebsitesBlocklistEnabled &&
+          other.commitmentCycle == this.commitmentCycle &&
+          other.commitmentLockUntil == this.commitmentLockUntil &&
           other.activePlan == this.activePlan &&
           other.updatedAt == this.updatedAt);
 }
@@ -1430,6 +1517,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<bool> accountabilityPartnerEnabled;
   final Value<bool> customBlockScreen;
   final Value<bool> customWebsitesBlocklistEnabled;
+  final Value<int> commitmentCycle;
+  final Value<DateTime?> commitmentLockUntil;
   final Value<String?> activePlan;
   final Value<DateTime> updatedAt;
   const BlockingSettingsCompanion({
@@ -1452,6 +1541,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.accountabilityPartnerEnabled = const Value.absent(),
     this.customBlockScreen = const Value.absent(),
     this.customWebsitesBlocklistEnabled = const Value.absent(),
+    this.commitmentCycle = const Value.absent(),
+    this.commitmentLockUntil = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -1475,6 +1566,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.accountabilityPartnerEnabled = const Value.absent(),
     this.customBlockScreen = const Value.absent(),
     this.customWebsitesBlocklistEnabled = const Value.absent(),
+    this.commitmentCycle = const Value.absent(),
+    this.commitmentLockUntil = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -1498,6 +1591,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<bool>? accountabilityPartnerEnabled,
     Expression<bool>? customBlockScreen,
     Expression<bool>? customWebsitesBlocklistEnabled,
+    Expression<int>? commitmentCycle,
+    Expression<DateTime>? commitmentLockUntil,
     Expression<String>? activePlan,
     Expression<DateTime>? updatedAt,
   }) {
@@ -1529,6 +1624,9 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       if (customBlockScreen != null) 'custom_block_screen': customBlockScreen,
       if (customWebsitesBlocklistEnabled != null)
         'custom_websites_blocklist_enabled': customWebsitesBlocklistEnabled,
+      if (commitmentCycle != null) 'commitment_cycle': commitmentCycle,
+      if (commitmentLockUntil != null)
+        'commitment_lock_until': commitmentLockUntil,
       if (activePlan != null) 'active_plan': activePlan,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -1554,6 +1652,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<bool>? accountabilityPartnerEnabled,
     Value<bool>? customBlockScreen,
     Value<bool>? customWebsitesBlocklistEnabled,
+    Value<int>? commitmentCycle,
+    Value<DateTime?>? commitmentLockUntil,
     Value<String?>? activePlan,
     Value<DateTime>? updatedAt,
   }) {
@@ -1582,6 +1682,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       customBlockScreen: customBlockScreen ?? this.customBlockScreen,
       customWebsitesBlocklistEnabled:
           customWebsitesBlocklistEnabled ?? this.customWebsitesBlocklistEnabled,
+      commitmentCycle: commitmentCycle ?? this.commitmentCycle,
+      commitmentLockUntil: commitmentLockUntil ?? this.commitmentLockUntil,
       activePlan: activePlan ?? this.activePlan,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -1661,6 +1763,14 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
         customWebsitesBlocklistEnabled.value,
       );
     }
+    if (commitmentCycle.present) {
+      map['commitment_cycle'] = Variable<int>(commitmentCycle.value);
+    }
+    if (commitmentLockUntil.present) {
+      map['commitment_lock_until'] = Variable<DateTime>(
+        commitmentLockUntil.value,
+      );
+    }
     if (activePlan.present) {
       map['active_plan'] = Variable<String>(activePlan.value);
     }
@@ -1696,6 +1806,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write(
             'customWebsitesBlocklistEnabled: $customWebsitesBlocklistEnabled, ',
           )
+          ..write('commitmentCycle: $commitmentCycle, ')
+          ..write('commitmentLockUntil: $commitmentLockUntil, ')
           ..write('activePlan: $activePlan, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1968,6 +2080,8 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<bool> accountabilityPartnerEnabled,
       Value<bool> customBlockScreen,
       Value<bool> customWebsitesBlocklistEnabled,
+      Value<int> commitmentCycle,
+      Value<DateTime?> commitmentLockUntil,
       Value<String?> activePlan,
       Value<DateTime> updatedAt,
     });
@@ -1992,6 +2106,8 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<bool> accountabilityPartnerEnabled,
       Value<bool> customBlockScreen,
       Value<bool> customWebsitesBlocklistEnabled,
+      Value<int> commitmentCycle,
+      Value<DateTime?> commitmentLockUntil,
       Value<String?> activePlan,
       Value<DateTime> updatedAt,
     });
@@ -2097,6 +2213,16 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<bool> get customWebsitesBlocklistEnabled => $composableBuilder(
     column: $table.customWebsitesBlocklistEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get commitmentCycle => $composableBuilder(
+    column: $table.commitmentCycle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get commitmentLockUntil => $composableBuilder(
+    column: $table.commitmentLockUntil,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2216,6 +2342,16 @@ class $$BlockingSettingsTableOrderingComposer
         builder: (column) => ColumnOrderings(column),
       );
 
+  ColumnOrderings<int> get commitmentCycle => $composableBuilder(
+    column: $table.commitmentCycle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get commitmentLockUntil => $composableBuilder(
+    column: $table.commitmentLockUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get activePlan => $composableBuilder(
     column: $table.activePlan,
     builder: (column) => ColumnOrderings(column),
@@ -2330,6 +2466,16 @@ class $$BlockingSettingsTableAnnotationComposer
         builder: (column) => column,
       );
 
+  GeneratedColumn<int> get commitmentCycle => $composableBuilder(
+    column: $table.commitmentCycle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get commitmentLockUntil => $composableBuilder(
+    column: $table.commitmentLockUntil,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get activePlan => $composableBuilder(
     column: $table.activePlan,
     builder: (column) => column,
@@ -2396,6 +2542,8 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> customBlockScreen = const Value.absent(),
                 Value<bool> customWebsitesBlocklistEnabled =
                     const Value.absent(),
+                Value<int> commitmentCycle = const Value.absent(),
+                Value<DateTime?> commitmentLockUntil = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion(
@@ -2418,6 +2566,8 @@ class $$BlockingSettingsTableTableManager
                 accountabilityPartnerEnabled: accountabilityPartnerEnabled,
                 customBlockScreen: customBlockScreen,
                 customWebsitesBlocklistEnabled: customWebsitesBlocklistEnabled,
+                commitmentCycle: commitmentCycle,
+                commitmentLockUntil: commitmentLockUntil,
                 activePlan: activePlan,
                 updatedAt: updatedAt,
               ),
@@ -2443,6 +2593,8 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> customBlockScreen = const Value.absent(),
                 Value<bool> customWebsitesBlocklistEnabled =
                     const Value.absent(),
+                Value<int> commitmentCycle = const Value.absent(),
+                Value<DateTime?> commitmentLockUntil = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion.insert(
@@ -2465,6 +2617,8 @@ class $$BlockingSettingsTableTableManager
                 accountabilityPartnerEnabled: accountabilityPartnerEnabled,
                 customBlockScreen: customBlockScreen,
                 customWebsitesBlocklistEnabled: customWebsitesBlocklistEnabled,
+                commitmentCycle: commitmentCycle,
+                commitmentLockUntil: commitmentLockUntil,
                 activePlan: activePlan,
                 updatedAt: updatedAt,
               ),

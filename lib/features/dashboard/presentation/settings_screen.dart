@@ -48,9 +48,20 @@ class SettingsScreen extends ConsumerWidget {
 
     if (confirmed != true) return;
 
-    await ref.read(blockingSettingsActionsProvider.notifier).leaveSession();
+    final left =
+        await ref.read(blockingSettingsActionsProvider.notifier).leaveSession();
 
     if (!context.mounted) return;
+    if (!left) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l.commitment_cannot_leave),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: _card,
+        ),
+      );
+      return;
+    }
     context.go('/welcome');
   }
 

@@ -387,6 +387,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get protection_start_failed => 'Could not start Protection';
 
   @override
+  String get commitment_warning_title => 'Commitment Mode';
+
+  @override
+  String commitment_warning_body(int days) {
+    return 'Protection will stay ON and you will NOT be able to turn it off for $days days. That\'s the point — it takes the choice away in a weak moment. After that you get a short break, then it locks again for even longer. Are you sure?';
+  }
+
+  @override
+  String get commitment_warning_confirm => 'Lock me in';
+
+  @override
+  String commitment_locked_banner(int days) {
+    return 'Committed · $days days left';
+  }
+
+  @override
+  String commitment_locked_sub(String date) {
+    return 'Protection can\'t be turned off until $date';
+  }
+
+  @override
+  String commitment_break_banner(int minutes) {
+    return 'Break open · $minutes min left';
+  }
+
+  @override
+  String get commitment_break_sub =>
+      'You can turn protection off now. It re-locks automatically — longer this time.';
+
+  @override
+  String commitment_locked_toast(int days) {
+    return 'Locked for $days more days. You committed to this.';
+  }
+
+  @override
+  String get commitment_cannot_leave =>
+      'You can\'t leave while Protection is locked.';
+
+  @override
   String get onboarding_continue => 'Continue';
 
   @override

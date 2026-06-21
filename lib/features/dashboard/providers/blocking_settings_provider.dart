@@ -2,17 +2,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
+import 'package:unchained/features/dashboard/domain/commitment.dart';
 
 final blockingSettingsProvider = StreamProvider<BlockingSetting>((ref) {
   return ref.watch(blockingSettingsRepositoryProvider).watchSettings();
 });
 
-enum ProtectionToggleResult { ok, permissionDenied, failed }
+/// The user's current spot in the commitment cycle, derived from settings.
+final commitmentStatusProvider = Provider<CommitmentStatus>((ref) {
+  final settings = ref.watch(blockingSettingsProvider).asData?.value;
+  if (settings == null) return CommitmentStatus.none_;
+  return computeCommitment(
+    settings.commitmentCycle,
+    settings.commitmentLockUntil,
+    DateTime.now(),
+  );
+});
+
+enum ProtectionToggleResult { ok, permissionDenied, failed, locked }
 
 class BlockingSettingsActions extends Notifier<void> {
   @override
   void build() {
     _reconcileWithNative();
+    _reconcileCommitment();
   }
 
   Future<void> _reconcileWithNative() async {
@@ -23,6 +36,30 @@ class BlockingSettingsActions extends Notifier<void> {
     if (settings.protectionEnabled != actuallyRunning) {
       await repo.toggleField('protectionEnabled', actuallyRunning);
     }
+  }
+
+  /// If a break has fully elapsed while the app was closed, roll the
+  /// commitment forward into its next (longer) lock and re-arm protection.
+  Future<void> _reconcileCommitment() async {
+    final repo = ref.read(blockingSettingsRepositoryProvider);
+    final settings = await repo.getSettings();
+    if (settings == null) return;
+    final advanced = advanceIfLapsed(
+      settings.commitmentCycle,
+      settings.commitmentLockUntil,
+      DateTime.now(),
+    );
+    if (advanced == null) return;
+
+    await repo.setCommitment(
+        cycle: advanced.cycle, lockUntil: advanced.lockUntil);
+    // A new lock just began — make sure protection is actually running.
+    final running = await BlockingService.isRunning();
+    if (!running) {
+      final granted = await BlockingService.prepare();
+      if (granted) await BlockingService.start();
+    }
+    await repo.toggleField('protectionEnabled', true);
   }
 
   Future<void> toggle(String field, bool value) {
@@ -41,10 +78,34 @@ class BlockingSettingsActions extends Notifier<void> {
       await repo.toggleField('protectionEnabled', true);
       return ProtectionToggleResult.ok;
     } else {
+      // Roll any lapsed break forward first, then refuse if still locked.
+      await _reconcileCommitment();
+      final settings = await repo.getSettings();
+      final status = computeCommitment(
+        settings?.commitmentCycle ?? 0,
+        settings?.commitmentLockUntil,
+        DateTime.now(),
+      );
+      if (status.isLocked) return ProtectionToggleResult.locked;
       await BlockingService.stop();
       await repo.toggleField('protectionEnabled', false);
       return ProtectionToggleResult.ok;
     }
+  }
+
+  /// Begins the first commitment lock (cycle 1 = 14 days) and turns
+  /// protection on. Call this once the user has confirmed the warning.
+  Future<ProtectionToggleResult> startCommitment() async {
+    final repo = ref.read(blockingSettingsRepositoryProvider);
+    final granted = await BlockingService.prepare();
+    if (!granted) return ProtectionToggleResult.permissionDenied;
+    final started = await BlockingService.start();
+    if (!started) return ProtectionToggleResult.failed;
+    final lockUntil =
+        DateTime.now().add(CommitmentStatus.lockDurationForCycle(1));
+    await repo.setCommitment(cycle: 1, lockUntil: lockUntil);
+    await repo.toggleField('protectionEnabled', true);
+    return ProtectionToggleResult.ok;
   }
 
   Future<void> setStrictness(String level) {
@@ -59,9 +120,22 @@ class BlockingSettingsActions extends Notifier<void> {
 
   /// Turns off the native VPN and wipes the local session so the user can
   /// start over from the welcome screen as if newly installed.
-  Future<void> leaveSession() async {
+  ///
+  /// Refused (returns false) while a commitment lock is active — leaving
+  /// would be an escape hatch around the lock.
+  Future<bool> leaveSession() async {
+    await _reconcileCommitment();
+    final settings =
+        await ref.read(blockingSettingsRepositoryProvider).getSettings();
+    final status = computeCommitment(
+      settings?.commitmentCycle ?? 0,
+      settings?.commitmentLockUntil,
+      DateTime.now(),
+    );
+    if (status.isLocked) return false;
     await BlockingService.stop();
     await ref.read(blockingSettingsRepositoryProvider).resetSession();
+    return true;
   }
 }
 

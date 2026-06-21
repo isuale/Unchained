@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/app_database.dart';
+import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
 import 'package:unchained/features/dashboard/widgets/big_cta_button.dart';
@@ -74,16 +75,33 @@ class _DashboardBody extends ConsumerWidget {
 
   Future<void> _toggleMaster(
       BuildContext context, WidgetRef ref, bool value) async {
-    final result = await ref
-        .read(blockingSettingsActionsProvider.notifier)
-        .toggleProtection(value);
-    if (!context.mounted) return;
+    final notifier = ref.read(blockingSettingsActionsProvider.notifier);
+    final status = ref.read(commitmentStatusProvider);
     final l = AppLocalizations.of(context)!;
+
+    ProtectionToggleResult result;
+    if (value) {
+      if (!status.isActive) {
+        // Turning protection on for the first time starts the commitment.
+        final confirmed = await _confirmCommitment(context, l);
+        if (confirmed != true) return;
+        result = await notifier.startCommitment();
+      } else {
+        // Re-enabling during a break — no new commitment, just turn it on.
+        result = await notifier.toggleProtection(true);
+      }
+    } else {
+      result = await notifier.toggleProtection(false);
+    }
+
+    if (!context.mounted) return;
     String? msg;
     if (result == ProtectionToggleResult.permissionDenied) {
       msg = l.protection_permission_needed;
     } else if (result == ProtectionToggleResult.failed) {
       msg = l.protection_start_failed;
+    } else if (result == ProtectionToggleResult.locked) {
+      msg = l.commitment_locked_toast(status.daysLeft);
     }
     if (msg != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +114,47 @@ class _DashboardBody extends ConsumerWidget {
     }
   }
 
+  /// One-time warning the user must accept before the lock engages.
+  Future<bool?> _confirmCommitment(
+      BuildContext context, AppLocalizations l) {
+    final firstLockDays =
+        CommitmentStatus.lockDurationForCycle(1).inDays;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF0A0E18),
+        title: Text(
+          l.commitment_warning_title,
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          l.commitment_warning_body(firstLockDays),
+          style: const TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              l.common_cancel,
+              style: const TextStyle(color: Color(0xFF888888)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              l.commitment_warning_confirm,
+              style: const TextStyle(
+                color: Color(0xFF1E5FFF),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _navLockedToForever(BuildContext context) {
     context.go('/plans/forever');
   }
@@ -105,6 +164,7 @@ class _DashboardBody extends ConsumerWidget {
     final protectionOn = settings.protectionEnabled;
     final basicSelected = settings.strictnessLevel == 'basic';
     final reelsShortsSelected = settings.socialMode == 'reelsAndShorts';
+    final commitment = ref.watch(commitmentStatusProvider);
 
     return SafeArea(
       child: ListView(
@@ -124,6 +184,14 @@ class _DashboardBody extends ConsumerWidget {
               onChanged: (v) => _toggleMaster(context, ref, v),
             ),
           ),
+
+          if (commitment.isActive) ...[
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _CommitmentBanner(status: commitment, l: l),
+            ),
+          ],
 
           const SizedBox(height: 24),
 
@@ -454,6 +522,70 @@ class _SectionWrapper extends StatelessWidget {
               border: Border.all(color: const Color(0xFF1A2238)),
             ),
             child: Column(children: children),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommitmentBanner extends StatelessWidget {
+  const _CommitmentBanner({required this.status, required this.l});
+
+  final CommitmentStatus status;
+  final AppLocalizations l;
+
+  static const _months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  String _shortDate(DateTime d) => '${_months[d.month - 1]} ${d.day}';
+
+  @override
+  Widget build(BuildContext context) {
+    final locked = status.isLocked;
+    final accent =
+        locked ? const Color(0xFF1E5FFF) : ProtectionDashboardScreen.green;
+    final title = locked
+        ? l.commitment_locked_banner(status.daysLeft)
+        : l.commitment_break_banner(status.minutesLeft);
+    final subtitle = locked
+        ? l.commitment_locked_sub(_shortDate(status.lockUntil!))
+        : l.commitment_break_sub;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0E1320),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(locked ? Icons.lock_clock : Icons.self_improvement,
+              color: accent, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                      color: Color(0xFF888888), fontSize: 12),
+                ),
+              ],
+            ),
           ),
         ],
       ),

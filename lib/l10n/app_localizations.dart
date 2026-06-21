@@ -836,6 +836,60 @@ abstract class AppLocalizations {
   /// **'No se pudo iniciar la Protección'**
   String get protection_start_failed;
 
+  /// No description provided for @commitment_warning_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo Compromiso'**
+  String get commitment_warning_title;
+
+  /// No description provided for @commitment_warning_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La Protección quedará ACTIVADA y NO podrás desactivarla durante {days} días. Ese es el punto: te quita la decisión en un momento de debilidad. Después tendrás una pausa corta y volverá a bloquearse por aún más tiempo. ¿Estás seguro?'**
+  String commitment_warning_body(int days);
+
+  /// No description provided for @commitment_warning_confirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprométeme'**
+  String get commitment_warning_confirm;
+
+  /// No description provided for @commitment_locked_banner.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprometido · quedan {days} días'**
+  String commitment_locked_banner(int days);
+
+  /// No description provided for @commitment_locked_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'La Protección no se puede desactivar hasta el {date}'**
+  String commitment_locked_sub(String date);
+
+  /// No description provided for @commitment_break_banner.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausa abierta · quedan {minutes} min'**
+  String commitment_break_banner(int minutes);
+
+  /// No description provided for @commitment_break_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora puedes desactivar la protección. Se vuelve a bloquear automáticamente, esta vez por más tiempo.'**
+  String get commitment_break_sub;
+
+  /// No description provided for @commitment_locked_toast.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueado por {days} días más. Te comprometiste a esto.'**
+  String commitment_locked_toast(int days);
+
+  /// No description provided for @commitment_cannot_leave.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes salir mientras la Protección está bloqueada.'**
+  String get commitment_cannot_leave;
+
   /// No description provided for @onboarding_continue.
   ///
   /// In es, this message translates to:

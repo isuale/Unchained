@@ -128,6 +128,40 @@
   "common_cancel": "Cancelar",
   "protection_permission_needed": "Se necesita permiso para activar la Protección",
   "protection_start_failed": "No se pudo iniciar la Protección",
+  "commitment_warning_title": "Modo Compromiso",
+  "commitment_warning_body": "La Protección quedará ACTIVADA y NO podrás desactivarla durante {days} días. Ese es el punto: te quita la decisión en un momento de debilidad. Después tendrás una pausa corta y volverá a bloquearse por aún más tiempo. ¿Estás seguro?",
+  "@commitment_warning_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_warning_confirm": "Comprométeme",
+  "commitment_locked_banner": "Comprometido · quedan {days} días",
+  "@commitment_locked_banner": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_locked_sub": "La Protección no se puede desactivar hasta el {date}",
+  "@commitment_locked_sub": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "commitment_break_banner": "Pausa abierta · quedan {minutes} min",
+  "@commitment_break_banner": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "commitment_break_sub": "Ahora puedes desactivar la protección. Se vuelve a bloquear automáticamente, esta vez por más tiempo.",
+  "commitment_locked_toast": "Bloqueado por {days} días más. Te comprometiste a esto.",
+  "@commitment_locked_toast": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_cannot_leave": "No puedes salir mientras la Protección está bloqueada.",
   "onboarding_continue": "Continuar",
   "onboarding_back": "Atrás",
   "onboarding_question_progress": "Pregunta {current} de {total}",

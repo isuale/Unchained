@@ -61,6 +61,14 @@ class BlockingSettings extends Table {
   BoolColumn get customWebsitesBlocklistEnabled =>
       boolean().withDefault(const Constant(false))();
 
+  // Commitment lock — a growing cycle the user can't casually exit.
+  // cycle 0 = no commitment; cycle N lock length = 7*(N+1) days
+  // (cycle 1 = 14d, cycle 2 = 21d, ...). After each lock there is a
+  // short break, then it re-locks one week longer. See domain/commitment.dart.
+  IntColumn get commitmentCycle =>
+      integer().withDefault(const Constant(0))();
+  DateTimeColumn get commitmentLockUntil => dateTime().nullable()();
+
   // The plan the user picked (null = none picked yet)
   TextColumn get activePlan => text().nullable()();
 
@@ -77,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -89,6 +97,14 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             await m.createTable(blockingSettings);
             await _ensureSettingsRow();
+          }
+          // For databases that already had the table (v2), add the new
+          // commitment columns. v1 dbs got them via createTable above.
+          if (from >= 2 && from < 3) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentCycle);
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentLockUntil);
           }
         },
         beforeOpen: (details) async {

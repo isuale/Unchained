@@ -128,6 +128,40 @@
   "common_cancel": "Cancel",
   "protection_permission_needed": "Permission needed to activate Protection",
   "protection_start_failed": "Could not start Protection",
+  "commitment_warning_title": "Commitment Mode",
+  "commitment_warning_body": "Protection will stay ON and you will NOT be able to turn it off for {days} days. That's the point — it takes the choice away in a weak moment. After that you get a short break, then it locks again for even longer. Are you sure?",
+  "@commitment_warning_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_warning_confirm": "Lock me in",
+  "commitment_locked_banner": "Committed · {days} days left",
+  "@commitment_locked_banner": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_locked_sub": "Protection can't be turned off until {date}",
+  "@commitment_locked_sub": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "commitment_break_banner": "Break open · {minutes} min left",
+  "@commitment_break_banner": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "commitment_break_sub": "You can turn protection off now. It re-locks automatically — longer this time.",
+  "commitment_locked_toast": "Locked for {days} more days. You committed to this.",
+  "@commitment_locked_toast": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_cannot_leave": "You can't leave while Protection is locked.",
   "onboarding_continue": "Continue",
   "onboarding_back": "Back",
   "onboarding_question_progress": "Question {current} of {total}",
