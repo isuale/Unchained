@@ -1,0 +1,475 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:unchained/core/database/app_database.dart';
+import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
+import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
+import 'package:unchained/features/dashboard/widgets/big_cta_button.dart';
+import 'package:unchained/features/dashboard/widgets/dashboard_header.dart';
+import 'package:unchained/features/dashboard/widgets/master_toggle_card.dart';
+import 'package:unchained/features/dashboard/widgets/pill_selector.dart';
+import 'package:unchained/features/dashboard/widgets/section_title.dart';
+import 'package:unchained/features/dashboard/widgets/toggle_row.dart';
+import 'package:unchained/l10n/app_localizations.dart';
+
+class ProtectionDashboardScreen extends ConsumerWidget {
+  const ProtectionDashboardScreen({super.key});
+
+  static const _bgTop = Color(0xFF000000);
+  static const _bgBottom = Color(0xFF050812);
+  static const _separator = Color(0xFF1A2238);
+  static const _green = Color(0xFF00D26A);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
+    final asyncSettings = ref.watch(blockingSettingsProvider);
+    final activePlan = ref.watch(activePlanProvider);
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [_bgTop, _bgBottom],
+        ),
+      ),
+      child: asyncSettings.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF1E5FFF)),
+        ),
+        error: (e, _) => Center(
+          child: Text(
+            'Error loading settings: $e',
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+        data: (s) => _DashboardBody(
+          settings: s,
+          activePlan: activePlan,
+          l: l,
+        ),
+      ),
+    );
+  }
+
+  static Color get separator => _separator;
+  static Color get green => _green;
+}
+
+class _DashboardBody extends ConsumerWidget {
+  const _DashboardBody({
+    required this.settings,
+    required this.activePlan,
+    required this.l,
+  });
+
+  final BlockingSetting settings;
+  final ActivePlan? activePlan;
+  final AppLocalizations l;
+
+  void _toggle(WidgetRef ref, String field, bool value) {
+    ref.read(blockingSettingsActionsProvider.notifier).toggle(field, value);
+  }
+
+  Future<void> _toggleMaster(
+      BuildContext context, WidgetRef ref, bool value) async {
+    final result = await ref
+        .read(blockingSettingsActionsProvider.notifier)
+        .toggleProtection(value);
+    if (!context.mounted) return;
+    final l = AppLocalizations.of(context)!;
+    String? msg;
+    if (result == ProtectionToggleResult.permissionDenied) {
+      msg = l.protection_permission_needed;
+    } else if (result == ProtectionToggleResult.failed) {
+      msg = l.protection_start_failed;
+    }
+    if (msg != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF0A0F1C),
+        ),
+      );
+    }
+  }
+
+  void _navLockedToForever(BuildContext context) {
+    context.go('/plans/forever');
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final protectionOn = settings.protectionEnabled;
+    final basicSelected = settings.strictnessLevel == 'basic';
+    final reelsShortsSelected = settings.socialMode == 'reelsAndShorts';
+
+    return SafeArea(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DashboardHeader(activePlan: activePlan, streakDays: 3),
+          const SizedBox(height: 12),
+
+          // Master
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: MasterToggleCard(
+              title: l.dashboard_protection_title,
+              activeLabel: l.dashboard_protection_active,
+              offLabel: l.dashboard_protection_off,
+              value: protectionOn,
+              onChanged: (v) => _toggleMaster(context, ref, v),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Strictness
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SectionTitle(title: l.dashboard_strictness_title),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: PillSelector(
+              leftLabel: l.dashboard_strictness_basic,
+              rightLabel: l.dashboard_strictness_strict,
+              isLeftSelected: basicSelected,
+              onSelectLeft: () => ref
+                  .read(blockingSettingsActionsProvider.notifier)
+                  .setStrictness('basic'),
+              onSelectRight: () => ref
+                  .read(blockingSettingsActionsProvider.notifier)
+                  .setStrictness('strict'),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Core
+          _SectionWrapper(
+            title: SectionTitle(title: l.dashboard_section_core),
+            children: [
+              SizedBox(
+                height: 56,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Opacity(
+                    opacity: protectionOn ? 1.0 : 0.4,
+                    child: Row(
+                      children: [
+                        Icon(
+                          protectionOn
+                              ? Icons.check_circle
+                              : Icons.remove_circle_outline,
+                          color: protectionOn
+                              ? ProtectionDashboardScreen.green
+                              : const Color(0xFF666666),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.dashboard_porn_websites_blocked,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                l.dashboard_porn_always_on,
+                                style: const TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_search_filtering,
+                value: settings.searchFilteringEnabled,
+                onChanged: protectionOn
+                    ? (v) => _toggle(ref, 'searchFilteringEnabled', v)
+                    : null,
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.search,
+              ),
+            ],
+          ),
+
+          // Social
+          _SectionWrapper(
+            title: SectionTitle(title: l.dashboard_section_social),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                child: PillSelector(
+                  leftLabel: l.dashboard_social_mode_reels_shorts,
+                  rightLabel: l.dashboard_social_mode_all,
+                  isLeftSelected: reelsShortsSelected,
+                  onSelectLeft: () => ref
+                      .read(blockingSettingsActionsProvider.notifier)
+                      .setSocialMode('reelsAndShorts'),
+                  onSelectRight: () => ref
+                      .read(blockingSettingsActionsProvider.notifier)
+                      .setSocialMode('allSocial'),
+                ),
+              ),
+              ToggleRow(
+                label: l.dashboard_block_reels,
+                value: settings.blockReels,
+                onChanged: (v) => _toggle(ref, 'blockReels', v),
+                isLocked: isFeatureLocked('blockReels', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.movie_outlined,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_block_shorts,
+                value: settings.blockShorts,
+                onChanged: (v) => _toggle(ref, 'blockShorts', v),
+                isLocked: isFeatureLocked('blockShorts', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.smart_display_outlined,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_block_tiktok,
+                value: settings.blockTikTok,
+                onChanged: (v) => _toggle(ref, 'blockTikTok', v),
+                isLocked: isFeatureLocked('blockTikTok', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.music_note,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_block_snapchat,
+                value: settings.blockSnapchatStories,
+                onChanged: (v) => _toggle(ref, 'blockSnapchatStories', v),
+                isLocked:
+                    isFeatureLocked('blockSnapchatStories', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.camera_alt_outlined,
+              ),
+            ],
+          ),
+
+          // Content
+          _SectionWrapper(
+            title: SectionTitle(title: l.dashboard_section_content),
+            children: [
+              ToggleRow(
+                label: l.dashboard_block_shopping,
+                value: settings.blockShopping,
+                onChanged: (v) => _toggle(ref, 'blockShopping', v),
+                isLocked: isFeatureLocked('blockShopping', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.shopping_bag_outlined,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_block_gambling,
+                value: settings.blockGambling,
+                onChanged: (v) => _toggle(ref, 'blockGambling', v),
+                isLocked: isFeatureLocked('blockGambling', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.casino_outlined,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_block_image_search,
+                value: settings.blockImageVideoSearch,
+                onChanged: (v) => _toggle(ref, 'blockImageVideoSearch', v),
+                isLocked:
+                    isFeatureLocked('blockImageVideoSearch', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.image_search,
+              ),
+            ],
+          ),
+
+          // App control
+          _SectionWrapper(
+            title: SectionTitle(title: l.dashboard_section_app),
+            children: [
+              ToggleRow(
+                label: l.dashboard_app_time_limits,
+                value: settings.appTimeLimitsEnabled,
+                onChanged: (v) => _toggle(ref, 'appTimeLimitsEnabled', v),
+                isLocked:
+                    isFeatureLocked('appTimeLimitsEnabled', activePlan),
+                lockedTooltip: l.lock_monthly_plus,
+                onLockedTap: () => context.go('/plans/monthly'),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.timer_outlined,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_custom_apps_blocklist,
+                value: settings.customAppsBlocklistEnabled,
+                onChanged: (v) =>
+                    _toggle(ref, 'customAppsBlocklistEnabled', v),
+                isLocked: isFeatureLocked(
+                    'customAppsBlocklistEnabled', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.apps,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_block_in_app_browsers,
+                value: settings.blockInAppBrowsers,
+                onChanged: (v) => _toggle(ref, 'blockInAppBrowsers', v),
+                isLocked: isFeatureLocked('blockInAppBrowsers', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.web,
+              ),
+            ],
+          ),
+
+          // Advanced
+          _SectionWrapper(
+            title: SectionTitle(
+              title: l.dashboard_section_advanced,
+              accentSubtitle: l.dashboard_advanced_subtitle,
+            ),
+            children: [
+              ToggleRow(
+                label: l.dashboard_prevent_uninstall,
+                value: settings.preventUninstall,
+                onChanged: (v) => _toggle(ref, 'preventUninstall', v),
+                isLocked: isFeatureLocked('preventUninstall', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.lock_outline,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_accountability_partner,
+                value: settings.accountabilityPartnerEnabled,
+                onChanged: (v) =>
+                    _toggle(ref, 'accountabilityPartnerEnabled', v),
+                isLocked: false,
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.people_outline,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_custom_block_screen,
+                value: settings.customBlockScreen,
+                onChanged: (v) => _toggle(ref, 'customBlockScreen', v),
+                isLocked: isFeatureLocked('customBlockScreen', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.brush_outlined,
+              ),
+              const _RowSeparator(),
+              ToggleRow(
+                label: l.dashboard_custom_websites_blocklist,
+                value: settings.customWebsitesBlocklistEnabled,
+                onChanged: (v) =>
+                    _toggle(ref, 'customWebsitesBlocklistEnabled', v),
+                isLocked: isFeatureLocked(
+                    'customWebsitesBlocklistEnabled', activePlan),
+                lockedTooltip: l.lock_forever_only,
+                onLockedTap: () => _navLockedToForever(context),
+                parentEnabled: protectionOn,
+                leadingIcon: Icons.list_alt,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+          BigCtaButton(
+            label: l.dashboard_cta_activate,
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l.dashboard_cta_saved),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: const Color(0xFF0A0F1C),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionWrapper extends StatelessWidget {
+  const _SectionWrapper({required this.title, required this.children});
+  final Widget title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          title,
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF0E1320),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF1A2238)),
+            ),
+            child: Column(children: children),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RowSeparator extends StatelessWidget {
+  const _RowSeparator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      color: const Color(0xFF1A2238),
+    );
+  }
+}
