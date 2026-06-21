@@ -81,26 +81,24 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: _card,
+            ListTile(
+              tileColor: _card,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: ListTile(
-                leading: const Icon(Icons.logout, color: _danger),
-                title: Text(
-                  l.settings_leave_session_title,
-                  style: const TextStyle(
-                    color: _danger,
-                    fontWeight: FontWeight.w600,
-                  ),
+              leading: const Icon(Icons.logout, color: _danger),
+              title: Text(
+                l.settings_leave_session_title,
+                style: const TextStyle(
+                  color: _danger,
+                  fontWeight: FontWeight.w600,
                 ),
-                subtitle: Text(
-                  l.settings_leave_session_subtitle,
-                  style: const TextStyle(color: Color(0xFF888888)),
-                ),
-                onTap: () => _leaveSession(context, ref),
               ),
+              subtitle: Text(
+                l.settings_leave_session_subtitle,
+                style: const TextStyle(color: Color(0xFF888888)),
+              ),
+              onTap: () => _leaveSession(context, ref),
             ),
           ],
         ),
