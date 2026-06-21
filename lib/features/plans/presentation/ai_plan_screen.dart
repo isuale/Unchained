@@ -53,7 +53,7 @@ class AiPlanScreen extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => context.go('/home'),
+                    onPressed: () => context.go('/plans/all'),
                   ),
                 ),
               ),

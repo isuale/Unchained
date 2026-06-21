@@ -64,7 +64,7 @@ class AllPlansScreen extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => context.go('/home'),
+                  onPressed: () => context.go('/onboarding/analyzing'),
                 ),
               ),
               const SizedBox(height: 16),
