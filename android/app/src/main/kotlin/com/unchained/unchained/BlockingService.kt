@@ -5,7 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.ServiceInfo
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -16,7 +17,11 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
+import java.net.Inet4Address
 import java.net.InetAddress
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
 
 private val BLOCKLIST = setOf(
     "pornhub.com",
@@ -40,6 +45,14 @@ class BlockingService : VpnService() {
 
     @Volatile private var tunnelThread: Thread? = null
     @Volatile private var shouldRun: Boolean = false
+
+    // Worker pool so a slow/failed upstream DNS lookup never stalls the read loop.
+    @Volatile private var executor: ExecutorService? = null
+    // Writes to the tun must be serialized across worker threads + the loop thread.
+    private val writeLock = Any()
+    // Upstream DNS resolvers, resolved from the underlying (non-VPN) network at start,
+    // with public fallbacks appended. Captured once when the tunnel comes up.
+    @Volatile private var upstreamDns: List<InetAddress> = emptyList()
 
     companion object {
         const val TAG = "BlockingService"
@@ -100,16 +113,12 @@ class BlockingService : VpnService() {
         }
 
         // startForeground MUST be called within 5 seconds. Call before anything that can throw.
+        // Use the 2-arg overload so the foregroundServiceType comes from the manifest
+        // (declared there as "specialUse"). Specifying a type in code that isn't a subset
+        // of the manifest's declared type throws IllegalArgumentException and the system
+        // then kills us with ForegroundServiceDidNotStartInTimeException.
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    NOTIFICATION_ID,
-                    buildNotification(),
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-                )
-            } else {
-                startForeground(NOTIFICATION_ID, buildNotification())
-            }
+            startForeground(NOTIFICATION_ID, buildNotification())
         } catch (e: Exception) {
             Log.e(TAG, "startForeground failed", e)
             stopSelf()
@@ -143,6 +152,10 @@ class BlockingService : VpnService() {
         vpnInterface = builder.establish()
         Log.d(TAG, "VPN interface established: ${vpnInterface != null}")
 
+        upstreamDns = resolveUpstreamServers()
+        Log.d(TAG, "Upstream DNS servers: ${upstreamDns.joinToString { it.hostAddress ?: "?" }}")
+        executor = Executors.newFixedThreadPool(8)
+
         shouldRun = true
         tunnelThread = Thread { runTunnelLoop() }.apply {
             name = "UnchainedTunnel"
@@ -152,6 +165,8 @@ class BlockingService : VpnService() {
 
     private fun stopVpn() {
         shouldRun = false
+        executor?.shutdownNow()
+        executor = null
         try {
             vpnInterface?.close()
         } catch (e: Exception) {
@@ -236,30 +251,88 @@ class BlockingService : VpnService() {
         val domain = extractFirstQuestionName(dnsPayload)
         Log.d(TAG, "DNS query: '$domain'")
 
-        val responseDns: ByteArray = if (isBlocked(domain)) {
+        // Blocked domains are answered immediately (no network needed) right here.
+        if (isBlocked(domain)) {
             Log.i(TAG, "BLOCKED: $domain")
-            craftNxDomainResponse(dnsPayload)
-        } else {
-            try {
-                forwardDnsUpstream(dnsPayload)
-            } catch (e: Exception) {
-                Log.e(TAG, "Upstream forward failed for $domain", e)
-                return  // drop on upstream failure
-            }
+            writeResponse(tunOut, srcIp, dstIp, srcPort, craftNxDomainResponse(dnsPayload))
+            return
         }
 
-        val responsePacket = buildIpv4UdpPacket(
-            srcIp = dstIp,    // swap src/dst
-            dstIp = srcIp,
-            srcPort = 53,
-            dstPort = srcPort,
-            payload = responseDns,
-        )
+        // Everything else is forwarded upstream on a worker thread, so a slow or
+        // failing lookup never freezes the read loop (and therefore all other DNS).
+        val exec = executor ?: return
         try {
-            tunOut.write(responsePacket)
-        } catch (e: IOException) {
-            Log.e(TAG, "Failed to write response", e)
+            exec.execute {
+                val responseDns = try {
+                    forwardDnsUpstream(dnsPayload)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Upstream forward failed for $domain", e)
+                    return@execute  // drop; the client will retry
+                }
+                writeResponse(tunOut, srcIp, dstIp, srcPort, responseDns)
+            }
+        } catch (e: RejectedExecutionException) {
+            // Pool is shutting down (stopVpn) — drop the query.
         }
+    }
+
+    /**
+     * Wraps a DNS payload in an IPv4/UDP packet addressed back to the client and writes
+     * it to the tun. Source/destination are swapped so the reply looks like it came from
+     * the DNS server the client queried. Writes are serialized because multiple worker
+     * threads share the same tun descriptor.
+     */
+    private fun writeResponse(
+        tunOut: FileOutputStream,
+        origSrcIp: ByteArray,
+        origDstIp: ByteArray,
+        origSrcPort: Int,
+        dns: ByteArray,
+    ) {
+        val responsePacket = buildIpv4UdpPacket(
+            srcIp = origDstIp,    // swap src/dst
+            dstIp = origSrcIp,
+            srcPort = 53,
+            dstPort = origSrcPort,
+            payload = dns,
+        )
+        synchronized(writeLock) {
+            try {
+                tunOut.write(responsePacket)
+            } catch (e: IOException) {
+                Log.e(TAG, "Failed to write response", e)
+            }
+        }
+    }
+
+    /**
+     * The DNS servers to forward non-blocked queries to. Prefers the resolvers of the
+     * underlying physical network (the ones this network actually permits — many routers
+     * and carriers block public resolvers like 1.1.1.1), then appends public fallbacks.
+     */
+    private fun resolveUpstreamServers(): List<InetAddress> {
+        val servers = LinkedHashSet<InetAddress>()
+        try {
+            val cm = getSystemService(ConnectivityManager::class.java)
+            if (cm != null) {
+                for (network in cm.allNetworks) {
+                    val caps = cm.getNetworkCapabilities(network) ?: continue
+                    // Underlying real networks only — skip our own VPN transport.
+                    if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) continue
+                    if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) continue
+                    val lp = cm.getLinkProperties(network) ?: continue
+                    for (dns in lp.dnsServers) {
+                        if (dns is Inet4Address) servers.add(dns)  // packet builder is IPv4-only
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to read system DNS servers", e)
+        }
+        // Public fallbacks, used only if the system servers are empty or unreachable.
+        try { servers.add(InetAddress.getByName("1.1.1.1")) } catch (_: Exception) {}
+        try { servers.add(InetAddress.getByName("8.8.8.8")) } catch (_: Exception) {}
+        return servers.toList()
     }
 
     // ------------------------------------------------------------------------
@@ -306,19 +379,25 @@ class BlockingService : VpnService() {
     }
 
     private fun forwardDnsUpstream(query: ByteArray): ByteArray {
-        val socket = DatagramSocket()
-        try {
-            protect(socket)  // CRITICAL: prevent loop through our own VPN
-            socket.soTimeout = 5000
-            val upstream = InetAddress.getByName("1.1.1.1")
-            socket.send(DatagramPacket(query, query.size, upstream, 53))
-            val recv = ByteArray(4096)
-            val pkt = DatagramPacket(recv, recv.size)
-            socket.receive(pkt)
-            return recv.copyOfRange(0, pkt.length)
-        } finally {
-            socket.close()
+        val servers = upstreamDns.ifEmpty { resolveUpstreamServers() }
+        var lastError: Exception? = null
+        for (server in servers) {
+            val socket = DatagramSocket()
+            try {
+                protect(socket)  // CRITICAL: send over the real network, not back through our VPN
+                socket.soTimeout = 3000
+                socket.send(DatagramPacket(query, query.size, server, 53))
+                val recv = ByteArray(4096)
+                val pkt = DatagramPacket(recv, recv.size)
+                socket.receive(pkt)
+                return recv.copyOfRange(0, pkt.length)
+            } catch (e: Exception) {
+                lastError = e  // this server failed; try the next one
+            } finally {
+                socket.close()
+            }
         }
+        throw lastError ?: IOException("No upstream DNS server reachable")
     }
 
     private fun buildIpv4UdpPacket(
