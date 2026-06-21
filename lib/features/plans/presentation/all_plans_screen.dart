@@ -64,7 +64,8 @@ class AllPlansScreen extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => context.go('/onboarding/analyzing'),
+                  onPressed: () =>
+                      context.go(_planRouteFromId(recommendedId)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -112,6 +113,16 @@ ActivePlan _activePlanFromId(String id) => switch (id) {
       'monthly' => ActivePlan.monthly,
       'ai_plan' => ActivePlan.aiPlan,
       _ => ActivePlan.forever,
+    };
+
+// Back from "all plans" returns to the user's recommended plan screen
+// (taken from the saved assessment), not the analyzing screen — re-running
+// the analyzer with no in-memory answers would wrongly show 0%.
+String _planRouteFromId(String? id) => switch (id) {
+      'monthly' => '/plans/monthly',
+      'ai_plan' => '/plans/ai',
+      'forever' => '/plans/forever',
+      _ => '/plans/free-trial',
     };
 
 class _PlanCard {

@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/dashboard_screen.dart';
 import 'package:unchained/features/dashboard/stubs/accountability_stub.dart';
-import 'package:unchained/features/home/presentation/home_screen.dart';
 import 'package:unchained/features/onboarding/presentation/analyzing_screen.dart';
 import 'package:unchained/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:unchained/features/plans/presentation/ai_plan_screen.dart';
@@ -58,10 +57,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/accountability',
       builder: (context, state) => const AccountabilityStub(),
-    ),
-    GoRoute(
-      path: '/home',
-      builder: (context, state) => const HomeScreen(),
     ),
   ],
 );

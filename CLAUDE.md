@@ -51,11 +51,9 @@ This crosses the Dart/native boundary via a single `MethodChannel('unchained/blo
 - `android/.../MainActivity.kt` — handles the channel. `prepareVpn` triggers Android's `VpnService.prepare()` consent dialog (async, resolved in `onActivityResult`); start/stop dispatch intents to the foreground service.
 - `android/.../BlockingService.kt` — a `VpnService` that establishes a tun interface (`10.0.0.1` DNS), reads packets in a loop, parses **IPv4/UDP/port-53 DNS queries only**, and returns a forged **NXDOMAIN** for domains in the hardcoded `BLOCKLIST`, forwarding everything else to upstream `1.1.1.1`. The actual blocklist lives here in Kotlin, not in Dart. IPv6 and non-DNS traffic pass through untouched.
 
-Two Riverpod entry points drive the toggle — keep them consistent:
-- `features/blocking/blocking_provider.dart` (`blockingProvider`, a simple `bool`).
-- `features/dashboard/providers/blocking_settings_provider.dart` (`blockingSettingsActionsProvider`), which both flips the native VPN and persists the `protectionEnabled` DB flag.
+The toggle is driven by `features/dashboard/providers/blocking_settings_provider.dart` (`blockingSettingsActionsProvider`), which both flips the native VPN and persists the `protectionEnabled` DB flag.
 
-Both notifiers **reconcile state from native on build** (`isRunning()`), because the VPN can be revoked or killed by the OS independent of the app. When changing toggle logic, preserve this reconcile-from-truth pattern.
+This notifier **reconciles state from native on build** (`isRunning()`), because the VPN can be revoked or killed by the OS independent of the app. When changing toggle logic, preserve this reconcile-from-truth pattern.
 
 ### Persistence (Drift)
 `lib/core/database/app_database.dart` defines two tables and `schemaVersion = 2` (bump it and add an `onUpgrade` branch for any schema change):
