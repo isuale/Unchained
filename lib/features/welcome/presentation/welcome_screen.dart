@@ -68,39 +68,6 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF1E5FFF),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                    ),
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text:
-                                '${AppLocalizations.of(context)!.welcome_have_account} ',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.normal,
-                              fontSize: 15,
-                            ),
-                          ),
-                          TextSpan(
-                            text:
-                                AppLocalizations.of(context)!.welcome_sign_in,
-                            style: const TextStyle(
-                              color: Color(0xFF1E5FFF),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 24),
                 ],
               ),
