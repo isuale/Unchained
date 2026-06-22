@@ -65,9 +65,22 @@ private var USER_BLOCKLIST: Set<String> = emptySet()
 @Volatile
 private var USER_ALLOWLIST: Set<String> = emptySet()
 
+// True if [lowerDomain] equals a list entry or is a subdomain of one. Instead of
+// scanning every entry (O(list size) with a string allocation per entry — far too
+// slow on the read loop now that the built-in list is ~1000 domains), we hash-look-up
+// the domain and each of its parent suffixes: O(number of labels), allocation-light,
+// and constant no matter how large the list grows. Semantically identical to the old
+// `lowerDomain == it || lowerDomain.endsWith(".$it")` check.
 private fun matchesAny(lowerDomain: String, list: Set<String>): Boolean {
-    if (list.isEmpty()) return false
-    return list.any { lowerDomain == it || lowerDomain.endsWith(".$it") }
+    if (list.isEmpty() || lowerDomain.isEmpty()) return false
+    if (list.contains(lowerDomain)) return true
+    var dot = lowerDomain.indexOf('.')
+    while (dot != -1) {
+        // Substring after the dot == "lowerDomain ends with .<suffix>".
+        if (list.contains(lowerDomain.substring(dot + 1))) return true
+        dot = lowerDomain.indexOf('.', dot + 1)
+    }
+    return false
 }
 
 private fun isAllowed(lowerDomain: String): Boolean =
