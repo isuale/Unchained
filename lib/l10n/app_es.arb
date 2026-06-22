@@ -112,6 +112,7 @@
   "nav_settings": "Ajustes",
   "plan_activating": "Activando tu plan...",
   "plan_activated": "Plan activado",
+  "plan_unavailable": "Este plan aún no está disponible. Por ahora solo se puede activar la prueba gratis.",
   "analyzing_skip_to_plans": "Saltar y elegir un plan",
   "lock_forever_only": "Solo Forever",
   "lock_monthly_plus": "Mensual+",

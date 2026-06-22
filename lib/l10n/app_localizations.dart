@@ -740,6 +740,12 @@ abstract class AppLocalizations {
   /// **'Plan activado'**
   String get plan_activated;
 
+  /// No description provided for @plan_unavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Este plan aún no está disponible. Por ahora solo se puede activar la prueba gratis.'**
+  String get plan_unavailable;
+
   /// No description provided for @analyzing_skip_to_plans.
   ///
   /// In es, this message translates to:
