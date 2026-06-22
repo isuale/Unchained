@@ -16,7 +16,7 @@ enum LockMode {
   disable,
 }
 
-/// Full-screen, back-proof gate: copy out ~1000 characters of Scripture within two
+/// Full-screen, back-proof gate: copy out ~1000 characters of Scripture within four
 /// minutes. Run out of time and what you typed is wiped and a fresh passage begins.
 /// There is no other way off this screen (except Cancel in [LockMode.disable]).
 class ScriptureLockScreen extends StatefulWidget {
@@ -29,7 +29,7 @@ class ScriptureLockScreen extends StatefulWidget {
 }
 
 class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
-  static const Duration _limit = Duration(minutes: 2);
+  static const Duration _limit = Duration(minutes: 4);
   static const Color _accent = Color(0xFF1E5FFF);
   static const Color _good = Color(0xFF34C759);
   static const Color _bad = Color(0xFFFF4D4F);

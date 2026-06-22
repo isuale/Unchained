@@ -114,7 +114,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
           const SizedBox(height: 8),
           const Text(
             'When you head toward Force stop or Uninstall, Unchained covers the '
-            'screen and asks you to copy a passage of Scripture within two minutes '
+            'screen and asks you to copy a passage of Scripture within four minutes '
             'first.',
             style: TextStyle(color: _dim, height: 1.4),
           ),
