@@ -72,6 +72,14 @@ class BlockingSettings extends Table {
   // The plan the user picked (null = none picked yet)
   TextColumn get activePlan => text().nullable()();
 
+  // User-managed domain lists, stored newline-separated (one domain per line).
+  // customBlocklist: extra sites the user chose to block, on top of the native
+  // built-in list. customAllowlist: sites the user chose to un-block (allow),
+  // on top of the hidden built-in allowlist asset. Both are pushed to the
+  // native VPN engine; see features/dashboard/domain/domain_lists.dart.
+  TextColumn get customBlocklist => text().nullable()();
+  TextColumn get customAllowlist => text().nullable()();
+
   DateTimeColumn get updatedAt =>
       dateTime().clientDefault(() => DateTime.now())();
 
@@ -85,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -105,6 +113,13 @@ class AppDatabase extends _$AppDatabase {
                 blockingSettings, blockingSettings.commitmentCycle);
             await m.addColumn(
                 blockingSettings, blockingSettings.commitmentLockUntil);
+          }
+          // v4: user-managed custom block/allow domain lists.
+          if (from >= 2 && from < 4) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.customBlocklist);
+            await m.addColumn(
+                blockingSettings, blockingSettings.customAllowlist);
           }
         },
         beforeOpen: (details) async {

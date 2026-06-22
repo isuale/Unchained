@@ -4,9 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.text.TextUtils
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
@@ -16,7 +19,12 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
 
     private val channelName = "unchained/blocking"
+    private val guardChannelName = "unchained/guard"
     private var pendingPrepareResult: MethodChannel.Result? = null
+
+    private var guardChannel: MethodChannel? = null
+    // Set when the watchdog launched us before the Flutter engine/channel was ready.
+    private var pendingShowLock = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +40,18 @@ class MainActivity : FlutterActivity() {
                     REQ_NOTIF
                 )
             }
+        }
+        if (intent?.getBooleanExtra(EXTRA_SHOW_LOCK, false) == true) {
+            pendingShowLock = true
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra(EXTRA_SHOW_LOCK, false)) {
+            // Engine is already up on a re-launch; deliver immediately.
+            guardChannel?.invokeMethod("showLock", null) ?: run { pendingShowLock = true }
         }
     }
 
@@ -58,9 +78,78 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     }
                     "isRunning" -> result.success(BlockingService.isRunning)
+                    "setUserLists" -> {
+                        @Suppress("UNCHECKED_CAST")
+                        val block = (call.argument<List<String>>("blocklist")) ?: emptyList()
+                        @Suppress("UNCHECKED_CAST")
+                        val allow = (call.argument<List<String>>("allowlist")) ?: emptyList()
+                        BlockingService.setUserLists(applicationContext, block, allow)
+                        result.success(true)
+                    }
+                    "getBuiltinBlocklist" -> result.success(BlockingService.builtinBlocklist())
                     else -> result.notImplemented()
                 }
             }
+
+        guardChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            guardChannelName
+        ).also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isAccessibilityEnabled" -> result.success(isAccessibilityServiceEnabled())
+                    "isOverlayGranted" -> result.success(Settings.canDrawOverlays(this))
+                    "isGuardEnabled" -> result.success(GuardState.isEnabled(this))
+                    "setGuardEnabled" -> {
+                        GuardState.setEnabled(this, call.arguments as? Boolean ?: false)
+                        result.success(true)
+                    }
+                    "openAccessibilitySettings" -> {
+                        // Grace so our own deep-link to enable the service isn't re-gated.
+                        GuardState.grantGrace()
+                        startActivity(
+                            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                        result.success(true)
+                    }
+                    "openOverlaySettings" -> {
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:$packageName")
+                            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                        result.success(true)
+                    }
+                    "challengePassed" -> {
+                        GuardState.grantGrace()
+                        result.success(true)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
+
+        if (pendingShowLock) {
+            pendingShowLock = false
+            guardChannel?.invokeMethod("showLock", null)
+        }
+    }
+
+    /** Whether our [UninstallGuardService] is currently enabled in system settings. */
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        val expected = "$packageName/${UninstallGuardService::class.java.name}"
+        val enabledServices = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
+        val splitter = TextUtils.SimpleStringSplitter(':')
+        splitter.setString(enabledServices)
+        for (service in splitter) {
+            if (service.equals(expected, ignoreCase = true)) return true
+        }
+        return false
     }
 
     private fun handlePrepare(result: MethodChannel.Result) {
@@ -87,6 +176,7 @@ class MainActivity : FlutterActivity() {
     }
 
     companion object {
+        const val EXTRA_SHOW_LOCK = "com.unchained.unchained.SHOW_LOCK"
         private const val REQ_VPN = 7001
         private const val REQ_NOTIF = 7002
     }

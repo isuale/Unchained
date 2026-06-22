@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:unchained/features/dashboard/presentation/settings_screen.dart';
 import 'package:unchained/features/dashboard/protection_dashboard_screen.dart';
-import 'package:unchained/features/dashboard/stubs/blocklist_stub.dart';
+import 'package:unchained/features/dashboard/presentation/blocklist_screen.dart';
 import 'package:unchained/features/dashboard/stubs/progress_stub.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
@@ -29,7 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         index: _index,
         children: const [
           ProtectionDashboardScreen(),
-          BlocklistStub(),
+          BlocklistScreen(),
           ProgressStub(),
           SettingsScreen(),
         ],

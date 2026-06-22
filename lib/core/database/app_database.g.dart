@@ -728,6 +728,28 @@ class $BlockingSettingsTable extends BlockingSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _customBlocklistMeta = const VerificationMeta(
+    'customBlocklist',
+  );
+  @override
+  late final GeneratedColumn<String> customBlocklist = GeneratedColumn<String>(
+    'custom_blocklist',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _customAllowlistMeta = const VerificationMeta(
+    'customAllowlist',
+  );
+  @override
+  late final GeneratedColumn<String> customAllowlist = GeneratedColumn<String>(
+    'custom_allowlist',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -764,6 +786,8 @@ class $BlockingSettingsTable extends BlockingSettings
     commitmentCycle,
     commitmentLockUntil,
     activePlan,
+    customBlocklist,
+    customAllowlist,
     updatedAt,
   ];
   @override
@@ -961,6 +985,24 @@ class $BlockingSettingsTable extends BlockingSettings
         activePlan.isAcceptableOrUnknown(data['active_plan']!, _activePlanMeta),
       );
     }
+    if (data.containsKey('custom_blocklist')) {
+      context.handle(
+        _customBlocklistMeta,
+        customBlocklist.isAcceptableOrUnknown(
+          data['custom_blocklist']!,
+          _customBlocklistMeta,
+        ),
+      );
+    }
+    if (data.containsKey('custom_allowlist')) {
+      context.handle(
+        _customAllowlistMeta,
+        customAllowlist.isAcceptableOrUnknown(
+          data['custom_allowlist']!,
+          _customAllowlistMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -1064,6 +1106,14 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.string,
         data['${effectivePrefix}active_plan'],
       ),
+      customBlocklist: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_blocklist'],
+      ),
+      customAllowlist: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_allowlist'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -1100,6 +1150,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final int commitmentCycle;
   final DateTime? commitmentLockUntil;
   final String? activePlan;
+  final String? customBlocklist;
+  final String? customAllowlist;
   final DateTime updatedAt;
   const BlockingSetting({
     required this.id,
@@ -1124,6 +1176,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     required this.commitmentCycle,
     this.commitmentLockUntil,
     this.activePlan,
+    this.customBlocklist,
+    this.customAllowlist,
     required this.updatedAt,
   });
   @override
@@ -1161,6 +1215,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     if (!nullToAbsent || activePlan != null) {
       map['active_plan'] = Variable<String>(activePlan);
     }
+    if (!nullToAbsent || customBlocklist != null) {
+      map['custom_blocklist'] = Variable<String>(customBlocklist);
+    }
+    if (!nullToAbsent || customAllowlist != null) {
+      map['custom_allowlist'] = Variable<String>(customAllowlist);
+    }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -1193,6 +1253,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       activePlan: activePlan == null && nullToAbsent
           ? const Value.absent()
           : Value(activePlan),
+      customBlocklist: customBlocklist == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customBlocklist),
+      customAllowlist: customAllowlist == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customAllowlist),
       updatedAt: Value(updatedAt),
     );
   }
@@ -1241,6 +1307,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
         json['commitmentLockUntil'],
       ),
       activePlan: serializer.fromJson<String?>(json['activePlan']),
+      customBlocklist: serializer.fromJson<String?>(json['customBlocklist']),
+      customAllowlist: serializer.fromJson<String?>(json['customAllowlist']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -1276,6 +1344,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'commitmentCycle': serializer.toJson<int>(commitmentCycle),
       'commitmentLockUntil': serializer.toJson<DateTime?>(commitmentLockUntil),
       'activePlan': serializer.toJson<String?>(activePlan),
+      'customBlocklist': serializer.toJson<String?>(customBlocklist),
+      'customAllowlist': serializer.toJson<String?>(customAllowlist),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -1303,6 +1373,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     int? commitmentCycle,
     Value<DateTime?> commitmentLockUntil = const Value.absent(),
     Value<String?> activePlan = const Value.absent(),
+    Value<String?> customBlocklist = const Value.absent(),
+    Value<String?> customAllowlist = const Value.absent(),
     DateTime? updatedAt,
   }) => BlockingSetting(
     id: id ?? this.id,
@@ -1333,6 +1405,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
         ? commitmentLockUntil.value
         : this.commitmentLockUntil,
     activePlan: activePlan.present ? activePlan.value : this.activePlan,
+    customBlocklist: customBlocklist.present
+        ? customBlocklist.value
+        : this.customBlocklist,
+    customAllowlist: customAllowlist.present
+        ? customAllowlist.value
+        : this.customAllowlist,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   BlockingSetting copyWithCompanion(BlockingSettingsCompanion data) {
@@ -1402,6 +1480,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       activePlan: data.activePlan.present
           ? data.activePlan.value
           : this.activePlan,
+      customBlocklist: data.customBlocklist.present
+          ? data.customBlocklist.value
+          : this.customBlocklist,
+      customAllowlist: data.customAllowlist.present
+          ? data.customAllowlist.value
+          : this.customAllowlist,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -1435,6 +1519,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write('commitmentCycle: $commitmentCycle, ')
           ..write('commitmentLockUntil: $commitmentLockUntil, ')
           ..write('activePlan: $activePlan, ')
+          ..write('customBlocklist: $customBlocklist, ')
+          ..write('customAllowlist: $customAllowlist, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -1464,6 +1550,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     commitmentCycle,
     commitmentLockUntil,
     activePlan,
+    customBlocklist,
+    customAllowlist,
     updatedAt,
   ]);
   @override
@@ -1494,6 +1582,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.commitmentCycle == this.commitmentCycle &&
           other.commitmentLockUntil == this.commitmentLockUntil &&
           other.activePlan == this.activePlan &&
+          other.customBlocklist == this.customBlocklist &&
+          other.customAllowlist == this.customAllowlist &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -1520,6 +1610,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<int> commitmentCycle;
   final Value<DateTime?> commitmentLockUntil;
   final Value<String?> activePlan;
+  final Value<String?> customBlocklist;
+  final Value<String?> customAllowlist;
   final Value<DateTime> updatedAt;
   const BlockingSettingsCompanion({
     this.id = const Value.absent(),
@@ -1544,6 +1636,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.commitmentCycle = const Value.absent(),
     this.commitmentLockUntil = const Value.absent(),
     this.activePlan = const Value.absent(),
+    this.customBlocklist = const Value.absent(),
+    this.customAllowlist = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   BlockingSettingsCompanion.insert({
@@ -1569,6 +1663,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.commitmentCycle = const Value.absent(),
     this.commitmentLockUntil = const Value.absent(),
     this.activePlan = const Value.absent(),
+    this.customBlocklist = const Value.absent(),
+    this.customAllowlist = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   static Insertable<BlockingSetting> custom({
@@ -1594,6 +1690,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<int>? commitmentCycle,
     Expression<DateTime>? commitmentLockUntil,
     Expression<String>? activePlan,
+    Expression<String>? customBlocklist,
+    Expression<String>? customAllowlist,
     Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
@@ -1628,6 +1726,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       if (commitmentLockUntil != null)
         'commitment_lock_until': commitmentLockUntil,
       if (activePlan != null) 'active_plan': activePlan,
+      if (customBlocklist != null) 'custom_blocklist': customBlocklist,
+      if (customAllowlist != null) 'custom_allowlist': customAllowlist,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
@@ -1655,6 +1755,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<int>? commitmentCycle,
     Value<DateTime?>? commitmentLockUntil,
     Value<String?>? activePlan,
+    Value<String?>? customBlocklist,
+    Value<String?>? customAllowlist,
     Value<DateTime>? updatedAt,
   }) {
     return BlockingSettingsCompanion(
@@ -1685,6 +1787,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       commitmentCycle: commitmentCycle ?? this.commitmentCycle,
       commitmentLockUntil: commitmentLockUntil ?? this.commitmentLockUntil,
       activePlan: activePlan ?? this.activePlan,
+      customBlocklist: customBlocklist ?? this.customBlocklist,
+      customAllowlist: customAllowlist ?? this.customAllowlist,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -1774,6 +1878,12 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     if (activePlan.present) {
       map['active_plan'] = Variable<String>(activePlan.value);
     }
+    if (customBlocklist.present) {
+      map['custom_blocklist'] = Variable<String>(customBlocklist.value);
+    }
+    if (customAllowlist.present) {
+      map['custom_allowlist'] = Variable<String>(customAllowlist.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -1809,6 +1919,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write('commitmentCycle: $commitmentCycle, ')
           ..write('commitmentLockUntil: $commitmentLockUntil, ')
           ..write('activePlan: $activePlan, ')
+          ..write('customBlocklist: $customBlocklist, ')
+          ..write('customAllowlist: $customAllowlist, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -2083,6 +2195,8 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<int> commitmentCycle,
       Value<DateTime?> commitmentLockUntil,
       Value<String?> activePlan,
+      Value<String?> customBlocklist,
+      Value<String?> customAllowlist,
       Value<DateTime> updatedAt,
     });
 typedef $$BlockingSettingsTableUpdateCompanionBuilder =
@@ -2109,6 +2223,8 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<int> commitmentCycle,
       Value<DateTime?> commitmentLockUntil,
       Value<String?> activePlan,
+      Value<String?> customBlocklist,
+      Value<String?> customAllowlist,
       Value<DateTime> updatedAt,
     });
 
@@ -2228,6 +2344,16 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<String> get activePlan => $composableBuilder(
     column: $table.activePlan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customBlocklist => $composableBuilder(
+    column: $table.customBlocklist,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customAllowlist => $composableBuilder(
+    column: $table.customAllowlist,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2357,6 +2483,16 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get customBlocklist => $composableBuilder(
+    column: $table.customBlocklist,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customAllowlist => $composableBuilder(
+    column: $table.customAllowlist,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -2481,6 +2617,16 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get customBlocklist => $composableBuilder(
+    column: $table.customBlocklist,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customAllowlist => $composableBuilder(
+    column: $table.customAllowlist,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
@@ -2545,6 +2691,8 @@ class $$BlockingSettingsTableTableManager
                 Value<int> commitmentCycle = const Value.absent(),
                 Value<DateTime?> commitmentLockUntil = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
+                Value<String?> customBlocklist = const Value.absent(),
+                Value<String?> customAllowlist = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion(
                 id: id,
@@ -2569,6 +2717,8 @@ class $$BlockingSettingsTableTableManager
                 commitmentCycle: commitmentCycle,
                 commitmentLockUntil: commitmentLockUntil,
                 activePlan: activePlan,
+                customBlocklist: customBlocklist,
+                customAllowlist: customAllowlist,
                 updatedAt: updatedAt,
               ),
           createCompanionCallback:
@@ -2596,6 +2746,8 @@ class $$BlockingSettingsTableTableManager
                 Value<int> commitmentCycle = const Value.absent(),
                 Value<DateTime?> commitmentLockUntil = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
+                Value<String?> customBlocklist = const Value.absent(),
+                Value<String?> customAllowlist = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion.insert(
                 id: id,
@@ -2620,6 +2772,8 @@ class $$BlockingSettingsTableTableManager
                 commitmentCycle: commitmentCycle,
                 commitmentLockUntil: commitmentLockUntil,
                 activePlan: activePlan,
+                customBlocklist: customBlocklist,
+                customAllowlist: customAllowlist,
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0

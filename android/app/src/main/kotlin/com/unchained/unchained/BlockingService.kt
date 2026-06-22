@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
@@ -35,6 +36,11 @@ private val BLOCKLIST = setOf(
     "porn.com",
 )
 
+// SharedPreferences storage for the user's custom lists (see UserLists).
+const val LISTS_PREFS = "unchained_user_lists"
+const val KEY_USER_BLOCKLIST = "user_blocklist"
+const val KEY_USER_ALLOWLIST = "user_allowlist"
+
 // Domains that must always pass through, even if a blocklist rule would match
 // them. Loaded once at service start from assets/allowlist.txt (one domain per
 // line). Checked BEFORE the blocklist, so it can only ever un-block — it never
@@ -42,18 +48,29 @@ private val BLOCKLIST = setOf(
 @Volatile
 private var ALLOWLIST: Set<String> = emptySet()
 
-private fun isAllowed(lowerDomain: String): Boolean {
-    val allow = ALLOWLIST
-    if (allow.isEmpty()) return false
-    return allow.any { lowerDomain == it || lowerDomain.endsWith(".$it") }
+// User-managed lists, set from the UI via the method channel and persisted to
+// SharedPreferences so they survive a service restart. USER_ALLOWLIST un-blocks
+// (checked before any block rule); USER_BLOCKLIST blocks extra domains on top
+// of the built-in BLOCKLIST.
+@Volatile
+private var USER_BLOCKLIST: Set<String> = emptySet()
+@Volatile
+private var USER_ALLOWLIST: Set<String> = emptySet()
+
+private fun matchesAny(lowerDomain: String, list: Set<String>): Boolean {
+    if (list.isEmpty()) return false
+    return list.any { lowerDomain == it || lowerDomain.endsWith(".$it") }
 }
+
+private fun isAllowed(lowerDomain: String): Boolean =
+    matchesAny(lowerDomain, ALLOWLIST) || matchesAny(lowerDomain, USER_ALLOWLIST)
 
 private fun isBlocked(domain: String): Boolean {
     if (domain.isEmpty()) return false
     val lower = domain.lowercase()
     // Allowlist wins: a listed domain (or its subdomains) is never blocked.
     if (isAllowed(lower)) return false
-    return BLOCKLIST.any { lower == it || lower.endsWith(".$it") }
+    return matchesAny(lower, BLOCKLIST) || matchesAny(lower, USER_BLOCKLIST)
 }
 
 class BlockingService : VpnService() {
@@ -83,12 +100,37 @@ class BlockingService : VpnService() {
         @Volatile
         var isRunning: Boolean = false
             private set
+
+        /// The built-in always-blocked domains, exposed for the UI to display.
+        fun builtinBlocklist(): List<String> = BLOCKLIST.toList()
+
+        /// Replaces the in-memory user lists and persists them to prefs so the
+        /// running tunnel and any later restart both see the change. Domains are
+        /// stored lowercased; empties are dropped. Safe to call from any thread.
+        fun setUserLists(context: android.content.Context, block: List<String>, allow: List<String>) {
+            val b = block.map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toHashSet()
+            val a = allow.map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toHashSet()
+            USER_BLOCKLIST = b
+            USER_ALLOWLIST = a
+            context.getSharedPreferences(LISTS_PREFS, Context.MODE_PRIVATE).edit()
+                .putStringSet(KEY_USER_BLOCKLIST, b)
+                .putStringSet(KEY_USER_ALLOWLIST, a)
+                .apply()
+        }
+
+        /// Loads the persisted user lists into memory (called on service start).
+        fun loadUserLists(context: android.content.Context) {
+            val prefs = context.getSharedPreferences(LISTS_PREFS, Context.MODE_PRIVATE)
+            USER_BLOCKLIST = prefs.getStringSet(KEY_USER_BLOCKLIST, emptySet())?.toHashSet() ?: hashSetOf()
+            USER_ALLOWLIST = prefs.getStringSet(KEY_USER_ALLOWLIST, emptySet())?.toHashSet() ?: hashSetOf()
+        }
     }
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         loadAllowlist()
+        loadUserLists(this)
     }
 
     /// Reads assets/allowlist.txt into [ALLOWLIST]. Each non-blank, non-comment

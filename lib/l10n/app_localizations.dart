@@ -764,6 +764,108 @@ abstract class AppLocalizations {
   /// **'Lista'**
   String get stub_blocklist_title;
 
+  /// No description provided for @blocklist_tab_block.
+  ///
+  /// In es, this message translates to:
+  /// **'Lista de bloqueo'**
+  String get blocklist_tab_block;
+
+  /// No description provided for @blocklist_tab_allow.
+  ///
+  /// In es, this message translates to:
+  /// **'Lista blanca'**
+  String get blocklist_tab_allow;
+
+  /// No description provided for @blocklist_block_header.
+  ///
+  /// In es, this message translates to:
+  /// **'Webs bloqueadas'**
+  String get blocklist_block_header;
+
+  /// No description provided for @blocklist_block_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'Estos sitios están bloqueados. Añade cualquier web porno o que te distraiga que se escape.'**
+  String get blocklist_block_sub;
+
+  /// No description provided for @blocklist_allow_header.
+  ///
+  /// In es, this message translates to:
+  /// **'Webs permitidas'**
+  String get blocklist_allow_header;
+
+  /// No description provided for @blocklist_allow_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'Los sitios que añadas aquí nunca se bloquean. Las webs populares y seguras ya están permitidas automáticamente.'**
+  String get blocklist_allow_sub;
+
+  /// No description provided for @blocklist_builtin.
+  ///
+  /// In es, this message translates to:
+  /// **'Predefinido'**
+  String get blocklist_builtin;
+
+  /// No description provided for @blocklist_add_block_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade un sitio para bloquear (ej. ejemplo.com)'**
+  String get blocklist_add_block_hint;
+
+  /// No description provided for @blocklist_add_allow_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade un sitio para desbloquear (ej. ejemplo.com)'**
+  String get blocklist_add_allow_hint;
+
+  /// No description provided for @blocklist_add.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir'**
+  String get blocklist_add;
+
+  /// No description provided for @blocklist_block_empty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has añadido sitios bloqueados.'**
+  String get blocklist_block_empty;
+
+  /// No description provided for @blocklist_allow_empty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has permitido ningún sitio.'**
+  String get blocklist_allow_empty;
+
+  /// No description provided for @blocklist_invalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce un sitio válido como ejemplo.com'**
+  String get blocklist_invalid;
+
+  /// No description provided for @blocklist_duplicate.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese sitio ya está en la lista'**
+  String get blocklist_duplicate;
+
+  /// No description provided for @blocklist_blocked_added.
+  ///
+  /// In es, this message translates to:
+  /// **'{domain} ahora está bloqueado'**
+  String blocklist_blocked_added(String domain);
+
+  /// No description provided for @blocklist_allowed_added.
+  ///
+  /// In es, this message translates to:
+  /// **'{domain} ahora está permitido'**
+  String blocklist_allowed_added(String domain);
+
+  /// No description provided for @blocklist_remove.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get blocklist_remove;
+
   /// No description provided for @stub_progress_title.
   ///
   /// In es, this message translates to:

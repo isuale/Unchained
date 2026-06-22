@@ -45,4 +45,36 @@ class BlockingService {
       return false;
     }
   }
+
+  /// Pushes the user's custom block / allow domain lists to the native VPN
+  /// engine. Persisted natively too, so they survive a service restart. Safe
+  /// to call whether or not protection is currently running.
+  static Future<bool> setUserLists({
+    required List<String> blocklist,
+    required List<String> allowlist,
+  }) async {
+    try {
+      final result = await _channel.invokeMethod<bool>('setUserLists', {
+        'blocklist': blocklist,
+        'allowlist': allowlist,
+      });
+      return result ?? false;
+    } catch (e, st) {
+      debugPrint('BlockingService.setUserLists failed: $e\n$st');
+      return false;
+    }
+  }
+
+  /// The native built-in blocklist (the always-blocked adult domains), shown
+  /// read-only in the Blocklist UI. Returns an empty list on failure.
+  static Future<List<String>> builtinBlocklist() async {
+    try {
+      final result =
+          await _channel.invokeListMethod<String>('getBuiltinBlocklist');
+      return result ?? const [];
+    } catch (e, st) {
+      debugPrint('BlockingService.builtinBlocklist failed: $e\n$st');
+      return const [];
+    }
+  }
 }

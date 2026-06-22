@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/dashboard_screen.dart';
+import 'package:unchained/features/guard/presentation/scripture_lock_screen.dart';
 import 'package:unchained/features/dashboard/stubs/accountability_stub.dart';
 import 'package:unchained/features/onboarding/presentation/analyzing_screen.dart';
 import 'package:unchained/features/onboarding/presentation/onboarding_screen.dart';
@@ -57,6 +58,12 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/accountability',
       builder: (context, state) => const AccountabilityStub(),
+    ),
+    GoRoute(
+      path: '/lock',
+      builder: (context, state) => ScriptureLockScreen(
+        mode: state.extra is LockMode ? state.extra as LockMode : LockMode.block,
+      ),
     ),
   ],
 );

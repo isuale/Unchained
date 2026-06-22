@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Uninstall protection: lets the accessibility watchdog draw the scripture lock
+         over Settings, and (because the app holds it) start that activity from the
+         background when an "escape door" is detected. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:label="Unchained"
@@ -46,6 +50,20 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="dns_filtering" />
+        </service>
+
+        <!-- Uninstall-protection watchdog. The user must enable it by hand under
+             Settings > Accessibility; the system binds it via BIND_ACCESSIBILITY_SERVICE. -->
+        <service
+            android:name=".UninstallGuardService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/uninstall_guard_config" />
         </service>
 
         <!-- Don't delete the meta-data below.

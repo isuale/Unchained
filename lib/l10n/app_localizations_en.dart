@@ -349,6 +349,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stub_blocklist_title => 'Blocklist';
 
   @override
+  String get blocklist_tab_block => 'Blocklist';
+
+  @override
+  String get blocklist_tab_allow => 'Whitelist';
+
+  @override
+  String get blocklist_block_header => 'Blocked websites';
+
+  @override
+  String get blocklist_block_sub =>
+      'These sites are blocked. Add any porn or distracting site that slips through.';
+
+  @override
+  String get blocklist_allow_header => 'Allowed websites';
+
+  @override
+  String get blocklist_allow_sub =>
+      'Sites you add here are never blocked. Popular safe sites are already allowed automatically.';
+
+  @override
+  String get blocklist_builtin => 'Built-in';
+
+  @override
+  String get blocklist_add_block_hint =>
+      'Add a site to block (e.g. example.com)';
+
+  @override
+  String get blocklist_add_allow_hint =>
+      'Add a site to unblock (e.g. example.com)';
+
+  @override
+  String get blocklist_add => 'Add';
+
+  @override
+  String get blocklist_block_empty =>
+      'You haven\'t added any blocked sites yet.';
+
+  @override
+  String get blocklist_allow_empty => 'You haven\'t allowed any sites yet.';
+
+  @override
+  String get blocklist_invalid => 'Enter a valid site like example.com';
+
+  @override
+  String get blocklist_duplicate => 'That site is already on the list';
+
+  @override
+  String blocklist_blocked_added(String domain) {
+    return '$domain is now blocked';
+  }
+
+  @override
+  String blocklist_allowed_added(String domain) {
+    return '$domain is now allowed';
+  }
+
+  @override
+  String get blocklist_remove => 'Remove';
+
+  @override
   String get stub_progress_title => 'Progress';
 
   @override

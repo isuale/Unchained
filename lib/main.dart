@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/core/router/app_router.dart';
+import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // When the native watchdog catches an uninstall / force-stop attempt it asks us
+  // to throw up the scripture lock over whatever route is showing.
+  UninstallGuardService.registerLockHandler(() => appRouter.go('/lock'));
   runApp(const ProviderScope(child: MyApp()));
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
+import 'package:unchained/features/guard/presentation/uninstall_protection_card.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -81,6 +82,18 @@ class SettingsScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            const SizedBox(height: 28),
+            Text(
+              'PROTECTION',
+              style: const TextStyle(
+                color: Color(0xFF666666),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const UninstallProtectionCard(),
             const SizedBox(height: 28),
             Text(
               l.settings_section_session.toUpperCase(),

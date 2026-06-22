@@ -68,6 +68,20 @@ class BlockingSettingsRepository {
     await updateSettings(BlockingSettingsCompanion(activePlan: Value(plan)));
   }
 
+  /// Persists the user's custom blocklist (extra domains to block), stored
+  /// newline-separated. Pass the full desired list; it replaces the old one.
+  Future<void> setCustomBlocklist(List<String> domains) async {
+    await updateSettings(
+        BlockingSettingsCompanion(customBlocklist: Value(domains.join('\n'))));
+  }
+
+  /// Persists the user's custom allowlist (domains to un-block / allow),
+  /// stored newline-separated. Pass the full desired list; it replaces the old.
+  Future<void> setCustomAllowlist(List<String> domains) async {
+    await updateSettings(
+        BlockingSettingsCompanion(customAllowlist: Value(domains.join('\n'))));
+  }
+
   /// Persists the commitment cycle and the moment its lock expires.
   /// Pass cycle 0 / null to clear the commitment.
   Future<void> setCommitment({required int cycle, DateTime? lockUntil}) async {

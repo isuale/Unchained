@@ -1,21 +1,50 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
+import 'package:unchained/features/dashboard/domain/domain_lists.dart';
 
 final blockingSettingsProvider = StreamProvider<BlockingSetting>((ref) {
   return ref.watch(blockingSettingsRepositoryProvider).watchSettings();
 });
 
-/// The user's current spot in the commitment cycle, derived from settings.
+/// Ticks once per second so time-based UI (the lock countdown) refreshes
+/// even when nothing in the database changes.
+final _secondTickerProvider = StreamProvider<int>((ref) {
+  return Stream.periodic(const Duration(seconds: 1), (i) => i);
+});
+
+/// The user's current spot in the commitment cycle, recomputed every second.
+///
+/// When a break has fully elapsed, this also persists the roll-forward into
+/// the next (longer) lock, so the cycle advances live while the app is open —
+/// not only when it's reopened.
 final commitmentStatusProvider = Provider<CommitmentStatus>((ref) {
+  ref.watch(_secondTickerProvider); // re-evaluate every second
   final settings = ref.watch(blockingSettingsProvider).asData?.value;
   if (settings == null) return CommitmentStatus.none_;
+
+  final now = DateTime.now();
+  final advanced = advanceIfLapsed(
+    settings.commitmentCycle,
+    settings.commitmentLockUntil,
+    now,
+  );
+  if (advanced != null) {
+    // Break is over — re-lock for the next cycle and keep protection on.
+    final repo = ref.read(blockingSettingsRepositoryProvider);
+    repo.setCommitment(cycle: advanced.cycle, lockUntil: advanced.lockUntil);
+    repo.toggleField('protectionEnabled', true);
+    BlockingService.start();
+    return computeCommitment(advanced.cycle, advanced.lockUntil, now);
+  }
   return computeCommitment(
     settings.commitmentCycle,
     settings.commitmentLockUntil,
-    DateTime.now(),
+    now,
   );
 });
 
@@ -26,6 +55,19 @@ class BlockingSettingsActions extends Notifier<void> {
   void build() {
     _reconcileWithNative();
     _reconcileCommitment();
+    _syncUserLists();
+  }
+
+  /// Pushes the user's stored custom block/allow lists to the native engine on
+  /// startup, so a freshly launched VPN service has them even before any edit.
+  Future<void> _syncUserLists() async {
+    final repo = ref.read(blockingSettingsRepositoryProvider);
+    final settings = await repo.getSettings();
+    if (settings == null) return;
+    await BlockingService.setUserLists(
+      blocklist: parseDomainList(settings.customBlocklist),
+      allowlist: parseDomainList(settings.customAllowlist),
+    );
   }
 
   Future<void> _reconcileWithNative() async {
