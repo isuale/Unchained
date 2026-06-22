@@ -64,7 +64,7 @@ class _DomainListView extends StatefulWidget {
     required this.subtitle,
     required this.inputHint,
     required this.emptyText,
-    required this.builtin,
+    this.headerCard,
     required this.custom,
     required this.onAdd,
     required this.onRemove,
@@ -77,9 +77,9 @@ class _DomainListView extends StatefulWidget {
   final String inputHint;
   final String emptyText;
 
-  /// Read-only entries shown first (the built-in blocked domains). Empty for
-  /// the whitelist tab.
-  final List<String> builtin;
+  /// Optional summary card shown above the input (e.g. "1,000+ sites blocked").
+  /// Null on the whitelist tab, which deliberately starts clear.
+  final Widget? headerCard;
   final List<String> custom;
 
   /// Returns the result so we can show the right snackbar. Receives raw input.
@@ -149,6 +149,10 @@ class _DomainListViewState extends State<_DomainListView> {
           widget.subtitle,
           style: const TextStyle(color: Color(0xFF9AA3B2), height: 1.4),
         ),
+        if (widget.headerCard != null) ...[
+          const SizedBox(height: 16),
+          widget.headerCard!,
+        ],
         const SizedBox(height: 16),
         // Input row
         Row(
@@ -205,16 +209,8 @@ class _DomainListViewState extends State<_DomainListView> {
           ],
         ),
         const SizedBox(height: 20),
-        // Built-in (read-only) entries
-        for (final domain in widget.builtin)
-          _DomainTile(
-            domain: domain,
-            icon: widget.icon,
-            accent: widget.accent,
-            badge: l.blocklist_builtin,
-          ),
         // Custom entries (removable)
-        if (widget.custom.isEmpty && widget.builtin.isEmpty)
+        if (widget.custom.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 24),
             child: Center(
@@ -241,14 +237,12 @@ class _DomainTile extends StatelessWidget {
     required this.domain,
     required this.icon,
     required this.accent,
-    this.badge,
     this.onRemove,
   });
 
   final String domain;
   final IconData icon;
   final Color accent;
-  final String? badge;
   final VoidCallback? onRemove;
 
   @override
@@ -271,21 +265,6 @@ class _DomainTile extends StatelessWidget {
               style: const TextStyle(color: Colors.white, fontSize: 15),
             ),
           ),
-          if (badge != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                badge!,
-                style: TextStyle(
-                    color: accent,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600),
-              ),
-            ),
           if (onRemove != null)
             IconButton(
               onPressed: onRemove,
@@ -306,18 +285,51 @@ class _BlocklistTab extends ConsumerWidget {
     final l = AppLocalizations.of(context)!;
     final actions = ref.read(domainListsActionsProvider);
     final custom = ref.watch(customBlocklistProvider);
-    final builtin = ref.watch(builtinBlocklistProvider).asData?.value ?? const [];
+    final count = ref.watch(builtinBlocklistCountProvider).asData?.value ?? 0;
     return _DomainListView(
       header: l.blocklist_block_header,
       subtitle: l.blocklist_block_sub,
       inputHint: l.blocklist_add_block_hint,
       emptyText: l.blocklist_block_empty,
-      builtin: builtin,
+      headerCard: count > 0
+          ? _BuiltinSummaryCard(text: l.blocklist_builtin_summary(count))
+          : null,
       custom: custom,
       accent: const Color(0xFFE5484D),
       icon: Icons.block,
       onAdd: actions.addToBlocklist,
       onRemove: actions.removeFromBlocklist,
+    );
+  }
+}
+
+/// "🛡 N known porn sites are blocked automatically" — stands in for listing
+/// the ~1000 built-in domains individually (which would be unusable to scroll).
+class _BuiltinSummaryCard extends StatelessWidget {
+  const _BuiltinSummaryCard({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF13101A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF3A1F22)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.shield, color: Color(0xFFE5484D), size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.white, height: 1.3),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -335,7 +347,6 @@ class _WhitelistTab extends ConsumerWidget {
       subtitle: l.blocklist_allow_sub,
       inputHint: l.blocklist_add_allow_hint,
       emptyText: l.blocklist_allow_empty,
-      builtin: const [],
       custom: custom,
       accent: const Color(0xFF30A46C),
       icon: Icons.check_circle_outline,

@@ -376,6 +376,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get blocklist_builtin => 'Predefinido';
 
   @override
+  String blocklist_builtin_summary(int count) {
+    return '$count sitios porno conocidos se bloquean automáticamente';
+  }
+
+  @override
   String get blocklist_add_block_hint =>
       'Añade un sitio para bloquear (ej. ejemplo.com)';
 

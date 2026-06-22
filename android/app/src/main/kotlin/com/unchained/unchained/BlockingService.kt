@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 
+// A tiny hardcoded core, kept as a safety net even if the asset fails to load.
 private val BLOCKLIST = setOf(
     "pornhub.com",
     "xvideos.com",
@@ -35,6 +36,13 @@ private val BLOCKLIST = setOf(
     "spankbang.com",
     "porn.com",
 )
+
+// The large built-in porn blocklist (~1000 most-viewed adult domains), loaded
+// once from assets/blocklist.txt. Kept separate from the hardcoded core so the
+// core still works if the asset is missing. Loaded lazily so the UI can read
+// the count without the VPN service running.
+@Volatile
+private var BUILTIN_EXTRA: Set<String> = emptySet()
 
 // SharedPreferences storage for the user's custom lists (see UserLists).
 const val LISTS_PREFS = "unchained_user_lists"
@@ -70,7 +78,9 @@ private fun isBlocked(domain: String): Boolean {
     val lower = domain.lowercase()
     // Allowlist wins: a listed domain (or its subdomains) is never blocked.
     if (isAllowed(lower)) return false
-    return matchesAny(lower, BLOCKLIST) || matchesAny(lower, USER_BLOCKLIST)
+    return matchesAny(lower, BLOCKLIST) ||
+        matchesAny(lower, BUILTIN_EXTRA) ||
+        matchesAny(lower, USER_BLOCKLIST)
 }
 
 class BlockingService : VpnService() {
@@ -101,8 +111,33 @@ class BlockingService : VpnService() {
         var isRunning: Boolean = false
             private set
 
-        /// The built-in always-blocked domains, exposed for the UI to display.
+        /// The small hardcoded core, exposed for callers that want a sample.
         fun builtinBlocklist(): List<String> = BLOCKLIST.toList()
+
+        /// Loads assets/blocklist.txt (~1000 porn domains) into [BUILTIN_EXTRA].
+        /// Idempotent: skips if already loaded. Non-fatal on failure — the
+        /// hardcoded core still blocks the top sites. Lazily callable from the
+        /// UI (via [builtinBlocklistCount]) without the VPN service running.
+        fun loadBuiltinExtra(context: android.content.Context) {
+            if (BUILTIN_EXTRA.isNotEmpty()) return
+            try {
+                val domains = context.assets.open("blocklist.txt").bufferedReader().useLines { lines ->
+                    lines.map { it.trim().lowercase() }
+                        .filter { it.isNotEmpty() && !it.startsWith("#") }
+                        .toHashSet()
+                }
+                BUILTIN_EXTRA = domains
+            } catch (e: Exception) {
+                BUILTIN_EXTRA = emptySet()
+            }
+        }
+
+        /// Total number of always-blocked built-in domains (core + asset),
+        /// for the "N sites blocked" summary in the Blocklist UI.
+        fun builtinBlocklistCount(context: android.content.Context): Int {
+            loadBuiltinExtra(context)
+            return (BLOCKLIST + BUILTIN_EXTRA).size
+        }
 
         /// Replaces the in-memory user lists and persists them to prefs so the
         /// running tunnel and any later restart both see the change. Domains are
@@ -130,6 +165,7 @@ class BlockingService : VpnService() {
         super.onCreate()
         createNotificationChannel()
         loadAllowlist()
+        loadBuiltinExtra(this)
         loadUserLists(this)
     }
 

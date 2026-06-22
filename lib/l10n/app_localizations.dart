@@ -806,6 +806,12 @@ abstract class AppLocalizations {
   /// **'Predefinido'**
   String get blocklist_builtin;
 
+  /// No description provided for @blocklist_builtin_summary.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} sitios porno conocidos se bloquean automáticamente'**
+  String blocklist_builtin_summary(int count);
+
   /// No description provided for @blocklist_add_block_hint.
   ///
   /// In es, this message translates to:

@@ -77,4 +77,17 @@ class BlockingService {
       return const [];
     }
   }
+
+  /// How many domains the built-in porn blocklist contains (~1000), for the
+  /// "N sites blocked" summary. Returns 0 on failure.
+  static Future<int> builtinBlocklistCount() async {
+    try {
+      final result =
+          await _channel.invokeMethod<int>('getBuiltinBlocklistCount');
+      return result ?? 0;
+    } catch (e, st) {
+      debugPrint('BlockingService.builtinBlocklistCount failed: $e\n$st');
+      return 0;
+    }
+  }
 }

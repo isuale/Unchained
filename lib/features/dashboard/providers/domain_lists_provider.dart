@@ -19,10 +19,10 @@ final customAllowlistProvider = Provider<List<String>>((ref) {
   return parseDomainList(settings?.customAllowlist);
 });
 
-/// The native built-in blocklist (always-blocked adult domains), shown
-/// read-only at the top of the Blocklist tab.
-final builtinBlocklistProvider = FutureProvider<List<String>>((ref) {
-  return BlockingService.builtinBlocklist();
+/// How many domains the native built-in porn blocklist contains (~1000),
+/// shown as a summary at the top of the Blocklist tab.
+final builtinBlocklistCountProvider = FutureProvider<int>((ref) {
+  return BlockingService.builtinBlocklistCount();
 });
 
 enum DomainListResult { ok, invalid, duplicate }

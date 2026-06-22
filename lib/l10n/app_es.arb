@@ -123,6 +123,8 @@
   "blocklist_allow_header": "Webs permitidas",
   "blocklist_allow_sub": "Los sitios que añadas aquí nunca se bloquean. Las webs populares y seguras ya están permitidas automáticamente.",
   "blocklist_builtin": "Predefinido",
+  "blocklist_builtin_summary": "{count} sitios porno conocidos se bloquean automáticamente",
+  "@blocklist_builtin_summary": { "placeholders": { "count": { "type": "int" } } },
   "blocklist_add_block_hint": "Añade un sitio para bloquear (ej. ejemplo.com)",
   "blocklist_add_allow_hint": "Añade un sitio para desbloquear (ej. ejemplo.com)",
   "blocklist_add": "Añadir",

@@ -87,6 +87,8 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     }
                     "getBuiltinBlocklist" -> result.success(BlockingService.builtinBlocklist())
+                    "getBuiltinBlocklistCount" ->
+                        result.success(BlockingService.builtinBlocklistCount(applicationContext))
                     else -> result.notImplemented()
                 }
             }
