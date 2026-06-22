@@ -11,6 +11,9 @@ import 'package:unchained/features/dashboard/widgets/master_toggle_card.dart';
 import 'package:unchained/features/dashboard/widgets/pill_selector.dart';
 import 'package:unchained/features/dashboard/widgets/section_title.dart';
 import 'package:unchained/features/dashboard/widgets/toggle_row.dart';
+import 'package:unchained/features/guard/presentation/scripture_lock_screen.dart';
+import 'package:unchained/features/guard/presentation/uninstall_protection_card.dart';
+import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class ProtectionDashboardScreen extends ConsumerWidget {
@@ -71,6 +74,38 @@ class _DashboardBody extends ConsumerWidget {
 
   void _toggle(WidgetRef ref, String field, bool value) {
     ref.read(blockingSettingsActionsProvider.notifier).toggle(field, value);
+  }
+
+  /// Prevent-uninstall is more than a DB flag: it needs the system overlay +
+  /// accessibility permissions and a native guard. Flipping the switch here runs
+  /// the exact same flow as the Settings screen — turning *on* opens the
+  /// permission-asking activation card, turning *off* is gated by the scripture
+  /// lock — then mirrors the real native guard state back into the DB flag the
+  /// switch reflects.
+  Future<void> _togglePreventUninstall(
+      BuildContext context, WidgetRef ref, bool value) async {
+    if (value) {
+      await showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: const Color(0xFF0A0E18),
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => const SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: SingleChildScrollView(child: UninstallProtectionCard()),
+          ),
+        ),
+      );
+    } else {
+      // Turning protection off must pass the same scripture challenge.
+      await context.push('/lock', extra: LockMode.disable);
+    }
+    if (!context.mounted) return;
+    final enabled = await UninstallGuardService.isGuardEnabled();
+    ref
+        .read(blockingSettingsActionsProvider.notifier)
+        .toggle('preventUninstall', enabled);
   }
 
   Future<void> _toggleMaster(
@@ -438,7 +473,7 @@ class _DashboardBody extends ConsumerWidget {
               ToggleRow(
                 label: l.dashboard_prevent_uninstall,
                 value: settings.preventUninstall,
-                onChanged: (v) => _toggle(ref, 'preventUninstall', v),
+                onChanged: (v) => _togglePreventUninstall(context, ref, v),
                 isLocked: isFeatureLocked('preventUninstall', activePlan),
                 lockedTooltip: l.lock_forever_only,
                 onLockedTap: () => _navLockedToForever(context),

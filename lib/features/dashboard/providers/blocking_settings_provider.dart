@@ -6,6 +6,7 @@ import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/domain/domain_lists.dart';
+import 'package:unchained/features/guard/uninstall_guard_service.dart';
 
 final blockingSettingsProvider = StreamProvider<BlockingSetting>((ref) {
   return ref.watch(blockingSettingsRepositoryProvider).watchSettings();
@@ -72,11 +73,17 @@ class BlockingSettingsActions extends Notifier<void> {
 
   Future<void> _reconcileWithNative() async {
     final actuallyRunning = await BlockingService.isRunning();
+    // The uninstall guard is owned natively (it survives even if the app is
+    // killed), so its switch must reflect that truth, not a stale DB flag.
+    final guardEnabled = await UninstallGuardService.isGuardEnabled();
     final repo = ref.read(blockingSettingsRepositoryProvider);
     final settings = await repo.getSettings();
     if (settings == null) return;
     if (settings.protectionEnabled != actuallyRunning) {
       await repo.toggleField('protectionEnabled', actuallyRunning);
+    }
+    if (settings.preventUninstall != guardEnabled) {
+      await repo.toggleField('preventUninstall', guardEnabled);
     }
   }
 
