@@ -33,8 +33,14 @@ class CommitmentStatus {
     this.minutesLeft = 0,
   });
 
+  /// TEMPORARY TEST MODE — set back to false before committing.
+  /// When true, the cycle runs in minutes instead of weeks so the full
+  /// lock → break → re-lock flow can be watched in a couple of minutes.
+  static const bool testMode = false;
+
   /// The short release window between locks.
-  static const Duration breakDuration = Duration(minutes: 30);
+  static const Duration breakDuration =
+      testMode ? Duration(minutes: 1) : Duration(minutes: 30);
 
   final CommitmentPhase phase;
 
@@ -58,8 +64,10 @@ class CommitmentStatus {
   bool get isBreak => phase == CommitmentPhase.breakOpen;
 
   /// Lock length for [cycle]: cycle 1 = 14 days, +7 days each cycle.
-  static Duration lockDurationForCycle(int cycle) =>
-      Duration(days: 7 * (cycle + 1));
+  /// In [testMode]: cycle 1 = 2 min, +1 min each cycle.
+  static Duration lockDurationForCycle(int cycle) => testMode
+      ? Duration(minutes: cycle + 1)
+      : Duration(days: 7 * (cycle + 1));
 
   static const CommitmentStatus none_ =
       CommitmentStatus(phase: CommitmentPhase.none, cycle: 0);
