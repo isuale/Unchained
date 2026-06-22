@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Always commit:** After finishing any working feature or change, make a git commit so the user can always roll back if a function breaks. Commit only at a stable point (run codegen / `flutter analyze` first), stage specific paths, write a clear present-tense message, and commit to the current branch. Do **not** push unless asked. **Always proactively tell the user — without being asked — that a commit was made, stating the short hash as their rollback point** (and whether it was pushed; default is not pushed). See the `auto-commit` skill for the full procedure.
 
-> **Always summarize:** End every response that involved doing work with a short, plain-language summary of what was done (what changed, why, and what to check next). The user is learning, so keep it clear and tie it to the actual files.
+> **Always recap (summary + teaching mode):** End every response that involved doing work with a **two-part recap**: (1) a short, plain-language **Summary** of what was done (what changed, why, status/commit hash, what to check next), and (2) a separate **🎓 Teaching mode** section that explains *how* it was done step by step and **defines every technical term used**, tied to the actual files. The user is learning, so the teaching breakdown is part of the deliverable — never skip it, even for small changes. See the `task-recap` skill for the full format and project glossary.
 
 ## Commands
 
