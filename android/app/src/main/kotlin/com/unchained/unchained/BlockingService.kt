@@ -35,9 +35,24 @@ private val BLOCKLIST = setOf(
     "porn.com",
 )
 
+// Domains that must always pass through, even if a blocklist rule would match
+// them. Loaded once at service start from assets/allowlist.txt (one domain per
+// line). Checked BEFORE the blocklist, so it can only ever un-block — it never
+// blocks anything. Adult domains are deliberately kept out of this file.
+@Volatile
+private var ALLOWLIST: Set<String> = emptySet()
+
+private fun isAllowed(lowerDomain: String): Boolean {
+    val allow = ALLOWLIST
+    if (allow.isEmpty()) return false
+    return allow.any { lowerDomain == it || lowerDomain.endsWith(".$it") }
+}
+
 private fun isBlocked(domain: String): Boolean {
     if (domain.isEmpty()) return false
     val lower = domain.lowercase()
+    // Allowlist wins: a listed domain (or its subdomains) is never blocked.
+    if (isAllowed(lower)) return false
     return BLOCKLIST.any { lower == it || lower.endsWith(".$it") }
 }
 
@@ -73,6 +88,25 @@ class BlockingService : VpnService() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        loadAllowlist()
+    }
+
+    /// Reads assets/allowlist.txt into [ALLOWLIST]. Each non-blank, non-comment
+    /// line is one domain. Failure is non-fatal: the allowlist just stays empty
+    /// and blocking falls back to the blocklist alone.
+    private fun loadAllowlist() {
+        try {
+            val domains = assets.open("allowlist.txt").bufferedReader().useLines { lines ->
+                lines.map { it.trim().lowercase() }
+                    .filter { it.isNotEmpty() && !it.startsWith("#") }
+                    .toHashSet()
+            }
+            ALLOWLIST = domains
+            Log.i(TAG, "Allowlist loaded: ${domains.size} domains")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load allowlist; continuing without it", e)
+            ALLOWLIST = emptySet()
+        }
     }
 
     private fun createNotificationChannel() {
