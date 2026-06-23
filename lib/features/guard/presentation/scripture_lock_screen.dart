@@ -16,7 +16,7 @@ enum LockMode {
   disable,
 }
 
-/// Full-screen, back-proof gate: copy out ~1000 characters of Scripture within four
+/// Full-screen, back-proof gate: copy out 800 characters of Scripture within four
 /// minutes. Run out of time and what you typed is wiped and a fresh passage begins.
 /// There is no other way off this screen (except Cancel in [LockMode.disable]).
 class ScriptureLockScreen extends StatefulWidget {
@@ -30,6 +30,9 @@ class ScriptureLockScreen extends StatefulWidget {
 
 class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
   static const Duration _limit = Duration(minutes: 4);
+  /// How many characters of the passage the user must copy to pass. Every
+  /// passage in [BiblePassages] is longer than this, so it is always reachable.
+  static const int _requiredChars = 800;
   static const Color _accent = Color(0xFF1E5FFF);
   static const Color _good = Color(0xFF34C759);
   static const Color _bad = Color(0xFFFF4D4F);
@@ -82,13 +85,28 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
     setState(() {}); // refresh progress / highlight
   }
 
-  bool get _isComplete =>
-      _controller.text.trim().toLowerCase() == _passage.trim().toLowerCase();
+  /// The slice of the current passage the user must copy: the first
+  /// [_requiredChars] characters, extended forward to the next word boundary so
+  /// the challenge never ends mid-word. Always at least [_requiredChars] long
+  /// because every passage is longer than that (defensive fallback to the whole
+  /// passage if a shorter one is ever added, so the screen can never soft-lock).
+  String get _challenge {
+    final passage = _passage;
+    if (_requiredChars >= passage.length) return passage;
+    var end = _requiredChars;
+    while (end < passage.length && passage.codeUnitAt(end) != 0x20) {
+      end++;
+    }
+    return passage.substring(0, end);
+  }
 
-  /// Number of leading characters typed correctly (case-insensitive).
+  bool get _isComplete => _matched >= _challenge.length;
+
+  /// Number of leading characters of [_challenge] typed correctly
+  /// (case-insensitive).
   int get _matched {
     final input = _controller.text.toLowerCase();
-    final target = _passage.toLowerCase();
+    final target = _challenge.toLowerCase();
     final n = input.length < target.length ? input.length : target.length;
     var i = 0;
     while (i < n && input.codeUnitAt(i) == target.codeUnitAt(i)) {
@@ -123,7 +141,7 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
   @override
   Widget build(BuildContext context) {
     final matched = _matched;
-    final total = _passage.length;
+    final total = _challenge.length;
     final urgent = _secondsLeft <= 20;
 
     return PopScope(
@@ -163,8 +181,8 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Copy the passage exactly to continue. If the timer runs out, it '
-                  'clears and you start over.',
+                  'Copy these 800 letters of Scripture exactly to continue. If the '
+                  'timer runs out, it clears and you start over.',
                   style: GoogleFonts.inter(color: _dim, fontSize: 13),
                 ),
                 const SizedBox(height: 14),
@@ -241,19 +259,21 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
     );
   }
 
-  /// The passage with the correctly-copied prefix in green and the rest dimmed.
+  /// The challenge text with the correctly-copied prefix in green and the rest
+  /// dimmed.
   Widget _highlightedPassage(int matched) {
+    final challenge = _challenge;
     final style = GoogleFonts.inter(fontSize: 15, height: 1.5);
     return RichText(
       text: TextSpan(
         style: style,
         children: [
           TextSpan(
-            text: _passage.substring(0, matched),
+            text: challenge.substring(0, matched),
             style: style.copyWith(color: _good),
           ),
           TextSpan(
-            text: _passage.substring(matched),
+            text: challenge.substring(matched),
             style: style.copyWith(color: const Color(0xFFC9D2E0)),
           ),
         ],

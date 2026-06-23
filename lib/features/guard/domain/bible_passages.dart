@@ -2,7 +2,8 @@ import 'dart:math';
 
 /// Scripture passages shown on the uninstall-protection lock screen.
 ///
-/// Each is roughly ~900–1000 characters and themed on the two things the user
+/// Each is at least ~820 characters (the lock requires copying 800) and themed
+/// on the two things the user
 /// asked for: **fleeing lust / sexual immorality** and **being strong / standing
 /// firm**. They are paraphrased from the ESV/KJV. Copying one out by hand is the
 /// deliberate friction that stands between a moment of weakness and uninstalling.
@@ -63,7 +64,9 @@ class BiblePassages {
         'covetousness, which is idolatry. For this is the will of God, your '
         'sanctification: that you abstain from sexual immorality; that each one of you '
         'know how to control his own body in holiness and honor. He who is in you is '
-        'greater than he who is in the world.',
+        'greater than he who is in the world. So make no provision for the flesh to '
+        'gratify its desires, but cast off the works of darkness and put on the armor '
+        'of light, and walk in it as children of the day.',
 
     // Steadfast under trial — a clean heart (James 1 / Psalm 119 / Psalm 51).
     'Blessed is the man who remains steadfast under trial, for when he has stood the '

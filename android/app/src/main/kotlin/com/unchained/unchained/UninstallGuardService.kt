@@ -145,19 +145,34 @@ class UninstallGuardService : AccessibilityService() {
         // Play Store heuristic; App-info / installer detection keys off the app label.
         private val UNINSTALL_HINTS = listOf("uninstall", "desinstalar")
 
-        // System Settings across OEMs.
+        // System Settings across OEMs. Force stop and Uninstall both live on the
+        // App-info page here; the per-OEM "security center" apps also expose an
+        // app-management / uninstall surface, so guard them too. Detection still
+        // keys off our app label appearing in the window, so listing extra
+        // packages cannot cause a false trigger on some other app's screen.
         private val SETTINGS_PACKAGES = setOf(
             "com.android.settings",
+            "com.miui.securitycenter",      // Xiaomi/MIUI
+            "com.coloros.safecenter",       // Oppo/Realme/OnePlus (ColorOS)
+            "com.oppo.safe",                // older ColorOS
+            "com.samsung.android.sm",       // Samsung Device care
         )
 
         // The package installer that shows the uninstall confirmation dialog.
         private val INSTALLER_PACKAGES = setOf(
             "com.google.android.packageinstaller",
             "com.android.packageinstaller",
+            "com.miui.packageinstaller",                // Xiaomi/MIUI
+            "com.samsung.android.packageinstaller",     // Samsung
+            "com.huawei.packageinstaller",              // Huawei/Honor
+            "com.vivo.packageinstaller",                // Vivo
         )
 
         private val STORE_PACKAGES = setOf(
             "com.android.vending",
+            "com.sec.android.app.samsungapps",          // Samsung Galaxy Store
+            "com.huawei.appmarket",                     // Huawei AppGallery
+            "com.xiaomi.market",                        // Xiaomi GetApps
         )
     }
 }
