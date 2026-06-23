@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="uninstall_guard_description">Keeps you accountable: when you head toward Force stop or Uninstall, Unchained asks you to copy a passage of Scripture first. This service only watches for those screens — it does not read your content.</string>
+    <string name="device_admin_label">Unchained uninstall protection</string>
+    <string name="device_admin_explanation">While this is active, Unchained cannot be uninstalled until you deactivate it here — the deliberate friction that keeps you accountable in a weak moment.</string>
 </resources>

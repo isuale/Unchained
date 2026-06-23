@@ -29,6 +29,8 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
   bool _loading = true;
   bool _overlay = false;
   bool _accessibility = false;
+  bool _deviceAdmin = false;
+  bool _deviceOwner = false;
   bool _enabled = false;
 
   @override
@@ -53,11 +55,15 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
   Future<void> _refresh() async {
     final overlay = await UninstallGuardService.isOverlayGranted();
     final accessibility = await UninstallGuardService.isAccessibilityEnabled();
+    final deviceAdmin = await UninstallGuardService.isDeviceAdminActive();
+    final deviceOwner = await UninstallGuardService.isDeviceOwner();
     final enabled = await UninstallGuardService.isGuardEnabled();
     if (!mounted) return;
     setState(() {
       _overlay = overlay;
       _accessibility = accessibility;
+      _deviceAdmin = deviceAdmin;
+      _deviceOwner = deviceOwner;
       _enabled = enabled;
       _loading = false;
     });
@@ -67,6 +73,8 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
 
   Future<void> _turnOn() async {
     await UninstallGuardService.setGuardEnabled(true);
+    // If we hold the device-owner role, also apply the OS-level hard block.
+    await UninstallGuardService.lockUninstall(true);
     await _refresh();
   }
 
@@ -115,7 +123,9 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
           const Text(
             'When you head toward Force stop or Uninstall, Unchained covers the '
             'screen and asks you to copy 800 letters of Scripture within four '
-            'minutes first.',
+            'minutes first. With device administrator on, the system also refuses '
+            'to uninstall until you deactivate it here — which is gated by the same '
+            'challenge.',
             style: TextStyle(color: _dim, height: 1.4),
           ),
           const SizedBox(height: 16),
@@ -144,6 +154,31 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
               actionLabel: 'Enable',
               onAction: UninstallGuardService.openAccessibilitySettings,
             ),
+            const SizedBox(height: 10),
+            _requirement(
+              done: _deviceAdmin,
+              label: 'Device administrator (hard block)',
+              actionLabel: 'Activate',
+              onAction: UninstallGuardService.requestDeviceAdmin,
+            ),
+            if (_deviceOwner) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.verified_user, color: _good, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Device owner — uninstall is blocked outright.',
+                      style: TextStyle(
+                        color: _good.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 16),
             _mainButton(),
           ],

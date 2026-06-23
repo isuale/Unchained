@@ -2,6 +2,7 @@ package com.unchained.unchained
 
 import android.Manifest
 import android.app.Activity
+import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -126,6 +127,34 @@ class MainActivity : FlutterActivity() {
                     }
                     "challengePassed" -> {
                         GuardState.grantGrace()
+                        result.success(true)
+                    }
+                    "isDeviceAdminActive" -> result.success(GuardAdmin.isAdminActive(this))
+                    "isDeviceOwner" -> result.success(GuardAdmin.isDeviceOwner(this))
+                    "requestDeviceAdmin" -> {
+                        // Grace so the watchdog doesn't fight our own deep-link into the
+                        // device-admin grant screen.
+                        GuardState.grantGrace()
+                        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                            .putExtra(
+                                DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                                UnchainedDeviceAdminReceiver.component(this),
+                            )
+                            .putExtra(
+                                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                getString(R.string.device_admin_explanation),
+                            )
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(intent)
+                        result.success(true)
+                    }
+                    "lockUninstall" -> {
+                        val blocked = call.arguments as? Boolean ?: true
+                        result.success(GuardAdmin.lockUninstall(this, blocked))
+                    }
+                    "removeDeviceAdmin" -> {
+                        // Only reachable after the scripture lock is passed (disable flow).
+                        GuardAdmin.removeAdmin(this)
                         result.success(true)
                     }
                     else -> result.notImplemented()

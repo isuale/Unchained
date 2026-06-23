@@ -123,6 +123,9 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
 
     if (widget.mode == LockMode.disable) {
       await UninstallGuardService.setGuardEnabled(false);
+      // Lift the OS-level hard block and step down as device admin, now that the
+      // challenge has been passed.
+      await UninstallGuardService.removeDeviceAdmin();
       if (mounted) Navigator.of(context).maybePop();
       return;
     }

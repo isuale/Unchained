@@ -52,6 +52,36 @@ class UninstallGuardService {
   /// which the watchdog stands down so the user can proceed.
   static Future<bool> challengePassed() => _invokeBool('challengePassed');
 
+  // --- Hard uninstall block (device admin / device owner) ---
+
+  /// Whether we are an active **device administrator**. While true, Android
+  /// refuses to uninstall the app until the admin is deactivated.
+  static Future<bool> isDeviceAdminActive() => _invokeBool('isDeviceAdminActive');
+
+  /// Whether we are the **device owner** — the strongest role, where uninstall
+  /// can be blocked outright with no deactivate door. Requires `dpm
+  /// set-device-owner` on a device with no accounts.
+  static Future<bool> isDeviceOwner() => _invokeBool('isDeviceOwner');
+
+  /// Launch the system dialog that asks the user to make us a device administrator.
+  static Future<bool> requestDeviceAdmin() => _invokeBool('requestDeviceAdmin');
+
+  /// If we are device owner, hard-block (or unblock) our own uninstall via the OS.
+  /// Returns false (a no-op) when we lack the device-owner role.
+  static Future<bool> lockUninstall(bool blocked) async {
+    try {
+      final r = await _channel.invokeMethod<bool>('lockUninstall', blocked);
+      return r ?? false;
+    } catch (e, st) {
+      debugPrint('UninstallGuardService.lockUninstall failed: $e\n$st');
+      return false;
+    }
+  }
+
+  /// Relinquish the device-admin role (and lift any device-owner uninstall block).
+  /// Only call after the scripture lock has been passed.
+  static Future<bool> removeDeviceAdmin() => _invokeBool('removeDeviceAdmin');
+
   static Future<bool> _invokeBool(String method) async {
     try {
       final r = await _channel.invokeMethod<bool>(method);
