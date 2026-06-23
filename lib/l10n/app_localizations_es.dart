@@ -341,10 +341,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get plan_activated => 'Plan activado';
 
   @override
-  String get plan_unavailable =>
-      'Este plan aún no está disponible. Por ahora solo se puede activar la prueba gratis.';
-
-  @override
   String get analyzing_skip_to_plans => 'Saltar y elegir un plan';
 
   @override

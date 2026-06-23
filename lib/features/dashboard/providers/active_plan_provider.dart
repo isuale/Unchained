@@ -43,6 +43,12 @@ bool isFeatureLocked(String featureKey, ActivePlan? plan) {
   };
   if (alwaysUnlocked.contains(featureKey)) return false;
 
+  // Available on every paid plan, but never on the free trial.
+  const paidPlansOnly = {'preventUninstall'};
+  if (paidPlansOnly.contains(featureKey)) {
+    return plan == ActivePlan.freeTrial;
+  }
+
   switch (plan) {
     case ActivePlan.freeTrial:
       return true;

@@ -12,16 +12,6 @@ class PlanActivationOverlay {
     required WidgetRef ref,
     required ActivePlan plan,
   }) async {
-    // Only the free trial can be installed/activated for now. Every paid plan
-    // is gated off here so the activation flow never runs for them.
-    if (plan != ActivePlan.freeTrial) {
-      final l = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.plan_unavailable)),
-      );
-      return;
-    }
-
     final navigator = Navigator.of(context, rootNavigator: true);
     showDialog<void>(
       context: context,
