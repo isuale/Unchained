@@ -1,3 +1,4 @@
+import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/onboarding/domain/data/onboarding_questions_data.dart';
 
 enum AddictionLevel { free, mild, moderate, severe }
@@ -26,4 +27,29 @@ int calculateTotalScore(Map<String, String> selectedAnswers) {
   if (percentage <= 50) return (percentage, AddictionLevel.mild, 'monthly');
   if (percentage <= 80) return (percentage, AddictionLevel.moderate, 'ai_plan');
   return (percentage, AddictionLevel.severe, 'forever');
+}
+
+/// The AI plan's on-device "calculation": maps the onboarding addiction
+/// percentage to a commitment schedule. The deeper the struggle, the longer the
+/// protected span and the fewer/no breaks; the most severe cases run as a
+/// never-ending [CommitmentMode.cycle].
+///
+/// This is intentionally a pure, deterministic function so the AI plan works
+/// offline, instantly and privately. A real model call could later be dropped
+/// in behind this same signature.
+CommitmentSchedule aiScheduleFor(int percentage) {
+  if (percentage <= 10) {
+    return const CommitmentSchedule(
+        mode: CommitmentMode.fixed, totalDays: 7, breakCount: 2);
+  }
+  if (percentage <= 50) {
+    return const CommitmentSchedule(
+        mode: CommitmentMode.fixed, totalDays: 21, breakCount: 1);
+  }
+  if (percentage <= 80) {
+    return const CommitmentSchedule(
+        mode: CommitmentMode.cycle, totalDays: 45, breakCount: 1);
+  }
+  return const CommitmentSchedule(
+      mode: CommitmentMode.cycle, totalDays: 90, breakCount: 0);
 }

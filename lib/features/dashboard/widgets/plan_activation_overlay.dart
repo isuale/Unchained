@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
+import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class PlanActivationOverlay {
   PlanActivationOverlay._();
 
+  /// Activates [plan] and, if given, stores its commitment [schedule] template.
+  /// The lock itself only engages when the user first turns protection on. Pass
+  /// a null [schedule] (or [CommitmentSchedule.none]) for plans with no lock
+  /// (e.g. the free trial), which clears any previous template.
   static Future<void> show({
     required BuildContext context,
     required WidgetRef ref,
     required ActivePlan plan,
+    CommitmentSchedule? schedule,
   }) async {
     final navigator = Navigator.of(context, rootNavigator: true);
     showDialog<void>(
@@ -22,6 +29,9 @@ class PlanActivationOverlay {
 
     await Future.delayed(const Duration(milliseconds: 800));
     await ref.read(activePlanActionsProvider.notifier).setActivePlan(plan);
+    await ref
+        .read(blockingSettingsRepositoryProvider)
+        .setCommitmentSchedule(schedule ?? CommitmentSchedule.none);
 
     if (!context.mounted) return;
     navigator.pop();

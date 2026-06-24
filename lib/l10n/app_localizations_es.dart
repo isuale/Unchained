@@ -495,6 +495,95 @@ class AppLocalizationsEs extends AppLocalizations {
       'No puedes salir mientras la Protección está bloqueada.';
 
   @override
+  String get commitment_warning_forever_title => 'Bloqueo Para Siempre';
+
+  @override
+  String get commitment_warning_forever_body =>
+      'La Protección quedará ACTIVADA de forma permanente y NO podrás desactivarla nunca. Es para siempre. ¿Estás seguro?';
+
+  @override
+  String commitment_warning_fixed_body(int days) {
+    return 'La Protección quedará ACTIVADA y no podrás desactivarla durante $days días (salvo en las pausas). Cuando termine el periodo, volverás a controlarla. ¿Estás seguro?';
+  }
+
+  @override
+  String commitment_warning_cycle_body(int days) {
+    return 'La Protección quedará ACTIVADA en un ciclo de $days días que se repite para siempre. Solo podrás desactivarla durante las pausas. ¿Estás seguro?';
+  }
+
+  @override
+  String get commitment_forever_banner => 'Comprometido para siempre';
+
+  @override
+  String get commitment_forever_sub =>
+      'La Protección está bloqueada de forma permanente.';
+
+  @override
+  String get commitment_forever_toast =>
+      'Esto es para siempre. La Protección no se puede desactivar.';
+
+  @override
+  String schedule_summary_days(int days) {
+    return '$days días de protección';
+  }
+
+  @override
+  String schedule_summary_breaks(int count) {
+    return '$count pausas de 30 min';
+  }
+
+  @override
+  String get schedule_summary_no_breaks => 'Sin pausas';
+
+  @override
+  String get schedule_summary_constant => 'Se repite para siempre (ciclo)';
+
+  @override
+  String get schedule_summary_once => 'Termina al completarse';
+
+  @override
+  String get monthly_setup_title => 'Configura tu plan';
+
+  @override
+  String get monthly_setup_subtitle =>
+      'Elige cuántos días quieres proteger y si quieres pausas.';
+
+  @override
+  String get monthly_setup_days_label => 'Días de protección';
+
+  @override
+  String get monthly_setup_breaks_label => 'Pausas';
+
+  @override
+  String get monthly_setup_breaks_with => 'Con pausas';
+
+  @override
+  String get monthly_setup_breaks_without => 'Sin pausas';
+
+  @override
+  String get monthly_setup_break_count_label => 'Número de pausas';
+
+  @override
+  String get monthly_setup_break_note =>
+      'Cada pausa dura 30 minutos y se reparte de forma uniforme.';
+
+  @override
+  String get monthly_setup_constant_label => 'Constante (sin fin)';
+
+  @override
+  String get monthly_setup_constant_sub =>
+      'Nunca termina: al completarse, vuelve a empezar en bucle.';
+
+  @override
+  String get monthly_setup_summary_label => 'RESUMEN';
+
+  @override
+  String get monthly_setup_activate => 'Activar plan';
+
+  @override
+  String get ai_plan_computed_label => 'TU PLAN CALCULADO POR IA';
+
+  @override
   String get onboarding_continue => 'Continuar';
 
   @override

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
-import 'package:unchained/features/dashboard/widgets/plan_activation_overlay.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class MonthlyPlanScreen extends ConsumerWidget {
@@ -119,11 +117,7 @@ class MonthlyPlanScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(28),
                       ),
                     ),
-                    onPressed: () => PlanActivationOverlay.show(
-                      context: context,
-                      ref: ref,
-                      plan: ActivePlan.monthly,
-                    ),
+                    onPressed: () => context.go('/plans/monthly/setup'),
                     child: Text(
                       l.monthly_cta,
                       style: const TextStyle(

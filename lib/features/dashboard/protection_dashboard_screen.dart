@@ -112,15 +112,22 @@ class _DashboardBody extends ConsumerWidget {
       BuildContext context, WidgetRef ref, bool value) async {
     final notifier = ref.read(blockingSettingsActionsProvider.notifier);
     final status = ref.read(commitmentStatusProvider);
+    final mode = commitmentModeFromString(settings.commitmentMode);
     final l = AppLocalizations.of(context)!;
 
     ProtectionToggleResult result;
     if (value) {
       if (!status.isActive) {
-        // Turning protection on for the first time starts the commitment.
-        final confirmed = await _confirmCommitment(context, l);
-        if (confirmed != true) return;
-        result = await notifier.startCommitment();
+        if (mode == CommitmentMode.none) {
+          // No plan-driven lock (e.g. free trial) — just turn protection on.
+          result = await notifier.toggleProtection(true);
+        } else {
+          // Turning protection on for the first time starts the commitment.
+          final confirmed = await _confirmCommitment(
+              context, l, mode, settings.commitmentTotalDays);
+          if (confirmed != true) return;
+          result = await notifier.startCommitment();
+        }
       } else {
         // Re-enabling during a break — no new commitment, just turn it on.
         result = await notifier.toggleProtection(true);
@@ -136,7 +143,9 @@ class _DashboardBody extends ConsumerWidget {
     } else if (result == ProtectionToggleResult.failed) {
       msg = l.protection_start_failed;
     } else if (result == ProtectionToggleResult.locked) {
-      msg = l.commitment_locked_toast(status.daysLeft);
+      msg = status.isPermanent
+          ? l.commitment_forever_toast
+          : l.commitment_locked_toast(status.daysLeft);
     }
     if (msg != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -149,22 +158,29 @@ class _DashboardBody extends ConsumerWidget {
     }
   }
 
-  /// One-time warning the user must accept before the lock engages.
+  /// One-time warning the user must accept before the lock engages. The wording
+  /// depends on the plan's commitment [mode].
   Future<bool?> _confirmCommitment(
-      BuildContext context, AppLocalizations l) {
-    final firstLockDays =
-        CommitmentStatus.lockDurationForCycle(1).inDays;
+      BuildContext context, AppLocalizations l, CommitmentMode mode, int days) {
+    final title = mode == CommitmentMode.forever
+        ? l.commitment_warning_forever_title
+        : l.commitment_warning_title;
+    final body = switch (mode) {
+      CommitmentMode.forever => l.commitment_warning_forever_body,
+      CommitmentMode.cycle => l.commitment_warning_cycle_body(days),
+      _ => l.commitment_warning_fixed_body(days),
+    };
     return showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF0A0E18),
         title: Text(
-          l.commitment_warning_title,
+          title,
           style: const TextStyle(
               color: Colors.white, fontWeight: FontWeight.bold),
         ),
         content: Text(
-          l.commitment_warning_body(firstLockDays),
+          body,
           style: const TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
         ),
         actions: [
@@ -580,14 +596,21 @@ class _CommitmentBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locked = status.isLocked;
+    final permanent = status.isPermanent;
     final accent =
         locked ? const Color(0xFF1E5FFF) : ProtectionDashboardScreen.green;
-    final title = locked
-        ? l.commitment_locked_banner(status.daysLeft)
-        : l.commitment_break_banner(status.minutesLeft);
-    final subtitle = locked
-        ? l.commitment_locked_sub(_shortDate(status.lockUntil!))
-        : l.commitment_break_sub;
+    final String title;
+    final String subtitle;
+    if (permanent) {
+      title = l.commitment_forever_banner;
+      subtitle = l.commitment_forever_sub;
+    } else if (locked) {
+      title = l.commitment_locked_banner(status.daysLeft);
+      subtitle = l.commitment_locked_sub(_shortDate(status.lockUntil!));
+    } else {
+      title = l.commitment_break_banner(status.minutesLeft);
+      subtitle = l.commitment_break_sub;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -598,8 +621,14 @@ class _CommitmentBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(locked ? Icons.lock_clock : Icons.self_improvement,
-              color: accent, size: 22),
+          Icon(
+              permanent
+                  ? Icons.lock
+                  : locked
+                      ? Icons.lock_clock
+                      : Icons.self_improvement,
+              color: accent,
+              size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

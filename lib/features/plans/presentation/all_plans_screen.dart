@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/user_assessment_repository.dart';
-import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
-import 'package:unchained/features/dashboard/widgets/plan_activation_overlay.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class AllPlansScreen extends ConsumerWidget {
@@ -95,11 +93,10 @@ class AllPlansScreen extends ConsumerWidget {
                       mutedBorder: _mutedBorder,
                       recommendedLabel: l.plans_recommended_badge,
                       ctaLabel: l.plans_card_cta,
-                      onTap: () => PlanActivationOverlay.show(
-                        context: context,
-                        ref: ref,
-                        plan: _activePlanFromId(plan.id),
-                      ),
+                      // Open the plan's detail screen so each plan runs its own
+                      // activation flow (Forever sets a permanent lock, Monthly
+                      // goes to the setup screen, AI computes its schedule).
+                      onTap: () => context.go(plan.route),
                     );
                   },
                 ),
@@ -111,13 +108,6 @@ class AllPlansScreen extends ConsumerWidget {
     );
   }
 }
-
-ActivePlan _activePlanFromId(String id) => switch (id) {
-      'free_trial' => ActivePlan.freeTrial,
-      'monthly' => ActivePlan.monthly,
-      'ai_plan' => ActivePlan.aiPlan,
-      _ => ActivePlan.forever,
-    };
 
 // Back from "all plans" returns to the user's recommended plan screen
 // (taken from the saved assessment), not the analyzing screen — re-running

@@ -717,6 +717,50 @@ class $BlockingSettingsTable extends BlockingSettings
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _commitmentModeMeta = const VerificationMeta(
+    'commitmentMode',
+  );
+  @override
+  late final GeneratedColumn<String> commitmentMode = GeneratedColumn<String>(
+    'commitment_mode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _commitmentTotalDaysMeta =
+      const VerificationMeta('commitmentTotalDays');
+  @override
+  late final GeneratedColumn<int> commitmentTotalDays = GeneratedColumn<int>(
+    'commitment_total_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _commitmentBreakCountMeta =
+      const VerificationMeta('commitmentBreakCount');
+  @override
+  late final GeneratedColumn<int> commitmentBreakCount = GeneratedColumn<int>(
+    'commitment_break_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _commitmentStartedAtMeta =
+      const VerificationMeta('commitmentStartedAt');
+  @override
+  late final GeneratedColumn<DateTime> commitmentStartedAt =
+      GeneratedColumn<DateTime>(
+        'commitment_started_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _activePlanMeta = const VerificationMeta(
     'activePlan',
   );
@@ -785,6 +829,10 @@ class $BlockingSettingsTable extends BlockingSettings
     customWebsitesBlocklistEnabled,
     commitmentCycle,
     commitmentLockUntil,
+    commitmentMode,
+    commitmentTotalDays,
+    commitmentBreakCount,
+    commitmentStartedAt,
     activePlan,
     customBlocklist,
     customAllowlist,
@@ -979,6 +1027,42 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
       );
     }
+    if (data.containsKey('commitment_mode')) {
+      context.handle(
+        _commitmentModeMeta,
+        commitmentMode.isAcceptableOrUnknown(
+          data['commitment_mode']!,
+          _commitmentModeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('commitment_total_days')) {
+      context.handle(
+        _commitmentTotalDaysMeta,
+        commitmentTotalDays.isAcceptableOrUnknown(
+          data['commitment_total_days']!,
+          _commitmentTotalDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('commitment_break_count')) {
+      context.handle(
+        _commitmentBreakCountMeta,
+        commitmentBreakCount.isAcceptableOrUnknown(
+          data['commitment_break_count']!,
+          _commitmentBreakCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('commitment_started_at')) {
+      context.handle(
+        _commitmentStartedAtMeta,
+        commitmentStartedAt.isAcceptableOrUnknown(
+          data['commitment_started_at']!,
+          _commitmentStartedAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('active_plan')) {
       context.handle(
         _activePlanMeta,
@@ -1102,6 +1186,22 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.dateTime,
         data['${effectivePrefix}commitment_lock_until'],
       ),
+      commitmentMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}commitment_mode'],
+      ),
+      commitmentTotalDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}commitment_total_days'],
+      )!,
+      commitmentBreakCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}commitment_break_count'],
+      )!,
+      commitmentStartedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}commitment_started_at'],
+      ),
       activePlan: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}active_plan'],
@@ -1149,6 +1249,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final bool customWebsitesBlocklistEnabled;
   final int commitmentCycle;
   final DateTime? commitmentLockUntil;
+  final String? commitmentMode;
+  final int commitmentTotalDays;
+  final int commitmentBreakCount;
+  final DateTime? commitmentStartedAt;
   final String? activePlan;
   final String? customBlocklist;
   final String? customAllowlist;
@@ -1175,6 +1279,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     required this.customWebsitesBlocklistEnabled,
     required this.commitmentCycle,
     this.commitmentLockUntil,
+    this.commitmentMode,
+    required this.commitmentTotalDays,
+    required this.commitmentBreakCount,
+    this.commitmentStartedAt,
     this.activePlan,
     this.customBlocklist,
     this.customAllowlist,
@@ -1211,6 +1319,14 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     map['commitment_cycle'] = Variable<int>(commitmentCycle);
     if (!nullToAbsent || commitmentLockUntil != null) {
       map['commitment_lock_until'] = Variable<DateTime>(commitmentLockUntil);
+    }
+    if (!nullToAbsent || commitmentMode != null) {
+      map['commitment_mode'] = Variable<String>(commitmentMode);
+    }
+    map['commitment_total_days'] = Variable<int>(commitmentTotalDays);
+    map['commitment_break_count'] = Variable<int>(commitmentBreakCount);
+    if (!nullToAbsent || commitmentStartedAt != null) {
+      map['commitment_started_at'] = Variable<DateTime>(commitmentStartedAt);
     }
     if (!nullToAbsent || activePlan != null) {
       map['active_plan'] = Variable<String>(activePlan);
@@ -1250,6 +1366,14 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       commitmentLockUntil: commitmentLockUntil == null && nullToAbsent
           ? const Value.absent()
           : Value(commitmentLockUntil),
+      commitmentMode: commitmentMode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(commitmentMode),
+      commitmentTotalDays: Value(commitmentTotalDays),
+      commitmentBreakCount: Value(commitmentBreakCount),
+      commitmentStartedAt: commitmentStartedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(commitmentStartedAt),
       activePlan: activePlan == null && nullToAbsent
           ? const Value.absent()
           : Value(activePlan),
@@ -1306,6 +1430,16 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       commitmentLockUntil: serializer.fromJson<DateTime?>(
         json['commitmentLockUntil'],
       ),
+      commitmentMode: serializer.fromJson<String?>(json['commitmentMode']),
+      commitmentTotalDays: serializer.fromJson<int>(
+        json['commitmentTotalDays'],
+      ),
+      commitmentBreakCount: serializer.fromJson<int>(
+        json['commitmentBreakCount'],
+      ),
+      commitmentStartedAt: serializer.fromJson<DateTime?>(
+        json['commitmentStartedAt'],
+      ),
       activePlan: serializer.fromJson<String?>(json['activePlan']),
       customBlocklist: serializer.fromJson<String?>(json['customBlocklist']),
       customAllowlist: serializer.fromJson<String?>(json['customAllowlist']),
@@ -1343,6 +1477,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       ),
       'commitmentCycle': serializer.toJson<int>(commitmentCycle),
       'commitmentLockUntil': serializer.toJson<DateTime?>(commitmentLockUntil),
+      'commitmentMode': serializer.toJson<String?>(commitmentMode),
+      'commitmentTotalDays': serializer.toJson<int>(commitmentTotalDays),
+      'commitmentBreakCount': serializer.toJson<int>(commitmentBreakCount),
+      'commitmentStartedAt': serializer.toJson<DateTime?>(commitmentStartedAt),
       'activePlan': serializer.toJson<String?>(activePlan),
       'customBlocklist': serializer.toJson<String?>(customBlocklist),
       'customAllowlist': serializer.toJson<String?>(customAllowlist),
@@ -1372,6 +1510,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     bool? customWebsitesBlocklistEnabled,
     int? commitmentCycle,
     Value<DateTime?> commitmentLockUntil = const Value.absent(),
+    Value<String?> commitmentMode = const Value.absent(),
+    int? commitmentTotalDays,
+    int? commitmentBreakCount,
+    Value<DateTime?> commitmentStartedAt = const Value.absent(),
     Value<String?> activePlan = const Value.absent(),
     Value<String?> customBlocklist = const Value.absent(),
     Value<String?> customAllowlist = const Value.absent(),
@@ -1404,6 +1546,14 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     commitmentLockUntil: commitmentLockUntil.present
         ? commitmentLockUntil.value
         : this.commitmentLockUntil,
+    commitmentMode: commitmentMode.present
+        ? commitmentMode.value
+        : this.commitmentMode,
+    commitmentTotalDays: commitmentTotalDays ?? this.commitmentTotalDays,
+    commitmentBreakCount: commitmentBreakCount ?? this.commitmentBreakCount,
+    commitmentStartedAt: commitmentStartedAt.present
+        ? commitmentStartedAt.value
+        : this.commitmentStartedAt,
     activePlan: activePlan.present ? activePlan.value : this.activePlan,
     customBlocklist: customBlocklist.present
         ? customBlocklist.value
@@ -1477,6 +1627,18 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       commitmentLockUntil: data.commitmentLockUntil.present
           ? data.commitmentLockUntil.value
           : this.commitmentLockUntil,
+      commitmentMode: data.commitmentMode.present
+          ? data.commitmentMode.value
+          : this.commitmentMode,
+      commitmentTotalDays: data.commitmentTotalDays.present
+          ? data.commitmentTotalDays.value
+          : this.commitmentTotalDays,
+      commitmentBreakCount: data.commitmentBreakCount.present
+          ? data.commitmentBreakCount.value
+          : this.commitmentBreakCount,
+      commitmentStartedAt: data.commitmentStartedAt.present
+          ? data.commitmentStartedAt.value
+          : this.commitmentStartedAt,
       activePlan: data.activePlan.present
           ? data.activePlan.value
           : this.activePlan,
@@ -1518,6 +1680,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           )
           ..write('commitmentCycle: $commitmentCycle, ')
           ..write('commitmentLockUntil: $commitmentLockUntil, ')
+          ..write('commitmentMode: $commitmentMode, ')
+          ..write('commitmentTotalDays: $commitmentTotalDays, ')
+          ..write('commitmentBreakCount: $commitmentBreakCount, ')
+          ..write('commitmentStartedAt: $commitmentStartedAt, ')
           ..write('activePlan: $activePlan, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
@@ -1549,6 +1715,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     customWebsitesBlocklistEnabled,
     commitmentCycle,
     commitmentLockUntil,
+    commitmentMode,
+    commitmentTotalDays,
+    commitmentBreakCount,
+    commitmentStartedAt,
     activePlan,
     customBlocklist,
     customAllowlist,
@@ -1581,6 +1751,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
               this.customWebsitesBlocklistEnabled &&
           other.commitmentCycle == this.commitmentCycle &&
           other.commitmentLockUntil == this.commitmentLockUntil &&
+          other.commitmentMode == this.commitmentMode &&
+          other.commitmentTotalDays == this.commitmentTotalDays &&
+          other.commitmentBreakCount == this.commitmentBreakCount &&
+          other.commitmentStartedAt == this.commitmentStartedAt &&
           other.activePlan == this.activePlan &&
           other.customBlocklist == this.customBlocklist &&
           other.customAllowlist == this.customAllowlist &&
@@ -1609,6 +1783,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<bool> customWebsitesBlocklistEnabled;
   final Value<int> commitmentCycle;
   final Value<DateTime?> commitmentLockUntil;
+  final Value<String?> commitmentMode;
+  final Value<int> commitmentTotalDays;
+  final Value<int> commitmentBreakCount;
+  final Value<DateTime?> commitmentStartedAt;
   final Value<String?> activePlan;
   final Value<String?> customBlocklist;
   final Value<String?> customAllowlist;
@@ -1635,6 +1813,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.customWebsitesBlocklistEnabled = const Value.absent(),
     this.commitmentCycle = const Value.absent(),
     this.commitmentLockUntil = const Value.absent(),
+    this.commitmentMode = const Value.absent(),
+    this.commitmentTotalDays = const Value.absent(),
+    this.commitmentBreakCount = const Value.absent(),
+    this.commitmentStartedAt = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
@@ -1662,6 +1844,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.customWebsitesBlocklistEnabled = const Value.absent(),
     this.commitmentCycle = const Value.absent(),
     this.commitmentLockUntil = const Value.absent(),
+    this.commitmentMode = const Value.absent(),
+    this.commitmentTotalDays = const Value.absent(),
+    this.commitmentBreakCount = const Value.absent(),
+    this.commitmentStartedAt = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
@@ -1689,6 +1875,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<bool>? customWebsitesBlocklistEnabled,
     Expression<int>? commitmentCycle,
     Expression<DateTime>? commitmentLockUntil,
+    Expression<String>? commitmentMode,
+    Expression<int>? commitmentTotalDays,
+    Expression<int>? commitmentBreakCount,
+    Expression<DateTime>? commitmentStartedAt,
     Expression<String>? activePlan,
     Expression<String>? customBlocklist,
     Expression<String>? customAllowlist,
@@ -1725,6 +1915,13 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       if (commitmentCycle != null) 'commitment_cycle': commitmentCycle,
       if (commitmentLockUntil != null)
         'commitment_lock_until': commitmentLockUntil,
+      if (commitmentMode != null) 'commitment_mode': commitmentMode,
+      if (commitmentTotalDays != null)
+        'commitment_total_days': commitmentTotalDays,
+      if (commitmentBreakCount != null)
+        'commitment_break_count': commitmentBreakCount,
+      if (commitmentStartedAt != null)
+        'commitment_started_at': commitmentStartedAt,
       if (activePlan != null) 'active_plan': activePlan,
       if (customBlocklist != null) 'custom_blocklist': customBlocklist,
       if (customAllowlist != null) 'custom_allowlist': customAllowlist,
@@ -1754,6 +1951,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<bool>? customWebsitesBlocklistEnabled,
     Value<int>? commitmentCycle,
     Value<DateTime?>? commitmentLockUntil,
+    Value<String?>? commitmentMode,
+    Value<int>? commitmentTotalDays,
+    Value<int>? commitmentBreakCount,
+    Value<DateTime?>? commitmentStartedAt,
     Value<String?>? activePlan,
     Value<String?>? customBlocklist,
     Value<String?>? customAllowlist,
@@ -1786,6 +1987,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           customWebsitesBlocklistEnabled ?? this.customWebsitesBlocklistEnabled,
       commitmentCycle: commitmentCycle ?? this.commitmentCycle,
       commitmentLockUntil: commitmentLockUntil ?? this.commitmentLockUntil,
+      commitmentMode: commitmentMode ?? this.commitmentMode,
+      commitmentTotalDays: commitmentTotalDays ?? this.commitmentTotalDays,
+      commitmentBreakCount: commitmentBreakCount ?? this.commitmentBreakCount,
+      commitmentStartedAt: commitmentStartedAt ?? this.commitmentStartedAt,
       activePlan: activePlan ?? this.activePlan,
       customBlocklist: customBlocklist ?? this.customBlocklist,
       customAllowlist: customAllowlist ?? this.customAllowlist,
@@ -1875,6 +2080,20 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
         commitmentLockUntil.value,
       );
     }
+    if (commitmentMode.present) {
+      map['commitment_mode'] = Variable<String>(commitmentMode.value);
+    }
+    if (commitmentTotalDays.present) {
+      map['commitment_total_days'] = Variable<int>(commitmentTotalDays.value);
+    }
+    if (commitmentBreakCount.present) {
+      map['commitment_break_count'] = Variable<int>(commitmentBreakCount.value);
+    }
+    if (commitmentStartedAt.present) {
+      map['commitment_started_at'] = Variable<DateTime>(
+        commitmentStartedAt.value,
+      );
+    }
     if (activePlan.present) {
       map['active_plan'] = Variable<String>(activePlan.value);
     }
@@ -1918,6 +2137,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           )
           ..write('commitmentCycle: $commitmentCycle, ')
           ..write('commitmentLockUntil: $commitmentLockUntil, ')
+          ..write('commitmentMode: $commitmentMode, ')
+          ..write('commitmentTotalDays: $commitmentTotalDays, ')
+          ..write('commitmentBreakCount: $commitmentBreakCount, ')
+          ..write('commitmentStartedAt: $commitmentStartedAt, ')
           ..write('activePlan: $activePlan, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
@@ -2194,6 +2417,10 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<bool> customWebsitesBlocklistEnabled,
       Value<int> commitmentCycle,
       Value<DateTime?> commitmentLockUntil,
+      Value<String?> commitmentMode,
+      Value<int> commitmentTotalDays,
+      Value<int> commitmentBreakCount,
+      Value<DateTime?> commitmentStartedAt,
       Value<String?> activePlan,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
@@ -2222,6 +2449,10 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<bool> customWebsitesBlocklistEnabled,
       Value<int> commitmentCycle,
       Value<DateTime?> commitmentLockUntil,
+      Value<String?> commitmentMode,
+      Value<int> commitmentTotalDays,
+      Value<int> commitmentBreakCount,
+      Value<DateTime?> commitmentStartedAt,
       Value<String?> activePlan,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
@@ -2339,6 +2570,26 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<DateTime> get commitmentLockUntil => $composableBuilder(
     column: $table.commitmentLockUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get commitmentMode => $composableBuilder(
+    column: $table.commitmentMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get commitmentTotalDays => $composableBuilder(
+    column: $table.commitmentTotalDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get commitmentBreakCount => $composableBuilder(
+    column: $table.commitmentBreakCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get commitmentStartedAt => $composableBuilder(
+    column: $table.commitmentStartedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2478,6 +2729,26 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get commitmentMode => $composableBuilder(
+    column: $table.commitmentMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get commitmentTotalDays => $composableBuilder(
+    column: $table.commitmentTotalDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get commitmentBreakCount => $composableBuilder(
+    column: $table.commitmentBreakCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get commitmentStartedAt => $composableBuilder(
+    column: $table.commitmentStartedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get activePlan => $composableBuilder(
     column: $table.activePlan,
     builder: (column) => ColumnOrderings(column),
@@ -2612,6 +2883,26 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get commitmentMode => $composableBuilder(
+    column: $table.commitmentMode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get commitmentTotalDays => $composableBuilder(
+    column: $table.commitmentTotalDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get commitmentBreakCount => $composableBuilder(
+    column: $table.commitmentBreakCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get commitmentStartedAt => $composableBuilder(
+    column: $table.commitmentStartedAt,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get activePlan => $composableBuilder(
     column: $table.activePlan,
     builder: (column) => column,
@@ -2690,6 +2981,10 @@ class $$BlockingSettingsTableTableManager
                     const Value.absent(),
                 Value<int> commitmentCycle = const Value.absent(),
                 Value<DateTime?> commitmentLockUntil = const Value.absent(),
+                Value<String?> commitmentMode = const Value.absent(),
+                Value<int> commitmentTotalDays = const Value.absent(),
+                Value<int> commitmentBreakCount = const Value.absent(),
+                Value<DateTime?> commitmentStartedAt = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
@@ -2716,6 +3011,10 @@ class $$BlockingSettingsTableTableManager
                 customWebsitesBlocklistEnabled: customWebsitesBlocklistEnabled,
                 commitmentCycle: commitmentCycle,
                 commitmentLockUntil: commitmentLockUntil,
+                commitmentMode: commitmentMode,
+                commitmentTotalDays: commitmentTotalDays,
+                commitmentBreakCount: commitmentBreakCount,
+                commitmentStartedAt: commitmentStartedAt,
                 activePlan: activePlan,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,
@@ -2745,6 +3044,10 @@ class $$BlockingSettingsTableTableManager
                     const Value.absent(),
                 Value<int> commitmentCycle = const Value.absent(),
                 Value<DateTime?> commitmentLockUntil = const Value.absent(),
+                Value<String?> commitmentMode = const Value.absent(),
+                Value<int> commitmentTotalDays = const Value.absent(),
+                Value<int> commitmentBreakCount = const Value.absent(),
+                Value<DateTime?> commitmentStartedAt = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
@@ -2771,6 +3074,10 @@ class $$BlockingSettingsTableTableManager
                 customWebsitesBlocklistEnabled: customWebsitesBlocklistEnabled,
                 commitmentCycle: commitmentCycle,
                 commitmentLockUntil: commitmentLockUntil,
+                commitmentMode: commitmentMode,
+                commitmentTotalDays: commitmentTotalDays,
+                commitmentBreakCount: commitmentBreakCount,
+                commitmentStartedAt: commitmentStartedAt,
                 activePlan: activePlan,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,

@@ -491,6 +491,94 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can\'t leave while Protection is locked.';
 
   @override
+  String get commitment_warning_forever_title => 'Forever Lock';
+
+  @override
+  String get commitment_warning_forever_body =>
+      'Protection will stay ON permanently and you will NEVER be able to turn it off. This is forever. Are you sure?';
+
+  @override
+  String commitment_warning_fixed_body(int days) {
+    return 'Protection will stay ON and you won\'t be able to turn it off for $days days (except during breaks). When the period ends, you get control back. Are you sure?';
+  }
+
+  @override
+  String commitment_warning_cycle_body(int days) {
+    return 'Protection will stay ON in a $days-day cycle that repeats forever. You can only turn it off during breaks. Are you sure?';
+  }
+
+  @override
+  String get commitment_forever_banner => 'Committed forever';
+
+  @override
+  String get commitment_forever_sub => 'Protection is permanently locked.';
+
+  @override
+  String get commitment_forever_toast =>
+      'This is forever. Protection can\'t be turned off.';
+
+  @override
+  String schedule_summary_days(int days) {
+    return '$days days of protection';
+  }
+
+  @override
+  String schedule_summary_breaks(int count) {
+    return '$count breaks of 30 min';
+  }
+
+  @override
+  String get schedule_summary_no_breaks => 'No breaks';
+
+  @override
+  String get schedule_summary_constant => 'Repeats forever (cycle)';
+
+  @override
+  String get schedule_summary_once => 'Ends when complete';
+
+  @override
+  String get monthly_setup_title => 'Set up your plan';
+
+  @override
+  String get monthly_setup_subtitle =>
+      'Choose how many days to protect and whether you want breaks.';
+
+  @override
+  String get monthly_setup_days_label => 'Protection days';
+
+  @override
+  String get monthly_setup_breaks_label => 'Breaks';
+
+  @override
+  String get monthly_setup_breaks_with => 'With breaks';
+
+  @override
+  String get monthly_setup_breaks_without => 'Without breaks';
+
+  @override
+  String get monthly_setup_break_count_label => 'Number of breaks';
+
+  @override
+  String get monthly_setup_break_note =>
+      'Each break lasts 30 minutes and is spaced out evenly.';
+
+  @override
+  String get monthly_setup_constant_label => 'Constant (never ends)';
+
+  @override
+  String get monthly_setup_constant_sub =>
+      'Never ends — when it completes, it starts over in a loop.';
+
+  @override
+  String get monthly_setup_summary_label => 'SUMMARY';
+
+  @override
+  String get monthly_setup_activate => 'Activate plan';
+
+  @override
+  String get ai_plan_computed_label => 'YOUR AI-CALCULATED PLAN';
+
+  @override
   String get onboarding_continue => 'Continue';
 
   @override

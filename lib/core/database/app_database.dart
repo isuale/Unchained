@@ -61,13 +61,25 @@ class BlockingSettings extends Table {
   BoolColumn get customWebsitesBlocklistEnabled =>
       boolean().withDefault(const Constant(false))();
 
-  // Commitment lock — a growing cycle the user can't casually exit.
-  // cycle 0 = no commitment; cycle N lock length = 7*(N+1) days
-  // (cycle 1 = 14d, cycle 2 = 21d, ...). After each lock there is a
-  // short break, then it re-locks one week longer. See domain/commitment.dart.
+  // DEPRECATED (kept for migration safety, no longer read). The old global
+  // "growing cycle" commitment. Replaced by the plan-driven schedule below.
   IntColumn get commitmentCycle =>
       integer().withDefault(const Constant(0))();
   DateTimeColumn get commitmentLockUntil => dateTime().nullable()();
+
+  // Plan-driven commitment schedule. The active plan stores a template here at
+  // activation; the run begins (commitmentStartedAt is set) only when the user
+  // first turns protection on. See domain/commitment.dart.
+  //  - commitmentMode: 'forever' | 'fixed' | 'cycle' | null (null = no lock).
+  //  - commitmentTotalDays: total locked days across the span (forever: ignored).
+  //  - commitmentBreakCount: short breaks spaced evenly inside the span.
+  //  - commitmentStartedAt: run anchor; null until protection is first turned on.
+  TextColumn get commitmentMode => text().nullable()();
+  IntColumn get commitmentTotalDays =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get commitmentBreakCount =>
+      integer().withDefault(const Constant(0))();
+  DateTimeColumn get commitmentStartedAt => dateTime().nullable()();
 
   // The plan the user picked (null = none picked yet)
   TextColumn get activePlan => text().nullable()();
@@ -93,7 +105,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -120,6 +132,17 @@ class AppDatabase extends _$AppDatabase {
                 blockingSettings, blockingSettings.customBlocklist);
             await m.addColumn(
                 blockingSettings, blockingSettings.customAllowlist);
+          }
+          // v5: plan-driven commitment schedule (replaces the growing cycle).
+          if (from >= 2 && from < 5) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentMode);
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentTotalDays);
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentBreakCount);
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentStartedAt);
           }
         },
         beforeOpen: (details) async {

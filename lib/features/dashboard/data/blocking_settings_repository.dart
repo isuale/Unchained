@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/core/database/user_assessment_repository.dart';
+import 'package:unchained/features/dashboard/domain/commitment.dart';
 
 class BlockingSettingsRepository {
   BlockingSettingsRepository(this._db);
@@ -82,12 +83,33 @@ class BlockingSettingsRepository {
         BlockingSettingsCompanion(customAllowlist: Value(domains.join('\n'))));
   }
 
-  /// Persists the commitment cycle and the moment its lock expires.
-  /// Pass cycle 0 / null to clear the commitment.
-  Future<void> setCommitment({required int cycle, DateTime? lockUntil}) async {
+  /// Stores the commitment template chosen by a plan at activation. This does
+  /// not start a lock — the run begins later via [startCommitmentRun] when the
+  /// user first turns protection on. Clears any in-flight run anchor.
+  Future<void> setCommitmentSchedule(CommitmentSchedule schedule) async {
     await updateSettings(BlockingSettingsCompanion(
-      commitmentCycle: Value(cycle),
-      commitmentLockUntil: Value(lockUntil),
+      commitmentMode: Value(commitmentModeToString(schedule.mode)),
+      commitmentTotalDays: Value(schedule.totalDays),
+      commitmentBreakCount: Value(schedule.breakCount),
+      commitmentStartedAt: const Value(null),
+    ));
+  }
+
+  /// Anchors the commitment run at [startedAt] — called the moment the user
+  /// first turns protection on (or when a cycle rolls forward to a new span).
+  Future<void> startCommitmentRun(DateTime startedAt) async {
+    await updateSettings(
+        BlockingSettingsCompanion(commitmentStartedAt: Value(startedAt)));
+  }
+
+  /// Clears the commitment entirely (used when a fixed span completes). Leaves
+  /// protectionEnabled untouched — protection stays on but freely toggleable.
+  Future<void> clearCommitment() async {
+    await updateSettings(const BlockingSettingsCompanion(
+      commitmentMode: Value(null),
+      commitmentTotalDays: Value(0),
+      commitmentBreakCount: Value(0),
+      commitmentStartedAt: Value(null),
     ));
   }
 

@@ -998,6 +998,156 @@ abstract class AppLocalizations {
   /// **'No puedes salir mientras la Protección está bloqueada.'**
   String get commitment_cannot_leave;
 
+  /// No description provided for @commitment_warning_forever_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueo Para Siempre'**
+  String get commitment_warning_forever_title;
+
+  /// No description provided for @commitment_warning_forever_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La Protección quedará ACTIVADA de forma permanente y NO podrás desactivarla nunca. Es para siempre. ¿Estás seguro?'**
+  String get commitment_warning_forever_body;
+
+  /// No description provided for @commitment_warning_fixed_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La Protección quedará ACTIVADA y no podrás desactivarla durante {days} días (salvo en las pausas). Cuando termine el periodo, volverás a controlarla. ¿Estás seguro?'**
+  String commitment_warning_fixed_body(int days);
+
+  /// No description provided for @commitment_warning_cycle_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La Protección quedará ACTIVADA en un ciclo de {days} días que se repite para siempre. Solo podrás desactivarla durante las pausas. ¿Estás seguro?'**
+  String commitment_warning_cycle_body(int days);
+
+  /// No description provided for @commitment_forever_banner.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprometido para siempre'**
+  String get commitment_forever_banner;
+
+  /// No description provided for @commitment_forever_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'La Protección está bloqueada de forma permanente.'**
+  String get commitment_forever_sub;
+
+  /// No description provided for @commitment_forever_toast.
+  ///
+  /// In es, this message translates to:
+  /// **'Esto es para siempre. La Protección no se puede desactivar.'**
+  String get commitment_forever_toast;
+
+  /// No description provided for @schedule_summary_days.
+  ///
+  /// In es, this message translates to:
+  /// **'{days} días de protección'**
+  String schedule_summary_days(int days);
+
+  /// No description provided for @schedule_summary_breaks.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} pausas de 30 min'**
+  String schedule_summary_breaks(int count);
+
+  /// No description provided for @schedule_summary_no_breaks.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin pausas'**
+  String get schedule_summary_no_breaks;
+
+  /// No description provided for @schedule_summary_constant.
+  ///
+  /// In es, this message translates to:
+  /// **'Se repite para siempre (ciclo)'**
+  String get schedule_summary_constant;
+
+  /// No description provided for @schedule_summary_once.
+  ///
+  /// In es, this message translates to:
+  /// **'Termina al completarse'**
+  String get schedule_summary_once;
+
+  /// No description provided for @monthly_setup_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Configura tu plan'**
+  String get monthly_setup_title;
+
+  /// No description provided for @monthly_setup_subtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige cuántos días quieres proteger y si quieres pausas.'**
+  String get monthly_setup_subtitle;
+
+  /// No description provided for @monthly_setup_days_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Días de protección'**
+  String get monthly_setup_days_label;
+
+  /// No description provided for @monthly_setup_breaks_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausas'**
+  String get monthly_setup_breaks_label;
+
+  /// No description provided for @monthly_setup_breaks_with.
+  ///
+  /// In es, this message translates to:
+  /// **'Con pausas'**
+  String get monthly_setup_breaks_with;
+
+  /// No description provided for @monthly_setup_breaks_without.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin pausas'**
+  String get monthly_setup_breaks_without;
+
+  /// No description provided for @monthly_setup_break_count_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Número de pausas'**
+  String get monthly_setup_break_count_label;
+
+  /// No description provided for @monthly_setup_break_note.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada pausa dura 30 minutos y se reparte de forma uniforme.'**
+  String get monthly_setup_break_note;
+
+  /// No description provided for @monthly_setup_constant_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Constante (sin fin)'**
+  String get monthly_setup_constant_label;
+
+  /// No description provided for @monthly_setup_constant_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'Nunca termina: al completarse, vuelve a empezar en bucle.'**
+  String get monthly_setup_constant_sub;
+
+  /// No description provided for @monthly_setup_summary_label.
+  ///
+  /// In es, this message translates to:
+  /// **'RESUMEN'**
+  String get monthly_setup_summary_label;
+
+  /// No description provided for @monthly_setup_activate.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar plan'**
+  String get monthly_setup_activate;
+
+  /// No description provided for @ai_plan_computed_label.
+  ///
+  /// In es, this message translates to:
+  /// **'TU PLAN CALCULADO POR IA'**
+  String get ai_plan_computed_label;
+
   /// No description provided for @onboarding_continue.
   ///
   /// In es, this message translates to:

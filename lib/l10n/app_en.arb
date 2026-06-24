@@ -183,6 +183,51 @@
     }
   },
   "commitment_cannot_leave": "You can't leave while Protection is locked.",
+  "commitment_warning_forever_title": "Forever Lock",
+  "commitment_warning_forever_body": "Protection will stay ON permanently and you will NEVER be able to turn it off. This is forever. Are you sure?",
+  "commitment_warning_fixed_body": "Protection will stay ON and you won't be able to turn it off for {days} days (except during breaks). When the period ends, you get control back. Are you sure?",
+  "@commitment_warning_fixed_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_warning_cycle_body": "Protection will stay ON in a {days}-day cycle that repeats forever. You can only turn it off during breaks. Are you sure?",
+  "@commitment_warning_cycle_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_forever_banner": "Committed forever",
+  "commitment_forever_sub": "Protection is permanently locked.",
+  "commitment_forever_toast": "This is forever. Protection can't be turned off.",
+  "schedule_summary_days": "{days} days of protection",
+  "@schedule_summary_days": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "schedule_summary_breaks": "{count} breaks of 30 min",
+  "@schedule_summary_breaks": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "schedule_summary_no_breaks": "No breaks",
+  "schedule_summary_constant": "Repeats forever (cycle)",
+  "schedule_summary_once": "Ends when complete",
+  "monthly_setup_title": "Set up your plan",
+  "monthly_setup_subtitle": "Choose how many days to protect and whether you want breaks.",
+  "monthly_setup_days_label": "Protection days",
+  "monthly_setup_breaks_label": "Breaks",
+  "monthly_setup_breaks_with": "With breaks",
+  "monthly_setup_breaks_without": "Without breaks",
+  "monthly_setup_break_count_label": "Number of breaks",
+  "monthly_setup_break_note": "Each break lasts 30 minutes and is spaced out evenly.",
+  "monthly_setup_constant_label": "Constant (never ends)",
+  "monthly_setup_constant_sub": "Never ends — when it completes, it starts over in a loop.",
+  "monthly_setup_summary_label": "SUMMARY",
+  "monthly_setup_activate": "Activate plan",
+  "ai_plan_computed_label": "YOUR AI-CALCULATED PLAN",
   "onboarding_continue": "Continue",
   "onboarding_back": "Back",
   "onboarding_question_progress": "Question {current} of {total}",

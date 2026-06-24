@@ -18,36 +18,51 @@ final _secondTickerProvider = StreamProvider<int>((ref) {
   return Stream.periodic(const Duration(seconds: 1), (i) => i);
 });
 
-/// The user's current spot in the commitment cycle, recomputed every second.
+/// The user's current spot in the plan-driven commitment, recomputed every second.
 ///
-/// When a break has fully elapsed, this also persists the roll-forward into
-/// the next (longer) lock, so the cycle advances live while the app is open —
-/// not only when it's reopened.
+/// For a [CommitmentMode.cycle] this persists the roll-forward into the next
+/// span so the cycle advances live while the app is open (not only on reopen).
+/// For a [CommitmentMode.fixed] that has fully elapsed it clears the commitment,
+/// leaving protection running but freely toggleable.
 final commitmentStatusProvider = Provider<CommitmentStatus>((ref) {
   ref.watch(_secondTickerProvider); // re-evaluate every second
   final settings = ref.watch(blockingSettingsProvider).asData?.value;
   if (settings == null) return CommitmentStatus.none_;
 
+  final mode = commitmentModeFromString(settings.commitmentMode);
+  final days = settings.commitmentTotalDays;
+  final breaks = settings.commitmentBreakCount;
   final now = DateTime.now();
-  final advanced = advanceIfLapsed(
-    settings.commitmentCycle,
-    settings.commitmentLockUntil,
-    now,
-  );
-  if (advanced != null) {
-    // Break is over — re-lock for the next cycle and keep protection on.
+
+  // A repeating cycle whose span elapsed — roll it forward and keep protection on.
+  final newStart =
+      advanceCycle(mode, days, breaks, settings.commitmentStartedAt, now);
+  if (newStart != null) {
     final repo = ref.read(blockingSettingsRepositoryProvider);
-    repo.setCommitment(cycle: advanced.cycle, lockUntil: advanced.lockUntil);
+    repo.startCommitmentRun(newStart);
     repo.toggleField('protectionEnabled', true);
     BlockingService.start();
-    return computeCommitment(advanced.cycle, advanced.lockUntil, now);
+    return computeStatus(mode, days, breaks, newStart, now);
   }
-  return computeCommitment(
-    settings.commitmentCycle,
-    settings.commitmentLockUntil,
-    now,
-  );
+
+  final status =
+      computeStatus(mode, days, breaks, settings.commitmentStartedAt, now);
+  if (status.isCompleted) {
+    // A fixed span finished — clear the lock, leave protection running.
+    ref.read(blockingSettingsRepositoryProvider).clearCommitment();
+    return CommitmentStatus.none_;
+  }
+  return status;
 });
+
+/// Pure helper: the commitment status for a freshly-read settings row.
+CommitmentStatus _statusFor(BlockingSetting? s, DateTime now) => computeStatus(
+      commitmentModeFromString(s?.commitmentMode),
+      s?.commitmentTotalDays ?? 0,
+      s?.commitmentBreakCount ?? 0,
+      s?.commitmentStartedAt,
+      now,
+    );
 
 enum ProtectionToggleResult { ok, permissionDenied, failed, locked }
 
@@ -87,28 +102,38 @@ class BlockingSettingsActions extends Notifier<void> {
     }
   }
 
-  /// If a break has fully elapsed while the app was closed, roll the
-  /// commitment forward into its next (longer) lock and re-arm protection.
+  /// Reconciles the commitment after time has passed (app relaunch / before a
+  /// toggle-off). A lapsed [CommitmentMode.cycle] span rolls forward into a
+  /// fresh span and re-arms protection; a finished [CommitmentMode.fixed] span
+  /// clears the commitment (protection stays on but freely toggleable).
   Future<void> _reconcileCommitment() async {
     final repo = ref.read(blockingSettingsRepositoryProvider);
     final settings = await repo.getSettings();
     if (settings == null) return;
-    final advanced = advanceIfLapsed(
-      settings.commitmentCycle,
-      settings.commitmentLockUntil,
-      DateTime.now(),
-    );
-    if (advanced == null) return;
+    final mode = commitmentModeFromString(settings.commitmentMode);
+    final days = settings.commitmentTotalDays;
+    final breaks = settings.commitmentBreakCount;
+    final now = DateTime.now();
 
-    await repo.setCommitment(
-        cycle: advanced.cycle, lockUntil: advanced.lockUntil);
-    // A new lock just began — make sure protection is actually running.
-    final running = await BlockingService.isRunning();
-    if (!running) {
-      final granted = await BlockingService.prepare();
-      if (granted) await BlockingService.start();
+    final newStart =
+        advanceCycle(mode, days, breaks, settings.commitmentStartedAt, now);
+    if (newStart != null) {
+      await repo.startCommitmentRun(newStart);
+      // A new span just began — make sure protection is actually running.
+      final running = await BlockingService.isRunning();
+      if (!running) {
+        final granted = await BlockingService.prepare();
+        if (granted) await BlockingService.start();
+      }
+      await repo.toggleField('protectionEnabled', true);
+      return;
     }
-    await repo.toggleField('protectionEnabled', true);
+
+    final status =
+        computeStatus(mode, days, breaks, settings.commitmentStartedAt, now);
+    if (status.isCompleted) {
+      await repo.clearCommitment();
+    }
   }
 
   Future<void> toggle(String field, bool value) {
@@ -127,14 +152,10 @@ class BlockingSettingsActions extends Notifier<void> {
       await repo.toggleField('protectionEnabled', true);
       return ProtectionToggleResult.ok;
     } else {
-      // Roll any lapsed break forward first, then refuse if still locked.
+      // Roll any lapsed cycle/fixed span forward first, then refuse if still locked.
       await _reconcileCommitment();
       final settings = await repo.getSettings();
-      final status = computeCommitment(
-        settings?.commitmentCycle ?? 0,
-        settings?.commitmentLockUntil,
-        DateTime.now(),
-      );
+      final status = _statusFor(settings, DateTime.now());
       if (status.isLocked) return ProtectionToggleResult.locked;
       await BlockingService.stop();
       await repo.toggleField('protectionEnabled', false);
@@ -142,17 +163,21 @@ class BlockingSettingsActions extends Notifier<void> {
     }
   }
 
-  /// Begins the first commitment lock (cycle 1 = 14 days) and turns
-  /// protection on. Call this once the user has confirmed the warning.
+  /// Begins the commitment run using the plan's stored schedule template, and
+  /// turns protection on. Call this once the user has confirmed the warning.
+  /// If no template is stored (e.g. free trial), this just turns protection on
+  /// with no lock.
   Future<ProtectionToggleResult> startCommitment() async {
     final repo = ref.read(blockingSettingsRepositoryProvider);
     final granted = await BlockingService.prepare();
     if (!granted) return ProtectionToggleResult.permissionDenied;
     final started = await BlockingService.start();
     if (!started) return ProtectionToggleResult.failed;
-    final lockUntil =
-        DateTime.now().add(CommitmentStatus.lockDurationForCycle(1));
-    await repo.setCommitment(cycle: 1, lockUntil: lockUntil);
+    final settings = await repo.getSettings();
+    final mode = commitmentModeFromString(settings?.commitmentMode);
+    if (mode != CommitmentMode.none) {
+      await repo.startCommitmentRun(DateTime.now());
+    }
     await repo.toggleField('protectionEnabled', true);
     return ProtectionToggleResult.ok;
   }
@@ -176,11 +201,7 @@ class BlockingSettingsActions extends Notifier<void> {
     await _reconcileCommitment();
     final settings =
         await ref.read(blockingSettingsRepositoryProvider).getSettings();
-    final status = computeCommitment(
-      settings?.commitmentCycle ?? 0,
-      settings?.commitmentLockUntil,
-      DateTime.now(),
-    );
+    final status = _statusFor(settings, DateTime.now());
     if (status.isLocked) return false;
     await BlockingService.stop();
     await ref.read(blockingSettingsRepositoryProvider).resetSession();

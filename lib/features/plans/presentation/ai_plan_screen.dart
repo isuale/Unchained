@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unchained/core/database/user_assessment_repository.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/features/dashboard/widgets/plan_activation_overlay.dart';
+import 'package:unchained/features/onboarding/domain/plan_recommendation.dart';
+import 'package:unchained/features/plans/presentation/widgets/schedule_summary.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class AiPlanScreen extends ConsumerWidget {
@@ -31,6 +34,13 @@ class AiPlanScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+
+    // The AI plan's on-device "calculation": derive the schedule from the
+    // user's onboarding result. Falls back to a moderate default if no
+    // assessment exists yet (e.g. the user skipped onboarding).
+    final assessment = ref.watch(latestAssessmentProvider).asData?.value;
+    final schedule = aiScheduleFor(assessment?.percentage ?? 65);
+    final summaryLines = scheduleSummaryLines(l, schedule);
 
     final features = <String>[
       l.ai_plan_feature_1,
@@ -128,9 +138,61 @@ class AiPlanScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
               _animate(
                 5,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0E1320),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: _accent.withValues(alpha: 0.5)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.auto_awesome,
+                              color: _accent, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            l.ai_plan_computed_label,
+                            style: textTheme.labelMedium?.copyWith(
+                              color: _accent,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      for (final line in summaryLines)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  color: _accent, size: 18),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  line,
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 15),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              _animate(
+                6,
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -162,7 +224,7 @@ class AiPlanScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 40),
               _animate(
-                6,
+                7,
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -178,6 +240,7 @@ class AiPlanScreen extends ConsumerWidget {
                       context: context,
                       ref: ref,
                       plan: ActivePlan.aiPlan,
+                      schedule: schedule,
                     ),
                     child: Text(
                       l.ai_plan_cta,
@@ -191,7 +254,7 @@ class AiPlanScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               _animate(
-                7,
+                8,
                 Center(
                   child: TextButton(
                     onPressed: () => context.go('/plans/all'),

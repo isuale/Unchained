@@ -183,6 +183,51 @@
     }
   },
   "commitment_cannot_leave": "No puedes salir mientras la Protección está bloqueada.",
+  "commitment_warning_forever_title": "Bloqueo Para Siempre",
+  "commitment_warning_forever_body": "La Protección quedará ACTIVADA de forma permanente y NO podrás desactivarla nunca. Es para siempre. ¿Estás seguro?",
+  "commitment_warning_fixed_body": "La Protección quedará ACTIVADA y no podrás desactivarla durante {days} días (salvo en las pausas). Cuando termine el periodo, volverás a controlarla. ¿Estás seguro?",
+  "@commitment_warning_fixed_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_warning_cycle_body": "La Protección quedará ACTIVADA en un ciclo de {days} días que se repite para siempre. Solo podrás desactivarla durante las pausas. ¿Estás seguro?",
+  "@commitment_warning_cycle_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_forever_banner": "Comprometido para siempre",
+  "commitment_forever_sub": "La Protección está bloqueada de forma permanente.",
+  "commitment_forever_toast": "Esto es para siempre. La Protección no se puede desactivar.",
+  "schedule_summary_days": "{days} días de protección",
+  "@schedule_summary_days": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "schedule_summary_breaks": "{count} pausas de 30 min",
+  "@schedule_summary_breaks": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "schedule_summary_no_breaks": "Sin pausas",
+  "schedule_summary_constant": "Se repite para siempre (ciclo)",
+  "schedule_summary_once": "Termina al completarse",
+  "monthly_setup_title": "Configura tu plan",
+  "monthly_setup_subtitle": "Elige cuántos días quieres proteger y si quieres pausas.",
+  "monthly_setup_days_label": "Días de protección",
+  "monthly_setup_breaks_label": "Pausas",
+  "monthly_setup_breaks_with": "Con pausas",
+  "monthly_setup_breaks_without": "Sin pausas",
+  "monthly_setup_break_count_label": "Número de pausas",
+  "monthly_setup_break_note": "Cada pausa dura 30 minutos y se reparte de forma uniforme.",
+  "monthly_setup_constant_label": "Constante (sin fin)",
+  "monthly_setup_constant_sub": "Nunca termina: al completarse, vuelve a empezar en bucle.",
+  "monthly_setup_summary_label": "RESUMEN",
+  "monthly_setup_activate": "Activar plan",
+  "ai_plan_computed_label": "TU PLAN CALCULADO POR IA",
   "onboarding_continue": "Continuar",
   "onboarding_back": "Atrás",
   "onboarding_question_progress": "Pregunta {current} de {total}",
