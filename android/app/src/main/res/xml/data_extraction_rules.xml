@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Disable all data extraction so the app keeps NO information after uninstall.
+     cloud-backup: blocks Android Auto Backup from saving/restoring the Drift DB.
+     device-transfer: blocks restore during phone-to-phone (D2D) transfer.
+     An empty <exclude domain="root"/> excludes the entire app sandbox. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+    </device-transfer>
+</data-extraction-rules>
