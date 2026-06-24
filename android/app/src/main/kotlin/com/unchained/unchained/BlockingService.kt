@@ -44,6 +44,40 @@ private val BLOCKLIST = setOf(
 @Volatile
 private var BUILTIN_EXTRA: Set<String> = emptySet()
 
+// Well-known DNS-over-HTTPS (DoH) provider endpoints, plus the Firefox "canary".
+//
+// This is the reason a freshly-added blocked site still loads in the browser:
+// modern browsers (Firefox enables this BY DEFAULT) don't ask the system DNS
+// for the page. They first resolve a DoH provider here over plain DNS, then send
+// every *real* lookup encrypted over HTTPS (port 443) straight to that provider —
+// which our port-53 sinkhole never sees, so none of our block rules ever apply.
+//
+// We defeat the bypass two ways, both keyed off entries in this set:
+//   1. `use-application-dns.net` is Firefox's "canary domain". When a network's
+//      DNS answers NXDOMAIN for it, Firefox treats that as "this network filters
+//      DNS on purpose" and turns DoH OFF, falling back to the system resolver we
+//      control. Sinkholing it is the clean, standard opt-out.
+//   2. The provider hostnames themselves are sinkholed, so even a browser that
+//      ignores the canary can't bootstrap its encrypted resolver and falls back
+//      to the system DNS (which routes through this VPN and gets filtered).
+//
+// Checked BEFORE the allowlist so it can never be re-opened — allowing a DoH
+// endpoint would silently reinstate the tunnel around every other rule.
+private val DOH_BOOTSTRAP = setOf(
+    "use-application-dns.net",      // Firefox canary — NXDOMAIN here disables its DoH
+    "cloudflare-dns.com",           // covers mozilla.cloudflare-dns.com (Firefox default)
+    "one.one.one.one",
+    "dns.google",
+    "dns.google.com",
+    "dns.quad9.net",
+    "doh.opendns.com",
+    "dns.nextdns.io",
+    "doh.cleanbrowsing.org",
+    "dns.adguard.com",
+    "dns.adguard-dns.com",
+    "mozilla.cloudflare-dns.com",
+)
+
 // SharedPreferences storage for the user's custom lists (see UserLists).
 const val LISTS_PREFS = "unchained_user_lists"
 const val KEY_USER_BLOCKLIST = "user_blocklist"
@@ -89,6 +123,9 @@ private fun isAllowed(lowerDomain: String): Boolean =
 private fun isBlocked(domain: String): Boolean {
     if (domain.isEmpty()) return false
     val lower = domain.lowercase()
+    // DoH bootstrap is blocked unconditionally, even past the allowlist: if a
+    // browser's encrypted resolver comes up it tunnels around every rule below.
+    if (matchesAny(lower, DOH_BOOTSTRAP)) return true
     // Allowlist wins: a listed domain (or its subdomains) is never blocked.
     if (isAllowed(lower)) return false
     return matchesAny(lower, BLOCKLIST) ||
