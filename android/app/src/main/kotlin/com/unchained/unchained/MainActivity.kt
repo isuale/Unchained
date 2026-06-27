@@ -144,8 +144,13 @@ class MainActivity : FlutterActivity() {
                                 DevicePolicyManager.EXTRA_ADD_EXPLANATION,
                                 getString(R.string.device_admin_explanation),
                             )
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        startActivity(intent)
+                        // IMPORTANT: do NOT add FLAG_ACTIVITY_NEW_TASK here. The system's
+                        // DeviceAdminAdd screen calls finish() immediately when it is started
+                        // as a new task ("Cannot start ADD_DEVICE_ADMIN as a new task"), so the
+                        // grant dialog would never appear — the button would do nothing. We are
+                        // an Activity, so startActivityForResult launches it into our own task,
+                        // which the screen accepts.
+                        startActivityForResult(intent, REQ_DEVICE_ADMIN)
                         result.success(true)
                     }
                     "lockUninstall" -> {
@@ -203,6 +208,14 @@ class MainActivity : FlutterActivity() {
             val granted = resultCode == Activity.RESULT_OK
             pendingPrepareResult?.success(granted)
             pendingPrepareResult = null
+        } else if (requestCode == REQ_DEVICE_ADMIN) {
+            // Returned from the device-admin grant screen. Keep the watchdog standing
+            // down a moment longer (the window transition back to us can still surface
+            // the Settings page), and, if we are device owner, clamp the OS-level block.
+            GuardState.grantGrace()
+            if (resultCode == Activity.RESULT_OK && GuardState.isEnabled(this)) {
+                GuardAdmin.lockUninstall(this, true)
+            }
         }
     }
 
@@ -210,5 +223,6 @@ class MainActivity : FlutterActivity() {
         const val EXTRA_SHOW_LOCK = "com.unchained.unchained.SHOW_LOCK"
         private const val REQ_VPN = 7001
         private const val REQ_NOTIF = 7002
+        private const val REQ_DEVICE_ADMIN = 7003
     }
 }

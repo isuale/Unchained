@@ -2,9 +2,13 @@ package com.unchained.unchained
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
+import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityWindowInfo
 
 /**
  * The "uninstall protection" watchdog.
@@ -31,6 +35,11 @@ import android.view.accessibility.AccessibilityNodeInfo
  */
 class UninstallGuardService : AccessibilityService() {
 
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        Log.d(TAG, "service connected; guardEnabled=${GuardState.isEnabled(this)}")
+    }
+
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
         if (!GuardState.isEnabled(this)) return
@@ -46,6 +55,9 @@ class UninstallGuardService : AccessibilityService() {
         // Never react to ourselves (the lock screen itself, or our setup deep-links).
         if (pkg == packageName) return
 
+        val watched = pkg in SETTINGS_PACKAGES || pkg in INSTALLER_PACKAGES || pkg in STORE_PACKAGES
+        if (watched) Log.d(TAG, "watched window pkg=$pkg type=$type")
+
         val now = SystemClock.elapsedRealtime()
         // The user just passed the challenge — let them through their grace window.
         if (now < GuardState.graceUntilElapsed) return
@@ -53,17 +65,24 @@ class UninstallGuardService : AccessibilityService() {
         if (now - lastTriggerElapsed < TRIGGER_DEBOUNCE_MS) return
 
         val door = when {
-            pkg in SETTINGS_PACKAGES -> isOurAppOrAccessibilityScreen()
-            pkg in INSTALLER_PACKAGES -> mentionsUs()
-            pkg in STORE_PACKAGES -> isOurStoreListing()
+            pkg in SETTINGS_PACKAGES -> isOurAppOrAccessibilityScreen(event)
+            pkg in INSTALLER_PACKAGES -> mentionsUs(event)
+            pkg in STORE_PACKAGES -> isOurStoreListing(event)
             else -> false
         }
 
+        if (watched) Log.d(TAG, "door=$door for pkg=$pkg")
+
         if (door) {
             lastTriggerElapsed = now
+            Log.d(TAG, "TRIGGER: covering $pkg with lock")
             // Cancel the dangerous dialog/screen underneath, then cover with the lock.
+            // The BACK kicks off a window transition in the target app; launching the
+            // lock in the same instant races that transition and can lose the z-order
+            // fight (the lock never surfaces and the user is just bounced back). Let the
+            // BACK settle, then launch — so the lock reliably comes to the foreground.
             performGlobalAction(GLOBAL_ACTION_BACK)
-            launchLock()
+            mainHandler.postDelayed({ launchLock() }, LAUNCH_DELAY_MS)
         }
     }
 
@@ -73,34 +92,69 @@ class UninstallGuardService : AccessibilityService() {
      * True when the active Settings window is our app's **App info** page or the
      * **Accessibility** detail page for our app — both prominently show "Unchained".
      */
-    private fun isOurAppOrAccessibilityScreen(): Boolean = mentionsUs()
+    private fun isOurAppOrAccessibilityScreen(event: AccessibilityEvent): Boolean =
+        mentionsUs(event)
 
     /** Play Store listing for us: our name is present alongside an uninstall control. */
-    private fun isOurStoreListing(): Boolean {
-        val root = rootInActiveWindow ?: return false
-        return try {
-            nodeTreeContains(root, APP_LABELS) &&
-                nodeTreeContains(root, UNINSTALL_HINTS)
-        } finally {
-            root.recycle()
-        }
-    }
+    private fun isOurStoreListing(event: AccessibilityEvent): Boolean =
+        screenContains(event, APP_LABELS) && screenContains(event, UNINSTALL_HINTS)
 
-    /** Our app label appears somewhere in the active window. */
-    private fun mentionsUs(): Boolean {
-        val root = rootInActiveWindow ?: return false
-        return try {
-            nodeTreeContains(root, APP_LABELS)
-        } finally {
-            root.recycle()
+    /** Our app label appears somewhere on the current screen. */
+    private fun mentionsUs(event: AccessibilityEvent): Boolean =
+        screenContains(event, APP_LABELS)
+
+    /**
+     * Whether any of [needles] appears anywhere the user can currently see.
+     *
+     * We deliberately do *not* trust [rootInActiveWindow] alone: during the window
+     * transition into Force-stop / Uninstall, or when a confirm dialog is layered over
+     * Settings, the "active" window can momentarily be systemui or a stale node and the
+     * dangerous screen would slip past. So we look in three places and trigger if *any*
+     * of them mentions us: the event's own source node, the active window, and every
+     * interactive window the service can enumerate.
+     */
+    private fun screenContains(event: AccessibilityEvent, needles: List<String>): Boolean {
+        // 1) The node that fired this event.
+        event.source?.let { src ->
+            try {
+                if (nodeTreeContains(src, needles)) return true
+            } finally {
+                src.recycle()
+            }
         }
+        // 2) The current active window.
+        rootInActiveWindow?.let { root ->
+            try {
+                if (nodeTreeContains(root, needles)) return true
+            } finally {
+                root.recycle()
+            }
+        }
+        // 3) Every window the service can see (covers transitions / layered dialogs).
+        val all: List<AccessibilityWindowInfo> = try {
+            windows ?: emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+        for (w in all) {
+            val root = w.root ?: continue
+            try {
+                if (nodeTreeContains(root, needles)) return true
+            } finally {
+                root.recycle()
+            }
+        }
+        return false
     }
 
     private fun launchLock() {
         val intent = Intent(this, MainActivity::class.java).apply {
+            // CLEAR_TOP (vs. the old REORDER_TO_FRONT) forces a real bring-to-front of
+            // our existing instance and delivers onNewIntent, instead of a soft reorder
+            // that can be overridden by a competing transition and never become visible.
             addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
             )
             putExtra(MainActivity.EXTRA_SHOW_LOCK, true)
@@ -132,9 +186,18 @@ class UninstallGuardService : AccessibilityService() {
         return false
     }
 
+    /** Posts the delayed lock launch onto the main thread. */
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     companion object {
-        private const val TRIGGER_DEBOUNCE_MS = 1500L
+        private const val TAG = "UnchainedGuard"
+        // Short enough to re-cover almost immediately if the user dismisses us, long
+        // enough that one screen's burst of content-changed events fires us only once.
+        private const val TRIGGER_DEBOUNCE_MS = 700L
         private const val MAX_DEPTH = 40
+
+        /** Wait for the BACK transition to settle before launching the lock. */
+        private const val LAUNCH_DELAY_MS = 150L
 
         private var lastTriggerElapsed = 0L
 
