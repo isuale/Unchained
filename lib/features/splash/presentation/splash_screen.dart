@@ -26,7 +26,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     if (!mounted) return;
     if (settings?.activePlan != null) {
-      context.go('/dashboard');
+      // Returning user: gate the control panel behind the Terms & Conditions
+      // until they have accepted them once.
+      context.go(settings?.termsAccepted == true ? '/dashboard' : '/terms');
     } else {
       context.go('/welcome');
     }

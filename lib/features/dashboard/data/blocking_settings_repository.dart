@@ -69,6 +69,14 @@ class BlockingSettingsRepository {
     await updateSettings(BlockingSettingsCompanion(activePlan: Value(plan)));
   }
 
+  /// Records that the user has passed the Terms & Conditions gate (either by
+  /// agreeing or by choosing to continue at their own responsibility). Once set,
+  /// the gate is not shown again until the session is reset.
+  Future<void> setTermsAccepted(bool accepted) async {
+    await updateSettings(
+        BlockingSettingsCompanion(termsAccepted: Value(accepted)));
+  }
+
   /// Persists the user's custom blocklist (extra domains to block), stored
   /// newline-separated. Pass the full desired list; it replaces the old one.
   Future<void> setCustomBlocklist(List<String> domains) async {

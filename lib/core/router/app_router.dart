@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/dashboard_screen.dart';
 import 'package:unchained/features/guard/presentation/scripture_lock_screen.dart';
 import 'package:unchained/features/dashboard/stubs/accountability_stub.dart';
+import 'package:unchained/features/legal/presentation/terms_screen.dart';
 import 'package:unchained/features/onboarding/presentation/analyzing_screen.dart';
 import 'package:unchained/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:unchained/features/plans/presentation/ai_plan_screen.dart';
@@ -55,6 +56,12 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/plans/all',
       builder: (context, state) => const AllPlansScreen(),
+    ),
+    GoRoute(
+      path: '/terms',
+      builder: (context, state) => TermsScreen(
+        isGate: state.extra is bool ? state.extra as bool : true,
+      ),
     ),
     GoRoute(
       path: '/dashboard',

@@ -46,7 +46,14 @@ class PlanActivationOverlay {
     await Future.delayed(const Duration(milliseconds: 400));
     if (!context.mounted) return;
     navigator.pop();
-    context.go('/dashboard');
+    // Gate the control panel behind the Terms & Conditions until accepted once.
+    final accepted = (await ref
+            .read(blockingSettingsRepositoryProvider)
+            .getSettings())
+        ?.termsAccepted ==
+        true;
+    if (!context.mounted) return;
+    context.go(accepted ? '/dashboard' : '/terms');
   }
 }
 

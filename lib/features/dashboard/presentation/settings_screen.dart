@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
 import 'package:unchained/features/guard/presentation/uninstall_protection_card.dart';
 import 'package:unchained/l10n/app_localizations.dart';
+import 'package:unchained/shared/app_credits.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -123,6 +124,63 @@ class SettingsScreen extends ConsumerWidget {
                   style: const TextStyle(color: Color(0xFF888888)),
                 ),
                 onTap: () => _leaveSession(context, ref),
+              ),
+            ),
+            const SizedBox(height: 28),
+            Text(
+              'ABOUT',
+              style: const TextStyle(
+                color: Color(0xFF666666),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Material(
+              color: _card,
+              borderRadius: BorderRadius.circular(14),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.description_outlined,
+                        color: Color(0xFF8AA6FF)),
+                    title: const Text(
+                      'Terms & Conditions',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: Color(0xFF666666)),
+                    onTap: () => context.push('/terms', extra: false),
+                  ),
+                  const Divider(height: 1, color: Color(0xFF1A1F2E)),
+                  ListTile(
+                    leading: const Icon(Icons.bug_report_outlined,
+                        color: Color(0xFF8AA6FF)),
+                    title: const Text(
+                      'Report a bug',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: const Text(
+                      AppCredits.supportEmail,
+                      style: TextStyle(color: Color(0xFF888888)),
+                    ),
+                    onTap: AppCredits.contactSupport,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Center(
+              child: Text(
+                'Designed & developed by\n${AppCredits.ownerName}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF666666),
+                  fontSize: 12,
+                  height: 1.4,
+                ),
               ),
             ),
           ],

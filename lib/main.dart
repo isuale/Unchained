@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/core/router/app_router.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
+import 'package:unchained/shared/app_credits.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -120,6 +121,15 @@ class MyApp extends StatelessWidget {
         ),
       ),
       routerConfig: appRouter,
+      // Pin the owner credit + support contact to the bottom of every screen.
+      builder: (context, child) {
+        return Column(
+          children: [
+            Expanded(child: child ?? const SizedBox.shrink()),
+            const AppFooter(),
+          ],
+        );
+      },
     );
   }
 }

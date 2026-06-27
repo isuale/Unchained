@@ -84,6 +84,13 @@ class BlockingSettings extends Table {
   // The plan the user picked (null = none picked yet)
   TextColumn get activePlan => text().nullable()();
 
+  // Whether the user has accepted the Terms & Conditions gate that guards the
+  // control panel. Set true once the user agrees (or chooses to proceed at
+  // their own responsibility); checked on entry to /dashboard so the gate is
+  // shown only once. Reset to false by resetSession() (fresh-install behavior).
+  BoolColumn get termsAccepted =>
+      boolean().withDefault(const Constant(false))();
+
   // User-managed domain lists, stored newline-separated (one domain per line).
   // customBlocklist: extra sites the user chose to block, on top of the native
   // built-in list. customAllowlist: sites the user chose to un-block (allow),
@@ -105,7 +112,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -143,6 +150,11 @@ class AppDatabase extends _$AppDatabase {
                 blockingSettings, blockingSettings.commitmentBreakCount);
             await m.addColumn(
                 blockingSettings, blockingSettings.commitmentStartedAt);
+          }
+          // v6: Terms & Conditions acceptance gate for the control panel.
+          if (from >= 2 && from < 6) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.termsAccepted);
           }
         },
         beforeOpen: (details) async {
