@@ -18,6 +18,16 @@ void main() {
     appRouter.go('/lock');
   });
   runApp(const ProviderScope(child: MyApp()));
+  // Cold-start path: if the watchdog launched us specifically to show the lock,
+  // pull that fact once the engine is ready (a pushed showLock can be lost if it
+  // fires before the handler above is registered). Without this, opening App info
+  // while the app is closed lands the user on the dashboard, not the 800 letters.
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    if (await UninstallGuardService.consumePendingLock()) {
+      scriptureLockActive.value = true;
+      appRouter.go('/lock');
+    }
+  });
 }
 
 class MyApp extends StatelessWidget {

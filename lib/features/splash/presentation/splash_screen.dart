@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
+import 'package:unchained/features/guard/lock_visibility.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -25,6 +26,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     await minDelay;
 
     if (!mounted) return;
+    // If the watchdog cold-launched us for the lock, never navigate over it.
+    if (scriptureLockActive.value) return;
     if (settings?.activePlan != null) {
       // Returning user: gate the control panel behind the Terms & Conditions
       // until they have accepted them once.

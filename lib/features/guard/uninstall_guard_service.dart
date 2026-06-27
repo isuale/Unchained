@@ -52,6 +52,12 @@ class UninstallGuardService {
   /// which the watchdog stands down so the user can proceed.
   static Future<bool> challengePassed() => _invokeBool('challengePassed');
 
+  /// Whether this launch was the watchdog cold-starting us to show the lock.
+  /// Called once at startup so a pushed `showLock` lost to a handler-registration
+  /// race can't strand the user on the normal app instead of the 800 letters.
+  /// Clears the flag natively, so it returns true at most once per launch.
+  static Future<bool> consumePendingLock() => _invokeBool('consumePendingLock');
+
   // --- Hard uninstall block (device admin / device owner) ---
 
   /// Whether we are an active **device administrator**. While true, Android

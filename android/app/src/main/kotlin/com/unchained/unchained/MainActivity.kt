@@ -129,6 +129,19 @@ class MainActivity : FlutterActivity() {
                         GuardState.grantGrace()
                         result.success(true)
                     }
+                    "consumePendingLock" -> {
+                        // Cold-start safety net: when the watchdog cold-launches us to
+                        // show the lock, a *pushed* showLock can be lost if it fires before
+                        // Dart registers its handler — leaving the user on the normal app
+                        // (splash → dashboard) instead of the 800 letters. So Dart instead
+                        // *pulls* this once it's ready; we report whether this launch was
+                        // for the lock and clear the flag so a later normal open won't lock.
+                        val launchedForLock = pendingShowLock ||
+                            (intent?.getBooleanExtra(EXTRA_SHOW_LOCK, false) == true)
+                        pendingShowLock = false
+                        intent?.removeExtra(EXTRA_SHOW_LOCK)
+                        result.success(launchedForLock)
+                    }
                     "isDeviceAdminActive" -> result.success(GuardAdmin.isAdminActive(this))
                     "isDeviceOwner" -> result.success(GuardAdmin.isDeviceOwner(this))
                     "requestDeviceAdmin" -> {
