@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/guard/domain/bible_passages.dart';
+import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 
 /// Why the lock is showing.
@@ -49,6 +50,14 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
   @override
   void initState() {
     super.initState();
+    // Hide the app's footer chrome for the whole lifetime of the lock, so the
+    // user sees only the 800 letters. The watchdog path sets this synchronously
+    // before navigating (no first-frame footer); here we defer to a post-frame
+    // callback so toggling the ancestor listener never fires during build. Both
+    // are idempotent — this also covers the in-app "turn off" path.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scriptureLockActive.value = true;
+    });
     _passage = BiblePassages.random();
     _controller.addListener(_onChanged);
     _startTimer();
@@ -56,6 +65,11 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
 
   @override
   void dispose() {
+    // Lock is leaving the screen — restore the footer on every other route.
+    // Defer so we don't mark an ancestor dirty mid-teardown.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scriptureLockActive.value = false;
+    });
     _timer?.cancel();
     _controller.dispose();
     _focus.dispose();

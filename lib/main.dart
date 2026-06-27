@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/core/router/app_router.dart';
+import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 import 'package:unchained/shared/app_credits.dart';
@@ -9,8 +10,13 @@ import 'package:unchained/shared/app_credits.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // When the native watchdog catches an uninstall / force-stop attempt it asks us
-  // to throw up the scripture lock over whatever route is showing.
-  UninstallGuardService.registerLockHandler(() => appRouter.go('/lock'));
+  // to throw up the scripture lock over whatever route is showing. Flag it active
+  // *before* navigating so the owner-credit footer is gone on the lock's very first
+  // frame — the user must see only the 800 letters, not the app behind them.
+  UninstallGuardService.registerLockHandler(() {
+    scriptureLockActive.value = true;
+    appRouter.go('/lock');
+  });
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -121,12 +127,19 @@ class MyApp extends StatelessWidget {
         ),
       ),
       routerConfig: appRouter,
-      // Pin the owner credit + support contact to the bottom of every screen.
+      // Pin the owner credit + support contact to the bottom of every screen —
+      // except while the Scripture lock is up, where the user must see only the
+      // 800 letters. The route subtree (child) always stays inside Expanded so no
+      // screen is reparented or loses state when the footer collapses.
       builder: (context, child) {
         return Column(
           children: [
             Expanded(child: child ?? const SizedBox.shrink()),
-            const AppFooter(),
+            ValueListenableBuilder<bool>(
+              valueListenable: scriptureLockActive,
+              builder: (context, locked, _) =>
+                  locked ? const SizedBox.shrink() : const AppFooter(),
+            ),
           ],
         );
       },
