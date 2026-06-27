@@ -3,34 +3,60 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
 import 'package:unchained/shared/app_credits.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 /// Terms & Conditions gate shown once before the user reaches the control panel.
 ///
 /// In gate mode ([isGate] true, the default) it offers two ways forward — agree
 /// after reading, or continue without reading at the user's own responsibility —
-/// and both record acceptance so the gate is not shown again. In view mode
-/// ([isGate] false, opened from Settings) it just displays the terms with a back
-/// button and no acceptance buttons.
-class TermsScreen extends ConsumerWidget {
+/// and both record acceptance so the gate is not shown again. The gate is
+/// deliberately "sticky": it cannot be dismissed by the system back gesture, and
+/// it holds a wakelock so the screen never sleeps out from under the reader. It
+/// ends only when the user chooses one of the two buttons.
+///
+/// In view mode ([isGate] false, opened from Settings) it just displays the
+/// terms with a back button and no acceptance buttons.
+class TermsScreen extends ConsumerStatefulWidget {
   const TermsScreen({super.key, this.isGate = true});
 
   final bool isGate;
 
+  @override
+  ConsumerState<TermsScreen> createState() => _TermsScreenState();
+}
+
+class _TermsScreenState extends ConsumerState<TermsScreen> {
   static const Color _bg = Color(0xFF0A0E18);
   static const Color _primary = Color(0xFF1E5FFF);
   static const Color _heading = Colors.white;
   static const Color _body = Color(0xFFB6BDCC);
   static const Color _muted = Color(0xFF7A8294);
 
-  Future<void> _accept(BuildContext context, WidgetRef ref) async {
-    await ref
-        .read(blockingSettingsRepositoryProvider)
-        .setTermsAccepted(true);
-    if (!context.mounted) return;
+  @override
+  void initState() {
+    super.initState();
+    // Keep the screen on while the mandatory gate is up so the OS display
+    // timeout can't blank the Terms out before the user has decided.
+    if (widget.isGate) {
+      WakelockPlus.enable();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.isGate) {
+      WakelockPlus.disable();
+    }
+    super.dispose();
+  }
+
+  Future<void> _accept() async {
+    await ref.read(blockingSettingsRepositoryProvider).setTermsAccepted(true);
+    if (!mounted) return;
     context.go('/dashboard');
   }
 
-  Future<void> _continueAtOwnRisk(BuildContext context, WidgetRef ref) async {
+  Future<void> _continueAtOwnRisk() async {
     final proceed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -68,86 +94,92 @@ class TermsScreen extends ConsumerWidget {
     );
 
     if (proceed != true) return;
-    if (!context.mounted) return;
-    await _accept(context, ref);
+    if (!mounted) return;
+    await _accept();
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
+  Widget build(BuildContext context) {
+    final isGate = widget.isGate;
+    // In gate mode the screen is back-proof: the system back gesture/button
+    // does nothing, so the user can only leave by choosing a button.
+    return PopScope(
+      canPop: !isGate,
+      child: Scaffold(
         backgroundColor: Colors.black,
-        elevation: 0,
-        automaticallyImplyLeading: !isGate,
-        title: const Text('Terms & Conditions'),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                children: [
-                  if (isGate) ...[
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: _bg,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: _primary.withValues(alpha: 0.35),
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          elevation: 0,
+          automaticallyImplyLeading: !isGate,
+          title: const Text('Terms & Conditions'),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  children: [
+                    if (isGate) ...[
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: _bg,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: _primary.withValues(alpha: 0.35),
+                          ),
                         ),
-                      ),
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.info_outline, color: _primary, size: 22),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Please read these Terms & Conditions before '
-                              'using the control panel. If you choose not to '
-                              'read them, you use this app entirely at your own '
-                              'responsibility.',
-                              style: TextStyle(
-                                color: _body,
-                                fontSize: 14,
-                                height: 1.4,
+                        child: const Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.info_outline, color: _primary, size: 22),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Please read these Terms & Conditions before '
+                                'using the control panel. If you choose not to '
+                                'read them, you use this app entirely at your '
+                                'own responsibility.',
+                                style: TextStyle(
+                                  color: _body,
+                                  fontSize: 14,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    ..._terms.map(_section),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'By continuing you confirm that you have read, '
+                      'understood, and agree to these Terms & Conditions.',
+                      style: TextStyle(
+                        color: _muted,
+                        fontSize: 13,
+                        height: 1.4,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                     const SizedBox(height: 24),
+                    const _OwnerCredit(),
                   ],
-                  ..._terms.map(_section),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'By continuing you confirm that you have read, understood, '
-                    'and agree to these Terms & Conditions.',
-                    style: TextStyle(
-                      color: _muted,
-                      fontSize: 13,
-                      height: 1.4,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const _OwnerCredit(),
-                ],
+                ),
               ),
-            ),
-            if (isGate) _gateActions(context, ref),
-          ],
+              if (isGate) _gateActions(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _gateActions(BuildContext context, WidgetRef ref) {
+  Widget _gateActions() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: const BoxDecoration(
@@ -160,7 +192,7 @@ class TermsScreen extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => _accept(context, ref),
+              onPressed: _accept,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _primary,
                 foregroundColor: Colors.white,
@@ -177,7 +209,7 @@ class TermsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           TextButton(
-            onPressed: () => _continueAtOwnRisk(context, ref),
+            onPressed: _continueAtOwnRisk,
             child: const Text(
               "I don't want to read — continue at my own risk",
               textAlign: TextAlign.center,
