@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/user_assessment_repository.dart';
+import 'package:unchained/features/plans/presentation/widgets/plan_password_dialog.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class AllPlansScreen extends ConsumerWidget {
@@ -96,7 +97,12 @@ class AllPlansScreen extends ConsumerWidget {
                       // Open the plan's detail screen so each plan runs its own
                       // activation flow (Forever sets a permanent lock, Monthly
                       // goes to the setup screen, AI computes its schedule).
-                      onTap: () => context.go(plan.route),
+                      // Gate the switch behind a password so a tester can't
+                      // change the plan (and thereby weaken protection).
+                      onTap: () async {
+                        final ok = await showPlanPasswordDialog(context);
+                        if (ok && context.mounted) context.go(plan.route);
+                      },
                     );
                   },
                 ),
