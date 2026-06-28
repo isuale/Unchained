@@ -515,30 +515,6 @@ class _DashboardBody extends ConsumerWidget {
                 parentEnabled: protectionOn,
                 leadingIcon: Icons.people_outline,
               ),
-              const _RowSeparator(),
-              ToggleRow(
-                label: l.dashboard_custom_block_screen,
-                value: settings.customBlockScreen,
-                onChanged: (v) => _toggle(ref, 'customBlockScreen', v),
-                isLocked: isFeatureLocked('customBlockScreen', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.brush_outlined,
-              ),
-              const _RowSeparator(),
-              ToggleRow(
-                label: l.dashboard_custom_websites_blocklist,
-                value: settings.customWebsitesBlocklistEnabled,
-                onChanged: (v) =>
-                    _toggle(ref, 'customWebsitesBlocklistEnabled', v),
-                isLocked: isFeatureLocked(
-                    'customWebsitesBlocklistEnabled', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.list_alt,
-              ),
             ],
           ),
 
