@@ -8,7 +8,6 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.view.accessibility.AccessibilityWindowInfo
 
 /**
  * The "uninstall protection" watchdog.
@@ -65,8 +64,8 @@ class UninstallGuardService : AccessibilityService() {
         if (now - lastTriggerElapsed < TRIGGER_DEBOUNCE_MS) return
 
         val door = when {
-            pkg in SETTINGS_PACKAGES -> isOurAppOrAccessibilityScreen(event)
-            pkg in INSTALLER_PACKAGES -> mentionsUs(event)
+            pkg in SETTINGS_PACKAGES -> isOurAppInfoPage(event)
+            pkg in INSTALLER_PACKAGES -> isOurUninstallDialog(event)
             pkg in STORE_PACKAGES -> isOurStoreListing(event)
             else -> false
         }
@@ -89,31 +88,35 @@ class UninstallGuardService : AccessibilityService() {
     override fun onInterrupt() {}
 
     /**
-     * True when the active Settings window is our app's **App info** page or the
-     * **Accessibility** detail page for our app — both prominently show "Unchained".
+     * True ONLY when the active Settings window is **our app's App-info page** —
+     * the one screen that holds Force stop / Uninstall. We require BOTH our app
+     * label *and* a Force-stop/Uninstall control to be present in the same active
+     * window, so merely opening Settings, searching, or scrolling the Apps list
+     * (where our name appears without those controls) does NOT trigger the lock.
+     * The user keeps free access to all of Settings except this page.
      */
-    private fun isOurAppOrAccessibilityScreen(event: AccessibilityEvent): Boolean =
-        mentionsUs(event)
+    private fun isOurAppInfoPage(event: AccessibilityEvent): Boolean =
+        activeScreenContains(event, APP_LABELS) &&
+            activeScreenContains(event, DANGER_CONTROLS)
+
+    /** The package-installer's uninstall confirmation dialog for *our* app. */
+    private fun isOurUninstallDialog(event: AccessibilityEvent): Boolean =
+        activeScreenContains(event, APP_LABELS) &&
+            activeScreenContains(event, UNINSTALL_HINTS)
 
     /** Play Store listing for us: our name is present alongside an uninstall control. */
     private fun isOurStoreListing(event: AccessibilityEvent): Boolean =
-        screenContains(event, APP_LABELS) && screenContains(event, UNINSTALL_HINTS)
-
-    /** Our app label appears somewhere on the current screen. */
-    private fun mentionsUs(event: AccessibilityEvent): Boolean =
-        screenContains(event, APP_LABELS)
+        activeScreenContains(event, APP_LABELS) &&
+            activeScreenContains(event, UNINSTALL_HINTS)
 
     /**
-     * Whether any of [needles] appears anywhere the user can currently see.
-     *
-     * We deliberately do *not* trust [rootInActiveWindow] alone: during the window
-     * transition into Force-stop / Uninstall, or when a confirm dialog is layered over
-     * Settings, the "active" window can momentarily be systemui or a stale node and the
-     * dangerous screen would slip past. So we look in three places and trigger if *any*
-     * of them mentions us: the event's own source node, the active window, and every
-     * interactive window the service can enumerate.
+     * Whether all of [needles] appear in the window the user is actually looking at
+     * — the event's own source node or the active window. We deliberately do NOT
+     * scan every enumerable window: that picked up our app label from unrelated or
+     * lingering windows (even our own lock), firing the guard when the user merely
+     * opened Settings and bouncing them in and out of the lock.
      */
-    private fun screenContains(event: AccessibilityEvent, needles: List<String>): Boolean {
+    private fun activeScreenContains(event: AccessibilityEvent, needles: List<String>): Boolean {
         // 1) The node that fired this event.
         event.source?.let { src ->
             try {
@@ -122,22 +125,8 @@ class UninstallGuardService : AccessibilityService() {
                 src.recycle()
             }
         }
-        // 2) The current active window.
+        // 2) The current active (foreground, focused) window.
         rootInActiveWindow?.let { root ->
-            try {
-                if (nodeTreeContains(root, needles)) return true
-            } finally {
-                root.recycle()
-            }
-        }
-        // 3) Every window the service can see (covers transitions / layered dialogs).
-        val all: List<AccessibilityWindowInfo> = try {
-            windows ?: emptyList()
-        } catch (_: Exception) {
-            emptyList()
-        }
-        for (w in all) {
-            val root = w.root ?: continue
             try {
                 if (nodeTreeContains(root, needles)) return true
             } finally {
@@ -204,9 +193,18 @@ class UninstallGuardService : AccessibilityService() {
         // Our user-visible label (see android:label in the manifest). Lowercase.
         private val APP_LABELS = listOf("unchained")
 
-        // Localised-but-common uninstall captions, lowercase. Used only to harden the
-        // Play Store heuristic; App-info / installer detection keys off the app label.
+        // Uninstall captions (lowercase, EN + ES). Used for the installer dialog and
+        // the Play Store listing.
         private val UNINSTALL_HINTS = listOf("uninstall", "desinstalar")
+
+        // The dangerous controls that ONLY appear on our app's App-info page: Force
+        // stop and Uninstall (lowercase, EN + ES). Requiring one of these alongside
+        // our app label is what pins the trigger to that single page, so the rest of
+        // Settings stays freely accessible.
+        private val DANGER_CONTROLS = listOf(
+            "uninstall", "desinstalar",
+            "force stop", "forzar detención", "forzar detencion", "forzar parada", "detener",
+        )
 
         // System Settings across OEMs. Force stop and Uninstall both live on the
         // App-info page here; the per-OEM "security center" apps also expose an
