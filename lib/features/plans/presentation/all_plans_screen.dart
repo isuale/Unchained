@@ -97,9 +97,15 @@ class AllPlansScreen extends ConsumerWidget {
                       // Open the plan's detail screen so each plan runs its own
                       // activation flow (Forever sets a permanent lock, Monthly
                       // goes to the setup screen, AI computes its schedule).
-                      // Gate the switch behind a password so a tester can't
-                      // change the plan (and thereby weaken protection).
+                      // The recommended plan (the one assigned after the
+                      // questionnaire) is free to (re)select. Switching to any
+                      // *other* plan is gated behind a password, so a tester
+                      // can't change the plan and weaken protection.
                       onTap: () async {
+                        if (isRecommended) {
+                          context.go(plan.route);
+                          return;
+                        }
                         final ok = await showPlanPasswordDialog(context);
                         if (ok && context.mounted) context.go(plan.route);
                       },
