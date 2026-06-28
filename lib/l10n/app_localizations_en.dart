@@ -256,6 +256,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_advanced_subtitle => 'Increase Protection Level';
 
   @override
+  String get dashboard_coming_soon => 'Working on it';
+
+  @override
   String get dashboard_porn_websites_blocked => 'Porn websites blocked';
 
   @override

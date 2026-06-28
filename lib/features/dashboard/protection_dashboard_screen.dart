@@ -334,7 +334,10 @@ class _DashboardBody extends ConsumerWidget {
 
           // Social
           _SectionWrapper(
-            title: SectionTitle(title: l.dashboard_section_social),
+            title: SectionTitle(
+              title: l.dashboard_section_social,
+              comingSoonLabel: l.dashboard_coming_soon,
+            ),
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
@@ -399,7 +402,10 @@ class _DashboardBody extends ConsumerWidget {
 
           // Content
           _SectionWrapper(
-            title: SectionTitle(title: l.dashboard_section_content),
+            title: SectionTitle(
+              title: l.dashboard_section_content,
+              comingSoonLabel: l.dashboard_coming_soon,
+            ),
             children: [
               ToggleRow(
                 label: l.dashboard_block_shopping,
@@ -439,7 +445,10 @@ class _DashboardBody extends ConsumerWidget {
 
           // App control
           _SectionWrapper(
-            title: SectionTitle(title: l.dashboard_section_app),
+            title: SectionTitle(
+              title: l.dashboard_section_app,
+              comingSoonLabel: l.dashboard_coming_soon,
+            ),
             children: [
               ToggleRow(
                 label: l.dashboard_app_time_limits,

@@ -578,6 +578,12 @@ abstract class AppLocalizations {
   /// **'Aumenta el nivel de protección'**
   String get dashboard_advanced_subtitle;
 
+  /// No description provided for @dashboard_coming_soon.
+  ///
+  /// In es, this message translates to:
+  /// **'En desarrollo'**
+  String get dashboard_coming_soon;
+
   /// No description provided for @dashboard_porn_websites_blocked.
   ///
   /// In es, this message translates to:
