@@ -213,7 +213,6 @@ class _DashboardBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final protectionOn = settings.protectionEnabled;
-    final basicSelected = settings.strictnessLevel == 'basic';
     final reelsShortsSelected = settings.socialMode == 'reelsAndShorts';
     final commitment = ref.watch(commitmentStatusProvider);
 
@@ -243,28 +242,6 @@ class _DashboardBody extends ConsumerWidget {
               child: _CommitmentBanner(status: commitment, l: l),
             ),
           ],
-
-          const SizedBox(height: 24),
-
-          // Strictness
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SectionTitle(title: l.dashboard_strictness_title),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: PillSelector(
-              leftLabel: l.dashboard_strictness_basic,
-              rightLabel: l.dashboard_strictness_strict,
-              isLeftSelected: basicSelected,
-              onSelectLeft: () => ref
-                  .read(blockingSettingsActionsProvider.notifier)
-                  .setStrictness('basic'),
-              onSelectRight: () => ref
-                  .read(blockingSettingsActionsProvider.notifier)
-                  .setStrictness('strict'),
-            ),
-          ),
 
           const SizedBox(height: 24),
 
