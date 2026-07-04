@@ -7,8 +7,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -21,9 +23,11 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.Inet4Address
 import java.net.InetAddress
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 // A tiny hardcoded core, kept as a safety net even if the asset fails to load.
 private val BLOCKLIST = setOf(
@@ -149,6 +153,14 @@ class BlockingService : VpnService() {
     // The real network (Wi-Fi/cellular) our upstream queries must go out on. Captured
     // before establish() so it's the actual default link, not our own VPN.
     @Volatile private var underlyingNetwork: Network? = null
+    // Keeps [underlyingNetwork]/[upstreamDns] live for as long as the VPN runs. Without
+    // this, a one-time snapshot goes stale the moment the real network changes underneath
+    // the app (Wi-Fi reconnect, handover to cellular, waking from Doze) — every upstream
+    // DNS query then binds to a dead Network and fails for the full timeout, forever,
+    // until protection is toggled off/on. That's what produced the "internet gets slower
+    // and slower until nothing" symptom: failures pile up in the unbounded worker queue
+    // and never clear because nothing ever succeeds again.
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     companion object {
         const val TAG = "BlockingService"
@@ -318,6 +330,7 @@ class BlockingService : VpnService() {
         underlyingNetwork = pickUnderlyingNetwork(cm)
         upstreamDns = resolveUpstreamServers(cm, underlyingNetwork)
         Log.d(TAG, "Underlying network: $underlyingNetwork, upstream DNS: ${upstreamDns.joinToString { it.hostAddress ?: "?" }}")
+        if (cm != null) registerNetworkCallback(cm)
 
         val builder = Builder()
             .addAddress("10.0.0.2", 30)
@@ -329,7 +342,14 @@ class BlockingService : VpnService() {
         vpnInterface = builder.establish()
         Log.d(TAG, "VPN interface established: ${vpnInterface != null}")
 
-        executor = Executors.newFixedThreadPool(8)
+        // Bounded queue + drop-oldest: if upstream DNS is ever unreachable for a stretch
+        // (bad handover, dead zone), stale queued lookups get discarded in favor of fresh
+        // ones instead of piling up forever and dragging every later lookup down with them.
+        executor = ThreadPoolExecutor(
+            8, 8, 0L, TimeUnit.MILLISECONDS,
+            ArrayBlockingQueue(64),
+            ThreadPoolExecutor.DiscardOldestPolicy(),
+        )
 
         shouldRun = true
         tunnelThread = Thread { runTunnelLoop() }.apply {
@@ -338,10 +358,59 @@ class BlockingService : VpnService() {
         }
     }
 
+    /**
+     * Keeps [underlyingNetwork] and [upstreamDns] pointed at whatever the real default
+     * network currently is, for as long as the VPN runs. Requesting NOT_VPN means this
+     * never fires for our own tunnel — only for the actual Wi-Fi/cellular link — so it
+     * keeps tracking correctly even after establish() makes [ConnectivityManager] report
+     * our own VPN as the process's active network.
+     */
+    private fun registerNetworkCallback(cm: ConnectivityManager) {
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+            .build()
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                underlyingNetwork = network
+                upstreamDns = resolveUpstreamServers(cm, network)
+                Log.d(TAG, "Underlying network available: $network, upstream DNS: ${upstreamDns.joinToString { it.hostAddress ?: "?" }}")
+            }
+
+            override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
+                if (network != underlyingNetwork) return
+                upstreamDns = resolveUpstreamServers(cm, network)
+                Log.d(TAG, "Underlying network DNS changed, upstream DNS: ${upstreamDns.joinToString { it.hostAddress ?: "?" }}")
+            }
+
+            override fun onLost(network: Network) {
+                if (network != underlyingNetwork) return
+                Log.d(TAG, "Underlying network lost: $network")
+                underlyingNetwork = null
+                upstreamDns = emptyList()
+            }
+        }
+        try {
+            cm.registerNetworkCallback(request, callback)
+            networkCallback = callback
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to register network callback; upstream DNS will not track network changes", e)
+        }
+    }
+
     private fun stopVpn() {
         shouldRun = false
         executor?.shutdownNow()
         executor = null
+        val cm = getSystemService(ConnectivityManager::class.java)
+        networkCallback?.let {
+            try {
+                cm?.unregisterNetworkCallback(it)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error unregistering network callback", e)
+            }
+        }
+        networkCallback = null
         try {
             vpnInterface?.close()
         } catch (e: Exception) {
