@@ -316,12 +316,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_custom_websites_blocklist => 'Custom websites blocklist';
 
   @override
-  String get dashboard_cta_activate => 'ACTIVATE PROTECTION';
-
-  @override
-  String get dashboard_cta_saved => 'Protection configured';
-
-  @override
   String get nav_blocking => 'Blocking';
 
   @override

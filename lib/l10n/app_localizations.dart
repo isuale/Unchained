@@ -698,18 +698,6 @@ abstract class AppLocalizations {
   /// **'Lista personalizada de webs'**
   String get dashboard_custom_websites_blocklist;
 
-  /// No description provided for @dashboard_cta_activate.
-  ///
-  /// In es, this message translates to:
-  /// **'ACTIVAR PROTECCIÓN'**
-  String get dashboard_cta_activate;
-
-  /// No description provided for @dashboard_cta_saved.
-  ///
-  /// In es, this message translates to:
-  /// **'Protección configurada'**
-  String get dashboard_cta_saved;
-
   /// No description provided for @nav_blocking.
   ///
   /// In es, this message translates to:

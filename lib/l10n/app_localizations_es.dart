@@ -320,12 +320,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Lista personalizada de webs';
 
   @override
-  String get dashboard_cta_activate => 'ACTIVAR PROTECCIÓN';
-
-  @override
-  String get dashboard_cta_saved => 'Protección configurada';
-
-  @override
   String get nav_blocking => 'Bloqueo';
 
   @override

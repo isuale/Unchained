@@ -5,7 +5,6 @@ import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
-import 'package:unchained/features/dashboard/widgets/big_cta_button.dart';
 import 'package:unchained/features/dashboard/widgets/dashboard_header.dart';
 import 'package:unchained/features/dashboard/widgets/master_toggle_card.dart';
 import 'package:unchained/features/dashboard/widgets/pill_selector.dart';
@@ -495,19 +494,6 @@ class _DashboardBody extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: 24),
-          BigCtaButton(
-            label: l.dashboard_cta_activate,
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l.dashboard_cta_saved),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: const Color(0xFF0A0F1C),
-                ),
-              );
-            },
-          ),
           const SizedBox(height: 100),
         ],
       ),
