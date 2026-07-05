@@ -414,6 +414,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stub_progress_title => 'Progress';
 
   @override
+  String get progress_days_label => 'days protected';
+
+  @override
+  String progress_since(String date) {
+    return 'since $date';
+  }
+
+  @override
+  String get progress_weekly_section => 'Weekly progress';
+
+  @override
+  String get progress_milestones_section => 'Milestones';
+
+  @override
+  String get progress_off_title => 'Protection is off';
+
+  @override
+  String get progress_off_subtitle =>
+      'Turn on protection to start building your streak';
+
+  @override
+  String progress_week_tooltip(int week, int days) {
+    return 'Week $week: $days/7 days';
+  }
+
+  @override
   String get stub_settings_title => 'Settings';
 
   @override

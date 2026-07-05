@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:unchained/features/dashboard/presentation/settings_screen.dart';
 import 'package:unchained/features/dashboard/protection_dashboard_screen.dart';
 import 'package:unchained/features/dashboard/presentation/blocklist_screen.dart';
-import 'package:unchained/features/dashboard/stubs/progress_stub.dart';
+import 'package:unchained/features/dashboard/presentation/progress_screen.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: const [
           ProtectionDashboardScreen(),
           BlocklistScreen(),
-          ProgressStub(),
+          ProgressScreen(),
           SettingsScreen(),
         ],
       ),

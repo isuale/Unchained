@@ -81,6 +81,13 @@ class BlockingSettings extends Table {
       integer().withDefault(const Constant(0))();
   DateTimeColumn get commitmentStartedAt => dateTime().nullable()();
 
+  // Plan-agnostic streak anchor for the Progress tab: the first time
+  // protectionEnabled ever flips true, set once and never moved by later
+  // toggles or commitment breaks (see toggleField in the repository). Unlike
+  // commitmentStartedAt, this survives commitment completion/clearing, so the
+  // "days protected" streak keeps counting even after a fixed plan's lock ends.
+  DateTimeColumn get protectionStartedAt => dateTime().nullable()();
+
   // The plan the user picked (null = none picked yet)
   TextColumn get activePlan => text().nullable()();
 
@@ -112,7 +119,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -155,6 +162,11 @@ class AppDatabase extends _$AppDatabase {
           if (from >= 2 && from < 6) {
             await m.addColumn(
                 blockingSettings, blockingSettings.termsAccepted);
+          }
+          // v7: plan-agnostic streak anchor for the Progress tab.
+          if (from >= 2 && from < 7) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.protectionStartedAt);
           }
         },
         beforeOpen: (details) async {

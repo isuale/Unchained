@@ -872,6 +872,48 @@ abstract class AppLocalizations {
   /// **'Progreso'**
   String get stub_progress_title;
 
+  /// No description provided for @progress_days_label.
+  ///
+  /// In es, this message translates to:
+  /// **'días protegido'**
+  String get progress_days_label;
+
+  /// No description provided for @progress_since.
+  ///
+  /// In es, this message translates to:
+  /// **'desde {date}'**
+  String progress_since(String date);
+
+  /// No description provided for @progress_weekly_section.
+  ///
+  /// In es, this message translates to:
+  /// **'Progreso semanal'**
+  String get progress_weekly_section;
+
+  /// No description provided for @progress_milestones_section.
+  ///
+  /// In es, this message translates to:
+  /// **'Hitos'**
+  String get progress_milestones_section;
+
+  /// No description provided for @progress_off_title.
+  ///
+  /// In es, this message translates to:
+  /// **'La protección está desactivada'**
+  String get progress_off_title;
+
+  /// No description provided for @progress_off_subtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa la protección para empezar a construir tu racha'**
+  String get progress_off_subtitle;
+
+  /// No description provided for @progress_week_tooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Semana {week}: {days}/7 días'**
+  String progress_week_tooltip(int week, int days);
+
   /// No description provided for @stub_settings_title.
   ///
   /// In es, this message translates to:

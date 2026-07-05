@@ -137,6 +137,20 @@
   "@blocklist_allowed_added": { "placeholders": { "domain": { "type": "String" } } },
   "blocklist_remove": "Eliminar",
   "stub_progress_title": "Progreso",
+  "progress_days_label": "días protegido",
+  "progress_since": "desde {date}",
+  "@progress_since": { "placeholders": { "date": { "type": "String" } } },
+  "progress_weekly_section": "Progreso semanal",
+  "progress_milestones_section": "Hitos",
+  "progress_off_title": "La protección está desactivada",
+  "progress_off_subtitle": "Activa la protección para empezar a construir tu racha",
+  "progress_week_tooltip": "Semana {week}: {days}/7 días",
+  "@progress_week_tooltip": {
+    "placeholders": {
+      "week": { "type": "int" },
+      "days": { "type": "int" }
+    }
+  },
   "stub_settings_title": "Ajustes",
   "stub_accountability_title": "Responsabilidad",
   "settings_section_session": "Sesión",

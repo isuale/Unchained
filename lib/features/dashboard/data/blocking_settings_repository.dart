@@ -26,7 +26,7 @@ class BlockingSettingsRepository {
 
   Future<void> toggleField(String field, bool value) async {
     final v = Value(value);
-    final companion = switch (field) {
+    var companion = switch (field) {
       'protectionEnabled' => BlockingSettingsCompanion(protectionEnabled: v),
       'searchFilteringEnabled' =>
         BlockingSettingsCompanion(searchFilteringEnabled: v),
@@ -53,7 +53,24 @@ class BlockingSettingsRepository {
         BlockingSettingsCompanion(customWebsitesBlocklistEnabled: v),
       _ => throw ArgumentError('Unknown boolean field: $field'),
     };
+    if (field == 'protectionEnabled' && value) {
+      companion = await _withProtectionStartedAt(companion);
+    }
     await updateSettings(companion);
+  }
+
+  /// Stamps [protectionStartedAt] the first time protection is ever turned on,
+  /// then leaves it untouched on every later toggle so commitment breaks (or a
+  /// free-trial user flipping protection off and back on) don't reset the
+  /// "days protected" streak shown on the Progress tab.
+  Future<BlockingSettingsCompanion> _withProtectionStartedAt(
+      BlockingSettingsCompanion companion) async {
+    final existing = await getSettings();
+    if (existing != null && existing.protectionStartedAt == null) {
+      return companion.copyWith(
+          protectionStartedAt: Value(DateTime.now()));
+    }
+    return companion;
   }
 
   Future<void> setStrictness(String level) async {

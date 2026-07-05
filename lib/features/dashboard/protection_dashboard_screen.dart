@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
+import 'package:unchained/features/dashboard/domain/streak_progress.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
 import 'package:unchained/features/dashboard/widgets/dashboard_header.dart';
@@ -219,7 +220,11 @@ class _DashboardBody extends ConsumerWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DashboardHeader(activePlan: activePlan, streakDays: 3),
+          DashboardHeader(
+            activePlan: activePlan,
+            streakDays: currentStreakDays(
+                settings.protectionStartedAt, DateTime.now()),
+          ),
           const SizedBox(height: 12),
 
           // Master

@@ -137,6 +137,20 @@
   "@blocklist_allowed_added": { "placeholders": { "domain": { "type": "String" } } },
   "blocklist_remove": "Remove",
   "stub_progress_title": "Progress",
+  "progress_days_label": "days protected",
+  "progress_since": "since {date}",
+  "@progress_since": { "placeholders": { "date": { "type": "String" } } },
+  "progress_weekly_section": "Weekly progress",
+  "progress_milestones_section": "Milestones",
+  "progress_off_title": "Protection is off",
+  "progress_off_subtitle": "Turn on protection to start building your streak",
+  "progress_week_tooltip": "Week {week}: {days}/7 days",
+  "@progress_week_tooltip": {
+    "placeholders": {
+      "week": { "type": "int" },
+      "days": { "type": "int" }
+    }
+  },
   "stub_settings_title": "Settings",
   "stub_accountability_title": "Accountability",
   "settings_section_session": "Session",
