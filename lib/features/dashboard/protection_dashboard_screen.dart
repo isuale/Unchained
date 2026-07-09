@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/app_database.dart';
+import 'package:unchained/features/dashboard/data/feed_guard_bridge.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/domain/streak_progress.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
@@ -106,6 +107,104 @@ class _DashboardBody extends ConsumerWidget {
     ref
         .read(blockingSettingsActionsProvider.notifier)
         .toggle('preventUninstall', enabled);
+  }
+
+  /// Turning ON one of the Social feed blocks (Reels/Shorts/TikTok/Snapchat
+  /// Stories) first asks how many minutes per day to allow before it's
+  /// enforced — mirrors how a Family-Link-style app-timer prompts for a daily
+  /// budget rather than just hard-blocking outright. Turning it off needs no
+  /// prompt.
+  Future<void> _toggleSocialFeed(
+    BuildContext context,
+    WidgetRef ref,
+    String field,
+    int currentLimit,
+    bool value,
+  ) async {
+    final notifier = ref.read(blockingSettingsActionsProvider.notifier);
+    if (!value) {
+      await notifier.setSocialFeedTarget(field, false);
+      return;
+    }
+    final minutes = await _askDailyLimitMinutes(context, currentLimit);
+    if (minutes == null) return;
+    await notifier.setSocialFeedTarget(field, true, limitMinutes: minutes);
+  }
+
+  /// Simple stepper dialog for "how many minutes per day?" (5-180, steps of 5).
+  Future<int?> _askDailyLimitMinutes(BuildContext context, int initial) {
+    return showDialog<int>(
+      context: context,
+      builder: (dialogContext) {
+        var minutes = initial.clamp(5, 180);
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            backgroundColor: const Color(0xFF0A0E18),
+            title: const Text(
+              'Minutes per day',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Allowed today before it gets blocked for the rest of the day.',
+                  style: TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: minutes > 5
+                          ? () => setState(() => minutes -= 5)
+                          : null,
+                      icon: const Icon(Icons.remove_circle_outline,
+                          color: Color(0xFF1E5FFF)),
+                    ),
+                    SizedBox(
+                      width: 80,
+                      child: Text(
+                        '$minutes',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: minutes < 180
+                          ? () => setState(() => minutes += 5)
+                          : null,
+                      icon: const Icon(Icons.add_circle_outline,
+                          color: Color(0xFF1E5FFF)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel',
+                    style: TextStyle(color: Color(0xFF888888))),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(minutes),
+                child: const Text(
+                  'Confirm',
+                  style: TextStyle(
+                      color: Color(0xFF1E5FFF), fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _toggleMaster(
@@ -315,10 +414,7 @@ class _DashboardBody extends ConsumerWidget {
 
           // Social
           _SectionWrapper(
-            title: SectionTitle(
-              title: l.dashboard_section_social,
-              comingSoonLabel: l.dashboard_coming_soon,
-            ),
+            title: SectionTitle(title: l.dashboard_section_social),
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
@@ -334,10 +430,18 @@ class _DashboardBody extends ConsumerWidget {
                       .setSocialMode('allSocial'),
                 ),
               ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: _FeedGuardPermissionBanner(),
+              ),
               ToggleRow(
                 label: l.dashboard_block_reels,
+                sublabel: settings.blockReels
+                    ? '${settings.reelsLimitMinutes} min/day'
+                    : null,
                 value: settings.blockReels,
-                onChanged: (v) => _toggle(ref, 'blockReels', v),
+                onChanged: (v) => _toggleSocialFeed(
+                    context, ref, 'blockReels', settings.reelsLimitMinutes, v),
                 isLocked: isFeatureLocked('blockReels', activePlan),
                 lockedTooltip: l.lock_forever_only,
                 onLockedTap: () => _navLockedToForever(context),
@@ -347,8 +451,12 @@ class _DashboardBody extends ConsumerWidget {
               const _RowSeparator(),
               ToggleRow(
                 label: l.dashboard_block_shorts,
+                sublabel: settings.blockShorts
+                    ? '${settings.shortsLimitMinutes} min/day'
+                    : null,
                 value: settings.blockShorts,
-                onChanged: (v) => _toggle(ref, 'blockShorts', v),
+                onChanged: (v) => _toggleSocialFeed(context, ref,
+                    'blockShorts', settings.shortsLimitMinutes, v),
                 isLocked: isFeatureLocked('blockShorts', activePlan),
                 lockedTooltip: l.lock_forever_only,
                 onLockedTap: () => _navLockedToForever(context),
@@ -358,8 +466,12 @@ class _DashboardBody extends ConsumerWidget {
               const _RowSeparator(),
               ToggleRow(
                 label: l.dashboard_block_tiktok,
+                sublabel: settings.blockTikTok
+                    ? '${settings.tiktokLimitMinutes} min/day'
+                    : null,
                 value: settings.blockTikTok,
-                onChanged: (v) => _toggle(ref, 'blockTikTok', v),
+                onChanged: (v) => _toggleSocialFeed(context, ref,
+                    'blockTikTok', settings.tiktokLimitMinutes, v),
                 isLocked: isFeatureLocked('blockTikTok', activePlan),
                 lockedTooltip: l.lock_forever_only,
                 onLockedTap: () => _navLockedToForever(context),
@@ -369,8 +481,12 @@ class _DashboardBody extends ConsumerWidget {
               const _RowSeparator(),
               ToggleRow(
                 label: l.dashboard_block_snapchat,
+                sublabel: settings.blockSnapchatStories
+                    ? '${settings.snapchatLimitMinutes} min/day'
+                    : null,
                 value: settings.blockSnapchatStories,
-                onChanged: (v) => _toggle(ref, 'blockSnapchatStories', v),
+                onChanged: (v) => _toggleSocialFeed(context, ref,
+                    'blockSnapchatStories', settings.snapchatLimitMinutes, v),
                 isLocked:
                     isFeatureLocked('blockSnapchatStories', activePlan),
                 lockedTooltip: l.lock_forever_only,
@@ -619,6 +735,85 @@ class _RowSeparator extends StatelessWidget {
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: 16),
       color: const Color(0xFF1A2238),
+    );
+  }
+}
+
+/// Enforcing the Social feed limits requires a dedicated accessibility
+/// service (it has to watch for the Reels/Shorts/TikTok/Snapchat screens the
+/// same way the uninstall watchdog watches for Settings). Toggling a feed on
+/// above silently does nothing until this is granted, so surface it inline
+/// rather than leaving that a mystery.
+class _FeedGuardPermissionBanner extends StatefulWidget {
+  const _FeedGuardPermissionBanner();
+
+  @override
+  State<_FeedGuardPermissionBanner> createState() =>
+      _FeedGuardPermissionBannerState();
+}
+
+class _FeedGuardPermissionBannerState
+    extends State<_FeedGuardPermissionBanner> with WidgetsBindingObserver {
+  bool _loading = true;
+  bool _enabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _refresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refresh();
+  }
+
+  Future<void> _refresh() async {
+    final enabled = await FeedGuardBridge.isAccessibilityEnabled();
+    if (!mounted) return;
+    setState(() {
+      _enabled = enabled;
+      _loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading || _enabled) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFB800).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFFFB800).withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded,
+              color: Color(0xFFFFB800), size: 20),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Enable Accessibility access to enforce these daily limits.',
+              style: TextStyle(color: Color(0xFFB8C0D0), fontSize: 12),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              await FeedGuardBridge.openAccessibilitySettings();
+            },
+            child: const Text('Enable',
+                style: TextStyle(color: Color(0xFF1E5FFF))),
+          ),
+        ],
+      ),
     );
   }
 }

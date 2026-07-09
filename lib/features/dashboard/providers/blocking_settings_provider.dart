@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
+import 'package:unchained/features/dashboard/data/feed_guard_bridge.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/domain/domain_lists.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
@@ -72,6 +73,24 @@ class BlockingSettingsActions extends Notifier<void> {
     _reconcileWithNative();
     _reconcileCommitment();
     _syncUserLists();
+    _syncFeedGuardTargets();
+  }
+
+  /// Pushes the current Social feed enable/limit config to the native
+  /// FeedGuardService on startup, so the watchdog enforces the right budgets
+  /// even before the user touches a toggle this session.
+  Future<void> _syncFeedGuardTargets() async {
+    final repo = ref.read(blockingSettingsRepositoryProvider);
+    final settings = await repo.getSettings();
+    if (settings == null) return;
+    await FeedGuardBridge.setTargetConfig(
+        'blockReels', settings.blockReels, settings.reelsLimitMinutes);
+    await FeedGuardBridge.setTargetConfig(
+        'blockShorts', settings.blockShorts, settings.shortsLimitMinutes);
+    await FeedGuardBridge.setTargetConfig(
+        'blockTikTok', settings.blockTikTok, settings.tiktokLimitMinutes);
+    await FeedGuardBridge.setTargetConfig('blockSnapchatStories',
+        settings.blockSnapchatStories, settings.snapchatLimitMinutes);
   }
 
   /// Pushes the user's stored custom block/allow lists to the native engine on
@@ -190,6 +209,29 @@ class BlockingSettingsActions extends Notifier<void> {
 
   Future<void> setSocialMode(String mode) {
     return ref.read(blockingSettingsRepositoryProvider).setSocialMode(mode);
+  }
+
+  /// Turns one Social feed block (blockReels/blockShorts/blockTikTok/
+  /// blockSnapchatStories) on or off with its daily minute budget, persists
+  /// it, and immediately pushes the new config to the native watchdog so
+  /// enforcement takes effect without needing an app restart.
+  Future<void> setSocialFeedTarget(
+    String field,
+    bool enabled, {
+    int? limitMinutes,
+  }) async {
+    final repo = ref.read(blockingSettingsRepositoryProvider);
+    await repo.setSocialFeedTarget(field, enabled, limitMinutes: limitMinutes);
+    final settings = await repo.getSettings();
+    if (settings == null) return;
+    final minutes = switch (field) {
+      'blockReels' => settings.reelsLimitMinutes,
+      'blockShorts' => settings.shortsLimitMinutes,
+      'blockTikTok' => settings.tiktokLimitMinutes,
+      'blockSnapchatStories' => settings.snapchatLimitMinutes,
+      _ => 30,
+    };
+    await FeedGuardBridge.setTargetConfig(field, enabled, minutes);
   }
 
   /// Turns off the native VPN and wipes the local session so the user can

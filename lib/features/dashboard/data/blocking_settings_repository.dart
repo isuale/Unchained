@@ -82,6 +82,38 @@ class BlockingSettingsRepository {
     await updateSettings(BlockingSettingsCompanion(socialMode: Value(mode)));
   }
 
+  /// Turns one of the Social feed blocks (blockReels/blockShorts/blockTikTok/
+  /// blockSnapchatStories) on or off together with its daily minute budget, in
+  /// a single write. [limitMinutes] is only applied when [enabled] is true —
+  /// turning a feed off leaves its previously configured budget untouched so
+  /// the next time it's enabled the dialog can default to the last value.
+  Future<void> setSocialFeedTarget(
+    String enabledField,
+    bool enabled, {
+    int? limitMinutes,
+  }) async {
+    final e = Value(enabled);
+    var companion = switch (enabledField) {
+      'blockReels' => BlockingSettingsCompanion(blockReels: e),
+      'blockShorts' => BlockingSettingsCompanion(blockShorts: e),
+      'blockTikTok' => BlockingSettingsCompanion(blockTikTok: e),
+      'blockSnapchatStories' =>
+        BlockingSettingsCompanion(blockSnapchatStories: e),
+      _ => throw ArgumentError('Unknown social feed field: $enabledField'),
+    };
+    if (enabled && limitMinutes != null) {
+      final m = Value(limitMinutes);
+      companion = switch (enabledField) {
+        'blockReels' => companion.copyWith(reelsLimitMinutes: m),
+        'blockShorts' => companion.copyWith(shortsLimitMinutes: m),
+        'blockTikTok' => companion.copyWith(tiktokLimitMinutes: m),
+        'blockSnapchatStories' => companion.copyWith(snapchatLimitMinutes: m),
+        _ => companion,
+      };
+    }
+    await updateSettings(companion);
+  }
+
   Future<void> setActivePlan(String plan) async {
     await updateSettings(BlockingSettingsCompanion(activePlan: Value(plan)));
   }

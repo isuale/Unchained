@@ -70,6 +70,21 @@
                 android:resource="@xml/uninstall_guard_config" />
         </service>
 
+        <!-- Feed guard: daily time budgets for Instagram Reels / YouTube Shorts /
+             TikTok / Snapchat Stories. The user must enable it by hand under
+             Settings > Accessibility, same as the uninstall-protection watchdog. -->
+        <service
+            android:name=".FeedGuardService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/feed_guard_config" />
+        </service>
+
         <!-- Hard uninstall block. While this admin is active the system refuses to
              uninstall the app until it is deactivated; if the app is promoted to
              device owner it can block uninstall outright. -->

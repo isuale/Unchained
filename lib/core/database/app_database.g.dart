@@ -546,6 +546,51 @@ class $BlockingSettingsTable extends BlockingSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _reelsLimitMinutesMeta = const VerificationMeta(
+    'reelsLimitMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> reelsLimitMinutes = GeneratedColumn<int>(
+    'reels_limit_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _shortsLimitMinutesMeta =
+      const VerificationMeta('shortsLimitMinutes');
+  @override
+  late final GeneratedColumn<int> shortsLimitMinutes = GeneratedColumn<int>(
+    'shorts_limit_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _tiktokLimitMinutesMeta =
+      const VerificationMeta('tiktokLimitMinutes');
+  @override
+  late final GeneratedColumn<int> tiktokLimitMinutes = GeneratedColumn<int>(
+    'tiktok_limit_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _snapchatLimitMinutesMeta =
+      const VerificationMeta('snapchatLimitMinutes');
+  @override
+  late final GeneratedColumn<int> snapchatLimitMinutes = GeneratedColumn<int>(
+    'snapchat_limit_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
   static const VerificationMeta _blockShoppingMeta = const VerificationMeta(
     'blockShopping',
   );
@@ -843,6 +888,10 @@ class $BlockingSettingsTable extends BlockingSettings
     blockShorts,
     blockTikTok,
     blockSnapchatStories,
+    reelsLimitMinutes,
+    shortsLimitMinutes,
+    tiktokLimitMinutes,
+    snapchatLimitMinutes,
     blockShopping,
     blockGambling,
     blockImageVideoSearch,
@@ -944,6 +993,42 @@ class $BlockingSettingsTable extends BlockingSettings
         blockSnapchatStories.isAcceptableOrUnknown(
           data['block_snapchat_stories']!,
           _blockSnapchatStoriesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reels_limit_minutes')) {
+      context.handle(
+        _reelsLimitMinutesMeta,
+        reelsLimitMinutes.isAcceptableOrUnknown(
+          data['reels_limit_minutes']!,
+          _reelsLimitMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shorts_limit_minutes')) {
+      context.handle(
+        _shortsLimitMinutesMeta,
+        shortsLimitMinutes.isAcceptableOrUnknown(
+          data['shorts_limit_minutes']!,
+          _shortsLimitMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tiktok_limit_minutes')) {
+      context.handle(
+        _tiktokLimitMinutesMeta,
+        tiktokLimitMinutes.isAcceptableOrUnknown(
+          data['tiktok_limit_minutes']!,
+          _tiktokLimitMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('snapchat_limit_minutes')) {
+      context.handle(
+        _snapchatLimitMinutesMeta,
+        snapchatLimitMinutes.isAcceptableOrUnknown(
+          data['snapchat_limit_minutes']!,
+          _snapchatLimitMinutesMeta,
         ),
       );
     }
@@ -1184,6 +1269,22 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.bool,
         data['${effectivePrefix}block_snapchat_stories'],
       )!,
+      reelsLimitMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reels_limit_minutes'],
+      )!,
+      shortsLimitMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}shorts_limit_minutes'],
+      )!,
+      tiktokLimitMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tiktok_limit_minutes'],
+      )!,
+      snapchatLimitMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}snapchat_limit_minutes'],
+      )!,
       blockShopping: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}block_shopping'],
@@ -1291,6 +1392,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final bool blockShorts;
   final bool blockTikTok;
   final bool blockSnapchatStories;
+  final int reelsLimitMinutes;
+  final int shortsLimitMinutes;
+  final int tiktokLimitMinutes;
+  final int snapchatLimitMinutes;
   final bool blockShopping;
   final bool blockGambling;
   final bool blockImageVideoSearch;
@@ -1323,6 +1428,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     required this.blockShorts,
     required this.blockTikTok,
     required this.blockSnapchatStories,
+    required this.reelsLimitMinutes,
+    required this.shortsLimitMinutes,
+    required this.tiktokLimitMinutes,
+    required this.snapchatLimitMinutes,
     required this.blockShopping,
     required this.blockGambling,
     required this.blockImageVideoSearch,
@@ -1358,6 +1467,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     map['block_shorts'] = Variable<bool>(blockShorts);
     map['block_tik_tok'] = Variable<bool>(blockTikTok);
     map['block_snapchat_stories'] = Variable<bool>(blockSnapchatStories);
+    map['reels_limit_minutes'] = Variable<int>(reelsLimitMinutes);
+    map['shorts_limit_minutes'] = Variable<int>(shortsLimitMinutes);
+    map['tiktok_limit_minutes'] = Variable<int>(tiktokLimitMinutes);
+    map['snapchat_limit_minutes'] = Variable<int>(snapchatLimitMinutes);
     map['block_shopping'] = Variable<bool>(blockShopping);
     map['block_gambling'] = Variable<bool>(blockGambling);
     map['block_image_video_search'] = Variable<bool>(blockImageVideoSearch);
@@ -1414,6 +1527,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       blockShorts: Value(blockShorts),
       blockTikTok: Value(blockTikTok),
       blockSnapchatStories: Value(blockSnapchatStories),
+      reelsLimitMinutes: Value(reelsLimitMinutes),
+      shortsLimitMinutes: Value(shortsLimitMinutes),
+      tiktokLimitMinutes: Value(tiktokLimitMinutes),
+      snapchatLimitMinutes: Value(snapchatLimitMinutes),
       blockShopping: Value(blockShopping),
       blockGambling: Value(blockGambling),
       blockImageVideoSearch: Value(blockImageVideoSearch),
@@ -1472,6 +1589,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       blockSnapchatStories: serializer.fromJson<bool>(
         json['blockSnapchatStories'],
       ),
+      reelsLimitMinutes: serializer.fromJson<int>(json['reelsLimitMinutes']),
+      shortsLimitMinutes: serializer.fromJson<int>(json['shortsLimitMinutes']),
+      tiktokLimitMinutes: serializer.fromJson<int>(json['tiktokLimitMinutes']),
+      snapchatLimitMinutes: serializer.fromJson<int>(
+        json['snapchatLimitMinutes'],
+      ),
       blockShopping: serializer.fromJson<bool>(json['blockShopping']),
       blockGambling: serializer.fromJson<bool>(json['blockGambling']),
       blockImageVideoSearch: serializer.fromJson<bool>(
@@ -1529,6 +1652,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'blockShorts': serializer.toJson<bool>(blockShorts),
       'blockTikTok': serializer.toJson<bool>(blockTikTok),
       'blockSnapchatStories': serializer.toJson<bool>(blockSnapchatStories),
+      'reelsLimitMinutes': serializer.toJson<int>(reelsLimitMinutes),
+      'shortsLimitMinutes': serializer.toJson<int>(shortsLimitMinutes),
+      'tiktokLimitMinutes': serializer.toJson<int>(tiktokLimitMinutes),
+      'snapchatLimitMinutes': serializer.toJson<int>(snapchatLimitMinutes),
       'blockShopping': serializer.toJson<bool>(blockShopping),
       'blockGambling': serializer.toJson<bool>(blockGambling),
       'blockImageVideoSearch': serializer.toJson<bool>(blockImageVideoSearch),
@@ -1570,6 +1697,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     bool? blockShorts,
     bool? blockTikTok,
     bool? blockSnapchatStories,
+    int? reelsLimitMinutes,
+    int? shortsLimitMinutes,
+    int? tiktokLimitMinutes,
+    int? snapchatLimitMinutes,
     bool? blockShopping,
     bool? blockGambling,
     bool? blockImageVideoSearch,
@@ -1603,6 +1734,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     blockShorts: blockShorts ?? this.blockShorts,
     blockTikTok: blockTikTok ?? this.blockTikTok,
     blockSnapchatStories: blockSnapchatStories ?? this.blockSnapchatStories,
+    reelsLimitMinutes: reelsLimitMinutes ?? this.reelsLimitMinutes,
+    shortsLimitMinutes: shortsLimitMinutes ?? this.shortsLimitMinutes,
+    tiktokLimitMinutes: tiktokLimitMinutes ?? this.tiktokLimitMinutes,
+    snapchatLimitMinutes: snapchatLimitMinutes ?? this.snapchatLimitMinutes,
     blockShopping: blockShopping ?? this.blockShopping,
     blockGambling: blockGambling ?? this.blockGambling,
     blockImageVideoSearch: blockImageVideoSearch ?? this.blockImageVideoSearch,
@@ -1668,6 +1803,18 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       blockSnapchatStories: data.blockSnapchatStories.present
           ? data.blockSnapchatStories.value
           : this.blockSnapchatStories,
+      reelsLimitMinutes: data.reelsLimitMinutes.present
+          ? data.reelsLimitMinutes.value
+          : this.reelsLimitMinutes,
+      shortsLimitMinutes: data.shortsLimitMinutes.present
+          ? data.shortsLimitMinutes.value
+          : this.shortsLimitMinutes,
+      tiktokLimitMinutes: data.tiktokLimitMinutes.present
+          ? data.tiktokLimitMinutes.value
+          : this.tiktokLimitMinutes,
+      snapchatLimitMinutes: data.snapchatLimitMinutes.present
+          ? data.snapchatLimitMinutes.value
+          : this.snapchatLimitMinutes,
       blockShopping: data.blockShopping.present
           ? data.blockShopping.value
           : this.blockShopping,
@@ -1748,6 +1895,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write('blockShorts: $blockShorts, ')
           ..write('blockTikTok: $blockTikTok, ')
           ..write('blockSnapchatStories: $blockSnapchatStories, ')
+          ..write('reelsLimitMinutes: $reelsLimitMinutes, ')
+          ..write('shortsLimitMinutes: $shortsLimitMinutes, ')
+          ..write('tiktokLimitMinutes: $tiktokLimitMinutes, ')
+          ..write('snapchatLimitMinutes: $snapchatLimitMinutes, ')
           ..write('blockShopping: $blockShopping, ')
           ..write('blockGambling: $blockGambling, ')
           ..write('blockImageVideoSearch: $blockImageVideoSearch, ')
@@ -1789,6 +1940,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     blockShorts,
     blockTikTok,
     blockSnapchatStories,
+    reelsLimitMinutes,
+    shortsLimitMinutes,
+    tiktokLimitMinutes,
+    snapchatLimitMinutes,
     blockShopping,
     blockGambling,
     blockImageVideoSearch,
@@ -1825,6 +1980,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.blockShorts == this.blockShorts &&
           other.blockTikTok == this.blockTikTok &&
           other.blockSnapchatStories == this.blockSnapchatStories &&
+          other.reelsLimitMinutes == this.reelsLimitMinutes &&
+          other.shortsLimitMinutes == this.shortsLimitMinutes &&
+          other.tiktokLimitMinutes == this.tiktokLimitMinutes &&
+          other.snapchatLimitMinutes == this.snapchatLimitMinutes &&
           other.blockShopping == this.blockShopping &&
           other.blockGambling == this.blockGambling &&
           other.blockImageVideoSearch == this.blockImageVideoSearch &&
@@ -1861,6 +2020,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<bool> blockShorts;
   final Value<bool> blockTikTok;
   final Value<bool> blockSnapchatStories;
+  final Value<int> reelsLimitMinutes;
+  final Value<int> shortsLimitMinutes;
+  final Value<int> tiktokLimitMinutes;
+  final Value<int> snapchatLimitMinutes;
   final Value<bool> blockShopping;
   final Value<bool> blockGambling;
   final Value<bool> blockImageVideoSearch;
@@ -1893,6 +2056,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.blockShorts = const Value.absent(),
     this.blockTikTok = const Value.absent(),
     this.blockSnapchatStories = const Value.absent(),
+    this.reelsLimitMinutes = const Value.absent(),
+    this.shortsLimitMinutes = const Value.absent(),
+    this.tiktokLimitMinutes = const Value.absent(),
+    this.snapchatLimitMinutes = const Value.absent(),
     this.blockShopping = const Value.absent(),
     this.blockGambling = const Value.absent(),
     this.blockImageVideoSearch = const Value.absent(),
@@ -1926,6 +2093,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.blockShorts = const Value.absent(),
     this.blockTikTok = const Value.absent(),
     this.blockSnapchatStories = const Value.absent(),
+    this.reelsLimitMinutes = const Value.absent(),
+    this.shortsLimitMinutes = const Value.absent(),
+    this.tiktokLimitMinutes = const Value.absent(),
+    this.snapchatLimitMinutes = const Value.absent(),
     this.blockShopping = const Value.absent(),
     this.blockGambling = const Value.absent(),
     this.blockImageVideoSearch = const Value.absent(),
@@ -1959,6 +2130,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<bool>? blockShorts,
     Expression<bool>? blockTikTok,
     Expression<bool>? blockSnapchatStories,
+    Expression<int>? reelsLimitMinutes,
+    Expression<int>? shortsLimitMinutes,
+    Expression<int>? tiktokLimitMinutes,
+    Expression<int>? snapchatLimitMinutes,
     Expression<bool>? blockShopping,
     Expression<bool>? blockGambling,
     Expression<bool>? blockImageVideoSearch,
@@ -1994,6 +2169,13 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       if (blockTikTok != null) 'block_tik_tok': blockTikTok,
       if (blockSnapchatStories != null)
         'block_snapchat_stories': blockSnapchatStories,
+      if (reelsLimitMinutes != null) 'reels_limit_minutes': reelsLimitMinutes,
+      if (shortsLimitMinutes != null)
+        'shorts_limit_minutes': shortsLimitMinutes,
+      if (tiktokLimitMinutes != null)
+        'tiktok_limit_minutes': tiktokLimitMinutes,
+      if (snapchatLimitMinutes != null)
+        'snapchat_limit_minutes': snapchatLimitMinutes,
       if (blockShopping != null) 'block_shopping': blockShopping,
       if (blockGambling != null) 'block_gambling': blockGambling,
       if (blockImageVideoSearch != null)
@@ -2040,6 +2222,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<bool>? blockShorts,
     Value<bool>? blockTikTok,
     Value<bool>? blockSnapchatStories,
+    Value<int>? reelsLimitMinutes,
+    Value<int>? shortsLimitMinutes,
+    Value<int>? tiktokLimitMinutes,
+    Value<int>? snapchatLimitMinutes,
     Value<bool>? blockShopping,
     Value<bool>? blockGambling,
     Value<bool>? blockImageVideoSearch,
@@ -2074,6 +2260,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       blockShorts: blockShorts ?? this.blockShorts,
       blockTikTok: blockTikTok ?? this.blockTikTok,
       blockSnapchatStories: blockSnapchatStories ?? this.blockSnapchatStories,
+      reelsLimitMinutes: reelsLimitMinutes ?? this.reelsLimitMinutes,
+      shortsLimitMinutes: shortsLimitMinutes ?? this.shortsLimitMinutes,
+      tiktokLimitMinutes: tiktokLimitMinutes ?? this.tiktokLimitMinutes,
+      snapchatLimitMinutes: snapchatLimitMinutes ?? this.snapchatLimitMinutes,
       blockShopping: blockShopping ?? this.blockShopping,
       blockGambling: blockGambling ?? this.blockGambling,
       blockImageVideoSearch:
@@ -2136,6 +2326,18 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       map['block_snapchat_stories'] = Variable<bool>(
         blockSnapchatStories.value,
       );
+    }
+    if (reelsLimitMinutes.present) {
+      map['reels_limit_minutes'] = Variable<int>(reelsLimitMinutes.value);
+    }
+    if (shortsLimitMinutes.present) {
+      map['shorts_limit_minutes'] = Variable<int>(shortsLimitMinutes.value);
+    }
+    if (tiktokLimitMinutes.present) {
+      map['tiktok_limit_minutes'] = Variable<int>(tiktokLimitMinutes.value);
+    }
+    if (snapchatLimitMinutes.present) {
+      map['snapchat_limit_minutes'] = Variable<int>(snapchatLimitMinutes.value);
     }
     if (blockShopping.present) {
       map['block_shopping'] = Variable<bool>(blockShopping.value);
@@ -2234,6 +2436,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write('blockShorts: $blockShorts, ')
           ..write('blockTikTok: $blockTikTok, ')
           ..write('blockSnapchatStories: $blockSnapchatStories, ')
+          ..write('reelsLimitMinutes: $reelsLimitMinutes, ')
+          ..write('shortsLimitMinutes: $shortsLimitMinutes, ')
+          ..write('tiktokLimitMinutes: $tiktokLimitMinutes, ')
+          ..write('snapchatLimitMinutes: $snapchatLimitMinutes, ')
           ..write('blockShopping: $blockShopping, ')
           ..write('blockGambling: $blockGambling, ')
           ..write('blockImageVideoSearch: $blockImageVideoSearch, ')
@@ -2520,6 +2726,10 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<bool> blockShorts,
       Value<bool> blockTikTok,
       Value<bool> blockSnapchatStories,
+      Value<int> reelsLimitMinutes,
+      Value<int> shortsLimitMinutes,
+      Value<int> tiktokLimitMinutes,
+      Value<int> snapchatLimitMinutes,
       Value<bool> blockShopping,
       Value<bool> blockGambling,
       Value<bool> blockImageVideoSearch,
@@ -2554,6 +2764,10 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<bool> blockShorts,
       Value<bool> blockTikTok,
       Value<bool> blockSnapchatStories,
+      Value<int> reelsLimitMinutes,
+      Value<int> shortsLimitMinutes,
+      Value<int> tiktokLimitMinutes,
+      Value<int> snapchatLimitMinutes,
       Value<bool> blockShopping,
       Value<bool> blockGambling,
       Value<bool> blockImageVideoSearch,
@@ -2629,6 +2843,26 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<bool> get blockSnapchatStories => $composableBuilder(
     column: $table.blockSnapchatStories,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reelsLimitMinutes => $composableBuilder(
+    column: $table.reelsLimitMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get shortsLimitMinutes => $composableBuilder(
+    column: $table.shortsLimitMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tiktokLimitMinutes => $composableBuilder(
+    column: $table.tiktokLimitMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get snapchatLimitMinutes => $composableBuilder(
+    column: $table.snapchatLimitMinutes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2797,6 +3031,26 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get reelsLimitMinutes => $composableBuilder(
+    column: $table.reelsLimitMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get shortsLimitMinutes => $composableBuilder(
+    column: $table.shortsLimitMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tiktokLimitMinutes => $composableBuilder(
+    column: $table.tiktokLimitMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get snapchatLimitMinutes => $composableBuilder(
+    column: $table.snapchatLimitMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get blockShopping => $composableBuilder(
     column: $table.blockShopping,
     builder: (column) => ColumnOrderings(column),
@@ -2961,6 +3215,26 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get reelsLimitMinutes => $composableBuilder(
+    column: $table.reelsLimitMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get shortsLimitMinutes => $composableBuilder(
+    column: $table.shortsLimitMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get tiktokLimitMinutes => $composableBuilder(
+    column: $table.tiktokLimitMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get snapchatLimitMinutes => $composableBuilder(
+    column: $table.snapchatLimitMinutes,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get blockShopping => $composableBuilder(
     column: $table.blockShopping,
     builder: (column) => column,
@@ -3117,6 +3391,10 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> blockShorts = const Value.absent(),
                 Value<bool> blockTikTok = const Value.absent(),
                 Value<bool> blockSnapchatStories = const Value.absent(),
+                Value<int> reelsLimitMinutes = const Value.absent(),
+                Value<int> shortsLimitMinutes = const Value.absent(),
+                Value<int> tiktokLimitMinutes = const Value.absent(),
+                Value<int> snapchatLimitMinutes = const Value.absent(),
                 Value<bool> blockShopping = const Value.absent(),
                 Value<bool> blockGambling = const Value.absent(),
                 Value<bool> blockImageVideoSearch = const Value.absent(),
@@ -3150,6 +3428,10 @@ class $$BlockingSettingsTableTableManager
                 blockShorts: blockShorts,
                 blockTikTok: blockTikTok,
                 blockSnapchatStories: blockSnapchatStories,
+                reelsLimitMinutes: reelsLimitMinutes,
+                shortsLimitMinutes: shortsLimitMinutes,
+                tiktokLimitMinutes: tiktokLimitMinutes,
+                snapchatLimitMinutes: snapchatLimitMinutes,
                 blockShopping: blockShopping,
                 blockGambling: blockGambling,
                 blockImageVideoSearch: blockImageVideoSearch,
@@ -3184,6 +3466,10 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> blockShorts = const Value.absent(),
                 Value<bool> blockTikTok = const Value.absent(),
                 Value<bool> blockSnapchatStories = const Value.absent(),
+                Value<int> reelsLimitMinutes = const Value.absent(),
+                Value<int> shortsLimitMinutes = const Value.absent(),
+                Value<int> tiktokLimitMinutes = const Value.absent(),
+                Value<int> snapchatLimitMinutes = const Value.absent(),
                 Value<bool> blockShopping = const Value.absent(),
                 Value<bool> blockGambling = const Value.absent(),
                 Value<bool> blockImageVideoSearch = const Value.absent(),
@@ -3217,6 +3503,10 @@ class $$BlockingSettingsTableTableManager
                 blockShorts: blockShorts,
                 blockTikTok: blockTikTok,
                 blockSnapchatStories: blockSnapchatStories,
+                reelsLimitMinutes: reelsLimitMinutes,
+                shortsLimitMinutes: shortsLimitMinutes,
+                tiktokLimitMinutes: tiktokLimitMinutes,
+                snapchatLimitMinutes: snapchatLimitMinutes,
                 blockShopping: blockShopping,
                 blockGambling: blockGambling,
                 blockImageVideoSearch: blockImageVideoSearch,

@@ -35,6 +35,19 @@ class BlockingSettings extends Table {
   BoolColumn get blockSnapchatStories =>
       boolean().withDefault(const Constant(false))();
 
+  // Daily time budget (minutes) for each social feed above, set via the
+  // "how many minutes per day" prompt shown when the matching block* toggle is
+  // turned on. Enforced natively by FeedGuardService (AccessibilityService);
+  // see android/.../FeedGuardService.kt.
+  IntColumn get reelsLimitMinutes =>
+      integer().withDefault(const Constant(30))();
+  IntColumn get shortsLimitMinutes =>
+      integer().withDefault(const Constant(30))();
+  IntColumn get tiktokLimitMinutes =>
+      integer().withDefault(const Constant(30))();
+  IntColumn get snapchatLimitMinutes =>
+      integer().withDefault(const Constant(30))();
+
   // Content
   BoolColumn get blockShopping =>
       boolean().withDefault(const Constant(false))();
@@ -119,7 +132,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -167,6 +180,18 @@ class AppDatabase extends _$AppDatabase {
           if (from >= 2 && from < 7) {
             await m.addColumn(
                 blockingSettings, blockingSettings.protectionStartedAt);
+          }
+          // v8: per-feed daily time budgets for the Social section (Reels/
+          // Shorts/TikTok/Snapchat Stories), enforced by FeedGuardService.
+          if (from >= 2 && from < 8) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.reelsLimitMinutes);
+            await m.addColumn(
+                blockingSettings, blockingSettings.shortsLimitMinutes);
+            await m.addColumn(
+                blockingSettings, blockingSettings.tiktokLimitMinutes);
+            await m.addColumn(
+                blockingSettings, blockingSettings.snapchatLimitMinutes);
           }
         },
         beforeOpen: (details) async {

@@ -21,6 +21,7 @@ class MainActivity : FlutterActivity() {
 
     private val channelName = "unchained/blocking"
     private val guardChannelName = "unchained/guard"
+    private val feedGuardChannelName = "unchained/feed_guard"
     private var pendingPrepareResult: MethodChannel.Result? = null
 
     private var guardChannel: MethodChannel? = null
@@ -180,6 +181,42 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, feedGuardChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isAccessibilityEnabled" ->
+                        result.success(isAccessibilityServiceEnabled(FeedGuardService::class.java))
+                    "openAccessibilitySettings" -> {
+                        startActivity(
+                            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                        result.success(true)
+                    }
+                    "setTargetConfig" -> {
+                        val target = call.argument<String>("target")
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        val limitMinutes = call.argument<Int>("limitMinutes") ?: 30
+                        if (target == null || target !in FeedGuardState.TARGETS) {
+                            result.success(false)
+                        } else {
+                            FeedGuardState.setConfig(this, target, enabled, limitMinutes)
+                            result.success(true)
+                        }
+                    }
+                    "getStatuses" -> {
+                        val statuses = FeedGuardState.TARGETS.associateWith { target ->
+                            mapOf(
+                                "usedSeconds" to FeedGuardState.usedSeconds(this, target),
+                                "remainingSeconds" to FeedGuardState.remainingSeconds(this, target),
+                            )
+                        }
+                        result.success(statuses)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
         if (pendingShowLock) {
             pendingShowLock = false
             guardChannel?.invokeMethod("showLock", null)
@@ -187,8 +224,12 @@ class MainActivity : FlutterActivity() {
     }
 
     /** Whether our [UninstallGuardService] is currently enabled in system settings. */
-    private fun isAccessibilityServiceEnabled(): Boolean {
-        val expected = "$packageName/${UninstallGuardService::class.java.name}"
+    private fun isAccessibilityServiceEnabled(): Boolean =
+        isAccessibilityServiceEnabled(UninstallGuardService::class.java)
+
+    /** Whether the given accessibility service class is currently enabled in system settings. */
+    private fun isAccessibilityServiceEnabled(serviceClass: Class<*>): Boolean {
+        val expected = "$packageName/${serviceClass.name}"
         val enabledServices = Settings.Secure.getString(
             contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
