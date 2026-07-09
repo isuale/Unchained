@@ -14,9 +14,11 @@ class PlanActivationOverlay {
   /// a null [schedule] (or [CommitmentSchedule.none]) for plans with no lock
   /// (e.g. the free trial), which clears any previous template.
   ///
-  /// Refused while a commitment lock is currently active (locked or on a
-  /// break) — switching plans must never be usable as a back door to wipe
-  /// the running lock and free up the protection toggle.
+  /// The plan switch itself is never blocked. But while a commitment lock is
+  /// currently active (locked or on a break), the new schedule is *not*
+  /// stored — the running lock is left untouched so it keeps enforcing
+  /// (protection stays un-toggleable) in the background under whichever
+  /// plan you switch to, instead of being wiped by the switch.
   static Future<void> show({
     required BuildContext context,
     required WidgetRef ref,
@@ -44,19 +46,10 @@ class PlanActivationOverlay {
     final status = computeStatus(
         mode, days, breaks, rolledStart ?? settings?.commitmentStartedAt, now);
 
-    if (status.isActive) {
-      if (!context.mounted) return;
-      navigator.pop();
-      if (!context.mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (_) => const _ActivationLocked(),
-      );
-      return;
-    }
-
     await ref.read(activePlanActionsProvider.notifier).setActivePlan(plan);
-    await repo.setCommitmentSchedule(schedule ?? CommitmentSchedule.none);
+    if (!status.isActive) {
+      await repo.setCommitmentSchedule(schedule ?? CommitmentSchedule.none);
+    }
 
     if (!context.mounted) return;
     navigator.pop();
@@ -145,43 +138,6 @@ class _ActivationDone extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Shown instead of activating a new plan when a commitment lock is
-/// currently active (locked or on a break) — the user must wait for it to
-/// end before switching plans.
-class _ActivationLocked extends StatelessWidget {
-  const _ActivationLocked();
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFF0A0E18),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFF1B2435)),
-      ),
-      title: const Row(
-        children: [
-          Icon(Icons.lock_outline, color: Color(0xFF1E5FFF), size: 22),
-          SizedBox(width: 8),
-          Text('Protection is locked', style: TextStyle(color: Colors.white)),
-        ],
-      ),
-      content: const Text(
-        "You can't switch plans while your protection commitment is "
-        'locked. Wait for the current lock (or break) to end, then try '
-        'again.',
-        style: TextStyle(color: Color(0xFF9AA5B1)),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('OK', style: TextStyle(color: Color(0xFF1E5FFF))),
-        ),
-      ],
     );
   }
 }
