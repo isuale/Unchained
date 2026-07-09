@@ -151,6 +151,16 @@
       "days": { "type": "int" }
     }
   },
+  "progress_trends_section": "Your trends",
+  "progress_blocked_trend_title": "Blocked temptations",
+  "progress_trend_down": "Down {percent}% vs your first week",
+  "@progress_trend_down": { "placeholders": { "percent": { "type": "int" } } },
+  "progress_trend_up": "Up {percent}% vs your first week",
+  "@progress_trend_up": { "placeholders": { "percent": { "type": "int" } } },
+  "progress_trend_flat": "Holding steady",
+  "progress_trend_need_data": "Keep going — your trend will show up after a week",
+  "progress_trend_unit_blocked": "blocked",
+  "progress_trend_unit_minutes": "min",
   "stub_settings_title": "Settings",
   "stub_accountability_title": "Accountability",
   "settings_section_session": "Session",

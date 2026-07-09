@@ -443,6 +443,35 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get progress_trends_section => 'Tus tendencias';
+
+  @override
+  String get progress_blocked_trend_title => 'Tentaciones bloqueadas';
+
+  @override
+  String progress_trend_down(int percent) {
+    return 'Bajó $percent% respecto a tu primera semana';
+  }
+
+  @override
+  String progress_trend_up(int percent) {
+    return 'Subió $percent% respecto a tu primera semana';
+  }
+
+  @override
+  String get progress_trend_flat => 'Se mantiene estable';
+
+  @override
+  String get progress_trend_need_data =>
+      'Sigue así — tu tendencia aparecerá después de una semana';
+
+  @override
+  String get progress_trend_unit_blocked => 'bloqueados';
+
+  @override
+  String get progress_trend_unit_minutes => 'min';
+
+  @override
   String get stub_settings_title => 'Ajustes';
 
   @override

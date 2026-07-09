@@ -91,6 +91,11 @@ class MainActivity : FlutterActivity() {
                     "getBuiltinBlocklist" -> result.success(BlockingService.builtinBlocklist())
                     "getBuiltinBlocklistCount" ->
                         result.success(BlockingService.builtinBlocklistCount(applicationContext))
+                    "getBlockedHistory" -> result.success(
+                        BlockingStats.history(applicationContext).map { (day, count) ->
+                            mapOf("day" to day, "count" to count)
+                        }
+                    )
                     else -> result.notImplemented()
                 }
             }
@@ -212,6 +217,14 @@ class MainActivity : FlutterActivity() {
                             )
                         }
                         result.success(statuses)
+                    }
+                    "getHistory" -> {
+                        val history = FeedGuardState.TARGETS.associateWith { target ->
+                            FeedGuardState.history(this, target).map { (day, usedSeconds) ->
+                                mapOf("day" to day, "usedSeconds" to usedSeconds)
+                            }
+                        }
+                        result.success(history)
                     }
                     else -> result.notImplemented()
                 }

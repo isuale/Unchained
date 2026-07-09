@@ -914,6 +914,54 @@ abstract class AppLocalizations {
   /// **'Semana {week}: {days}/7 días'**
   String progress_week_tooltip(int week, int days);
 
+  /// No description provided for @progress_trends_section.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus tendencias'**
+  String get progress_trends_section;
+
+  /// No description provided for @progress_blocked_trend_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Tentaciones bloqueadas'**
+  String get progress_blocked_trend_title;
+
+  /// No description provided for @progress_trend_down.
+  ///
+  /// In es, this message translates to:
+  /// **'Bajó {percent}% respecto a tu primera semana'**
+  String progress_trend_down(int percent);
+
+  /// No description provided for @progress_trend_up.
+  ///
+  /// In es, this message translates to:
+  /// **'Subió {percent}% respecto a tu primera semana'**
+  String progress_trend_up(int percent);
+
+  /// No description provided for @progress_trend_flat.
+  ///
+  /// In es, this message translates to:
+  /// **'Se mantiene estable'**
+  String get progress_trend_flat;
+
+  /// No description provided for @progress_trend_need_data.
+  ///
+  /// In es, this message translates to:
+  /// **'Sigue así — tu tendencia aparecerá después de una semana'**
+  String get progress_trend_need_data;
+
+  /// No description provided for @progress_trend_unit_blocked.
+  ///
+  /// In es, this message translates to:
+  /// **'bloqueados'**
+  String get progress_trend_unit_blocked;
+
+  /// No description provided for @progress_trend_unit_minutes.
+  ///
+  /// In es, this message translates to:
+  /// **'min'**
+  String get progress_trend_unit_minutes;
+
   /// No description provided for @stub_settings_title.
   ///
   /// In es, this message translates to:

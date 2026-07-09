@@ -90,4 +90,26 @@ class BlockingService {
       return 0;
     }
   }
+
+  /// Blocked-DNS-query counts for the last 14 days, keyed by day (UTC
+  /// midnight). Zero-filled for days with no blocks. Returns an empty map on
+  /// failure.
+  static Future<Map<DateTime, int>> getBlockedHistory() async {
+    try {
+      final result =
+          await _channel.invokeListMethod<dynamic>('getBlockedHistory');
+      if (result == null) return {};
+      return {
+        for (final entry in result)
+          _epochDayToDate((entry as Map)['day'] as int):
+              (entry['count'] as num).toInt(),
+      };
+    } catch (e, st) {
+      debugPrint('BlockingService.getBlockedHistory failed: $e\n$st');
+      return {};
+    }
+  }
 }
+
+DateTime _epochDayToDate(int epochDay) =>
+    DateTime.utc(1970, 1, 1).add(Duration(days: epochDay));

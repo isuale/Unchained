@@ -1,7 +1,6 @@
 package com.unchained.unchained
 
 import android.content.Context
-import java.time.LocalDate
 
 /**
  * Persisted state for the "feed guard" daily time budgets (Instagram Reels,
@@ -22,6 +21,7 @@ object FeedGuardState {
     )
 
     private const val PREFS = "unchained_feed_guard"
+    private const val MAX_HISTORY_DAYS = 14
 
     fun isEnabled(context: Context, target: String): Boolean =
         prefs(context).getBoolean(keyEnabled(target), false)
@@ -59,14 +59,30 @@ object FeedGuardState {
     fun isBudgetExhausted(context: Context, target: String): Boolean =
         remainingSeconds(context, target) <= 0
 
+    /**
+     * Last [days] days of usage for [target], oldest first, zero-filled for
+     * gaps (including days before this history existed). Today's entry is
+     * always the live count, not the last-saved snapshot.
+     */
+    fun history(context: Context, target: String, days: Int = MAX_HISTORY_DAYS): List<Pair<Long, Int>> {
+        usedSeconds(context, target) // force rollover so today's bucket is current
+        val stored = DayHistory.parse(prefs(context).getString(keyHistory(target), null)).toMutableMap()
+        stored[DayHistory.today()] = prefs(context).getInt(keyUsed(target), 0)
+        return DayHistory.zeroFilled(stored, days)
+    }
+
     private fun rolloverIfNeeded(context: Context, target: String) {
         val p = prefs(context)
-        val today = LocalDate.now().toEpochDay()
+        val today = DayHistory.today()
         val storedDay = p.getLong(keyResetDay(target), today)
         if (storedDay != today) {
+            val usedYesterday = p.getInt(keyUsed(target), 0)
+            val history = DayHistory.parse(p.getString(keyHistory(target), null)).toMutableMap()
+            history[storedDay] = usedYesterday
             p.edit()
                 .putInt(keyUsed(target), 0)
                 .putLong(keyResetDay(target), today)
+                .putString(keyHistory(target), DayHistory.serialize(DayHistory.trimmed(history, MAX_HISTORY_DAYS)))
                 .apply()
         }
     }
@@ -75,6 +91,7 @@ object FeedGuardState {
     private fun keyLimit(target: String) = "${target}_limit_min"
     private fun keyUsed(target: String) = "${target}_used_sec"
     private fun keyResetDay(target: String) = "${target}_reset_day"
+    private fun keyHistory(target: String) = "${target}_history"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)

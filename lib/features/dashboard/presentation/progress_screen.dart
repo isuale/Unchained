@@ -1,7 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:unchained/core/database/app_database.dart';
+import 'package:unchained/features/dashboard/domain/addiction_trends.dart';
 import 'package:unchained/features/dashboard/domain/streak_progress.dart';
+import 'package:unchained/features/dashboard/presentation/widgets/trend_chart_card.dart';
+import 'package:unchained/features/dashboard/providers/addiction_trends_provider.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
 import 'package:unchained/features/dashboard/widgets/section_title.dart';
 import 'package:unchained/l10n/app_localizations.dart';
@@ -72,6 +76,11 @@ class ProgressScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 SectionTitle(title: l.progress_milestones_section),
                 _MilestoneRow(streakDays: streakDays),
+                if (settings.protectionEnabled) ...[
+                  const SizedBox(height: 24),
+                  SectionTitle(title: l.progress_trends_section),
+                  _TrendsSection(settings: settings, l: l),
+                ],
               ],
             ),
           );
@@ -322,6 +331,145 @@ class _MilestoneChip extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// 14-day trend charts for blocked DNS queries and enabled feed-guard
+/// targets. Native data (not a Drift stream), so this fetches once via
+/// [addictionTrendsProvider] rather than watching [blockingSettingsProvider].
+class _TrendsSection extends ConsumerWidget {
+  const _TrendsSection({required this.settings, required this.l});
+
+  final BlockingSetting settings;
+  final AppLocalizations l;
+
+  static const _amber = Color(0xFFFFB800);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trendsAsync = ref.watch(addictionTrendsProvider);
+    return trendsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: CircularProgressIndicator(color: ProgressScreen._accent),
+        ),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (trends) {
+        final cards = <Widget>[];
+
+        final blockedSeries = _sortedEntries(trends.blocked);
+        if (blockedSeries.isNotEmpty) {
+          cards.add(_buildCard(
+            title: l.progress_blocked_trend_title,
+            icon: Icons.shield_outlined,
+            series: blockedSeries,
+            unitLabel: l.progress_trend_unit_blocked,
+            color: ProgressScreen._accent,
+          ));
+        }
+
+        final feedTargets = [
+          (
+            key: 'blockReels',
+            icon: Icons.movie_outlined,
+            label: l.dashboard_block_reels,
+            enabled: settings.blockReels,
+          ),
+          (
+            key: 'blockShorts',
+            icon: Icons.smart_display_outlined,
+            label: l.dashboard_block_shorts,
+            enabled: settings.blockShorts,
+          ),
+          (
+            key: 'blockTikTok',
+            icon: Icons.music_note,
+            label: l.dashboard_block_tiktok,
+            enabled: settings.blockTikTok,
+          ),
+          (
+            key: 'blockSnapchatStories',
+            icon: Icons.camera_alt_outlined,
+            label: l.dashboard_block_snapchat,
+            enabled: settings.blockSnapchatStories,
+          ),
+        ];
+
+        for (final target in feedTargets) {
+          if (!target.enabled) continue;
+          final rawSeries = _sortedEntries(trends.feed[target.key] ?? const {});
+          if (rawSeries.isEmpty) continue;
+          final minuteSeries = [
+            for (final e in rawSeries) MapEntry(e.key, (e.value / 60).round()),
+          ];
+          cards.add(_buildCard(
+            title: target.label,
+            icon: target.icon,
+            series: minuteSeries,
+            unitLabel: l.progress_trend_unit_minutes,
+            color: ProgressScreen._accent2,
+          ));
+        }
+
+        if (cards.isEmpty) return const SizedBox.shrink();
+        return Column(
+          children: [
+            for (final card in cards) ...[card, const SizedBox(height: 12)],
+          ],
+        );
+      },
+    );
+  }
+
+  TrendChartCard _buildCard({
+    required String title,
+    required IconData icon,
+    required List<MapEntry<DateTime, int>> series,
+    required String unitLabel,
+    required Color color,
+  }) {
+    final summary = summarizeTrend(series);
+    return TrendChartCard(
+      title: title,
+      icon: icon,
+      series: series,
+      unitLabel: unitLabel,
+      color: color,
+      insightText: _insightText(summary),
+      insightColor: _insightColor(summary),
+    );
+  }
+
+  String _insightText(TrendSummary s) {
+    if (!s.hasEnoughData) return l.progress_trend_need_data;
+    switch (s.direction) {
+      case TrendDirection.down:
+        return l.progress_trend_down(s.percentChange);
+      case TrendDirection.up:
+        return l.progress_trend_up(s.percentChange);
+      case TrendDirection.flat:
+        return l.progress_trend_flat;
+    }
+  }
+
+  Color _insightColor(TrendSummary s) {
+    if (!s.hasEnoughData) return ProgressScreen._muted;
+    switch (s.direction) {
+      case TrendDirection.down:
+        return ProgressScreen._green;
+      case TrendDirection.up:
+        return _amber;
+      case TrendDirection.flat:
+        return ProgressScreen._muted;
+    }
+  }
+
+  List<MapEntry<DateTime, int>> _sortedEntries(Map<DateTime, int> map) {
+    final entries = map.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    return entries;
   }
 }
 

@@ -73,6 +73,26 @@ class FeedGuardBridge {
     }
   }
 
+  /// Per-target usage history for the last 14 days: `{ target: { day: usedSeconds } }`,
+  /// zero-filled for gaps. Returns an empty map on any failure.
+  static Future<Map<String, Map<DateTime, int>>> getHistory() async {
+    try {
+      final r = await _channel.invokeMapMethod<String, dynamic>('getHistory');
+      if (r == null) return {};
+      return r.map((target, value) {
+        final days = List<dynamic>.from(value as List);
+        return MapEntry(target, {
+          for (final entry in days)
+            _epochDayToDate((entry as Map)['day'] as int):
+                (entry['usedSeconds'] as num).toInt(),
+        });
+      });
+    } catch (e, st) {
+      debugPrint('FeedGuardBridge.getHistory failed: $e\n$st');
+      return {};
+    }
+  }
+
   static Future<bool> _invokeBool(String method) async {
     try {
       final r = await _channel.invokeMethod<bool>(method);
@@ -83,3 +103,6 @@ class FeedGuardBridge {
     }
   }
 }
+
+DateTime _epochDayToDate(int epochDay) =>
+    DateTime.utc(1970, 1, 1).add(Duration(days: epochDay));

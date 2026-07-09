@@ -499,6 +499,11 @@ class BlockingService : VpnService() {
         // Blocked domains are answered immediately (no network needed) right here.
         if (isBlocked(domain)) {
             Log.i(TAG, "BLOCKED: $domain")
+            // Don't count DoH bootstrap hits — that's DNS plumbing hygiene, not the
+            // user visiting a blocked site, and would pollute the Progress-tab trend.
+            if (!matchesAny(domain.lowercase(), DOH_BOOTSTRAP)) {
+                BlockingStats.recordBlocked(this)
+            }
             writeResponse(tunOut, srcIp, dstIp, srcPort, craftNxDomainResponse(dnsPayload))
             return
         }
