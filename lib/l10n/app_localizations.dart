@@ -914,6 +914,66 @@ abstract class AppLocalizations {
   /// **'Semana {week}: {days}/7 días'**
   String progress_week_tooltip(int week, int days);
 
+  /// No description provided for @progress_journey_section.
+  ///
+  /// In es, this message translates to:
+  /// **'Días protegido vs. tentaciones'**
+  String get progress_journey_section;
+
+  /// No description provided for @progress_journey_temptations_label.
+  ///
+  /// In es, this message translates to:
+  /// **'tentaciones bloqueadas'**
+  String get progress_journey_temptations_label;
+
+  /// No description provided for @progress_journey_legend_days.
+  ///
+  /// In es, this message translates to:
+  /// **'Días protegido'**
+  String get progress_journey_legend_days;
+
+  /// No description provided for @progress_journey_legend_temptations.
+  ///
+  /// In es, this message translates to:
+  /// **'Tentaciones'**
+  String get progress_journey_legend_temptations;
+
+  /// No description provided for @progress_journey_down.
+  ///
+  /// In es, this message translates to:
+  /// **'A medida que crece tu racha, las tentaciones bajaron {percent}%'**
+  String progress_journey_down(int percent);
+
+  /// No description provided for @progress_journey_up.
+  ///
+  /// In es, this message translates to:
+  /// **'Las tentaciones subieron {percent}% — no aflojes'**
+  String progress_journey_up(int percent);
+
+  /// No description provided for @progress_journey_flat.
+  ///
+  /// In es, this message translates to:
+  /// **'Se mantiene estable mientras crece tu racha'**
+  String get progress_journey_flat;
+
+  /// No description provided for @progress_journey_building.
+  ///
+  /// In es, this message translates to:
+  /// **'Sigue así — la relación aparece después de una semana'**
+  String get progress_journey_building;
+
+  /// No description provided for @progress_journey_tooltip_day.
+  ///
+  /// In es, this message translates to:
+  /// **'Día {day} protegido'**
+  String progress_journey_tooltip_day(int day);
+
+  /// No description provided for @progress_journey_tooltip_blocked.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} bloqueadas'**
+  String progress_journey_tooltip_blocked(int count);
+
   /// No description provided for @progress_trends_section.
   ///
   /// In es, this message translates to:

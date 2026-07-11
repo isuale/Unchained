@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/dashboard/domain/addiction_trends.dart';
+import 'package:unchained/features/dashboard/domain/recovery_journey.dart';
 import 'package:unchained/features/dashboard/domain/streak_progress.dart';
+import 'package:unchained/features/dashboard/presentation/widgets/recovery_journey_card.dart';
 import 'package:unchained/features/dashboard/presentation/widgets/trend_chart_card.dart';
 import 'package:unchained/features/dashboard/providers/addiction_trends_provider.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
@@ -70,6 +72,9 @@ class ProgressScreen extends ConsumerWidget {
                   since: settings.protectionStartedAt!,
                   l: l,
                 ),
+                const SizedBox(height: 24),
+                SectionTitle(title: l.progress_journey_section),
+                _JourneySection(settings: settings, l: l),
                 const SizedBox(height: 24),
                 SectionTitle(title: l.progress_weekly_section),
                 _WeeklyChartCard(weeks: weeks, l: l),
@@ -331,6 +336,76 @@ class _MilestoneChip extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// The recovery-journey card: joins the protection streak (from [settings])
+/// with the native blocked-per-day history (from [addictionTrendsProvider])
+/// so the two numbers are shown *related* rather than side by side.
+class _JourneySection extends ConsumerWidget {
+  const _JourneySection({required this.settings, required this.l});
+
+  final BlockingSetting settings;
+  final AppLocalizations l;
+
+  static const _green = Color(0xFF00D26A);
+  static const _amber = Color(0xFFFFB800);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trendsAsync = ref.watch(addictionTrendsProvider);
+    return trendsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: CircularProgressIndicator(color: ProgressScreen._accent),
+        ),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (trends) {
+        final journey = buildRecoveryJourney(
+          settings.protectionStartedAt,
+          trends.blocked,
+          DateTime.now(),
+        );
+        if (journey.days.isEmpty) return const SizedBox.shrink();
+        return RecoveryJourneyCard(
+          journey: journey,
+          daysProtectedLabel: l.progress_days_label,
+          temptationsBlockedLabel: l.progress_journey_temptations_label,
+          insightText: _insightText(journey),
+          insightColor: _insightColor(journey),
+          legendDaysLabel: l.progress_journey_legend_days,
+          legendTemptationsLabel: l.progress_journey_legend_temptations,
+          tooltipDayProtected: (d) => l.progress_journey_tooltip_day(d),
+          tooltipBlocked: (c) => l.progress_journey_tooltip_blocked(c),
+        );
+      },
+    );
+  }
+
+  String _insightText(RecoveryJourney j) {
+    if (!j.hasEnoughData) return l.progress_journey_building;
+    switch (j.direction) {
+      case TrendDirection.down:
+        return l.progress_journey_down(j.percentChange);
+      case TrendDirection.up:
+        return l.progress_journey_up(j.percentChange);
+      case TrendDirection.flat:
+        return l.progress_journey_flat;
+    }
+  }
+
+  Color _insightColor(RecoveryJourney j) {
+    if (!j.hasEnoughData) return ProgressScreen._muted;
+    switch (j.direction) {
+      case TrendDirection.down:
+        return _green;
+      case TrendDirection.up:
+        return _amber;
+      case TrendDirection.flat:
+        return ProgressScreen._muted;
+    }
   }
 }
 

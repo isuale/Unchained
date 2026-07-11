@@ -443,6 +443,46 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get progress_journey_section => 'Días protegido vs. tentaciones';
+
+  @override
+  String get progress_journey_temptations_label => 'tentaciones bloqueadas';
+
+  @override
+  String get progress_journey_legend_days => 'Días protegido';
+
+  @override
+  String get progress_journey_legend_temptations => 'Tentaciones';
+
+  @override
+  String progress_journey_down(int percent) {
+    return 'A medida que crece tu racha, las tentaciones bajaron $percent%';
+  }
+
+  @override
+  String progress_journey_up(int percent) {
+    return 'Las tentaciones subieron $percent% — no aflojes';
+  }
+
+  @override
+  String get progress_journey_flat =>
+      'Se mantiene estable mientras crece tu racha';
+
+  @override
+  String get progress_journey_building =>
+      'Sigue así — la relación aparece después de una semana';
+
+  @override
+  String progress_journey_tooltip_day(int day) {
+    return 'Día $day protegido';
+  }
+
+  @override
+  String progress_journey_tooltip_blocked(int count) {
+    return '$count bloqueadas';
+  }
+
+  @override
   String get progress_trends_section => 'Tus tendencias';
 
   @override
