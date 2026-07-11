@@ -70,6 +70,7 @@ class FeedGuardService : AccessibilityService() {
 
         val target = targetForPackage(pkg) ?: run { stopTracking(); return }
         if (!FeedGuardState.isEnabled(this, target)) {
+            diagLog(target) { "pkg=$pkg target=$target NOT ENABLED (config never reached native)" }
             stopTracking()
             return
         }
@@ -77,13 +78,18 @@ class FeedGuardService : AccessibilityService() {
         val matched = if (target in WHOLE_APP_TARGETS) {
             true
         } else {
-            activeScreenHasResourceId(event, needlesFor(target))
+            activeScreenMatches(event, needlesFor(target))
         }
 
         if (!matched) {
+            diagLog(target) {
+                "pkg=$pkg target=$target enabled but NOT MATCHED. " +
+                    "Looking for ${needlesFor(target)}. ${sampleSignals(event)}"
+            }
             if (activeTarget == target) stopTracking()
             return
         }
+        Log.d(TAG, "pkg=$pkg target=$target MATCHED, tracking")
 
         if (activeTarget != target) {
             activeTarget = target
@@ -102,17 +108,19 @@ class FeedGuardService : AccessibilityService() {
         } else {
             rootInActiveWindow?.let { root ->
                 try {
-                    nodeTreeHasResourceId(root, needlesFor(target))
+                    nodeTreeMatches(root, needlesFor(target))
                 } finally {
                     root.recycle()
                 }
             } ?: false
         }
         if (!stillThere) {
+            Log.d(TAG, "tick: $target no longer on screen, stop tracking")
             stopTracking()
             return
         }
-        FeedGuardState.addUsedSeconds(this, target, 1)
+        val used = FeedGuardState.addUsedSeconds(this, target, 1)
+        if (used % 10 == 0) Log.d(TAG, "tick: $target used=${used}s")
         enforceBudget(target)
     }
 
@@ -147,21 +155,19 @@ class FeedGuardService : AccessibilityService() {
         }
     }
 
-    /** Whether the event's own window (or the active window) has a node whose
-     * resource id contains any of [needles]. Mirrors
-     * [UninstallGuardService.activeScreenContains], but matches resource ids
-     * instead of text/content-description. */
-    private fun activeScreenHasResourceId(event: AccessibilityEvent, needles: List<String>): Boolean {
+    /** Whether the event's own window (or the active window) has a node matching any
+     * of [needles]. Mirrors [UninstallGuardService.activeScreenContains]. */
+    private fun activeScreenMatches(event: AccessibilityEvent, needles: List<String>): Boolean {
         event.source?.let { src ->
             try {
-                if (nodeTreeHasResourceId(src, needles)) return true
+                if (nodeTreeMatches(src, needles)) return true
             } finally {
                 src.recycle()
             }
         }
         rootInActiveWindow?.let { root ->
             try {
-                if (nodeTreeHasResourceId(root, needles)) return true
+                if (nodeTreeMatches(root, needles)) return true
             } finally {
                 root.recycle()
             }
@@ -169,7 +175,11 @@ class FeedGuardService : AccessibilityService() {
         return false
     }
 
-    private fun nodeTreeHasResourceId(
+    /** True if any node in the tree has a resource-id, content-description, or text
+     * containing one of [needles]. Instagram Reels exposes its only stable signal as a
+     * content-description ("Reel by <user>. Double tap…"), not a resource-id — so
+     * id-only matching (which is enough for YouTube Shorts) misses it entirely. */
+    private fun nodeTreeMatches(
         node: AccessibilityNodeInfo?,
         needles: List<String>,
         depth: Int = 0,
@@ -177,13 +187,64 @@ class FeedGuardService : AccessibilityService() {
         if (node == null || depth > MAX_DEPTH) return false
         val id = node.viewIdResourceName
         if (id != null && needles.any { id.contains(it) }) return true
+        val desc = node.contentDescription?.toString()
+        if (desc != null && needles.any { desc.contains(it) }) return true
+        val text = node.text?.toString()
+        if (text != null && needles.any { text.contains(it) }) return true
         for (i in 0 until node.childCount) {
             val child = node.getChild(i)
-            val hit = nodeTreeHasResourceId(child, needles, depth + 1)
+            val hit = nodeTreeMatches(child, needles, depth + 1)
             child?.recycle()
             if (hit) return true
         }
         return false
+    }
+
+    /** Diagnostic-only: collects up to [DIAG_MAX_IDS] distinct resource ids, on-screen
+     * texts, and content-descriptions visible in the active window. Instagram Reels was
+     * found to strip resource-ids almost entirely (only `search_row`/`ig_text` leak out),
+     * so we also sample text + content-description — the labels a screen-reader would
+     * announce — to find a stable signal for the Reels player. Read straight out of
+     * logcat instead of guessed at. */
+    private fun sampleSignals(event: AccessibilityEvent): String {
+        val ids = LinkedHashSet<String>()
+        val texts = LinkedHashSet<String>()
+        val descs = LinkedHashSet<String>()
+        fun collect(node: AccessibilityNodeInfo?, depth: Int) {
+            if (node == null || depth > 14) return
+            if (ids.size < DIAG_MAX_IDS) node.viewIdResourceName?.let { ids.add(it) }
+            if (texts.size < DIAG_MAX_IDS) {
+                node.text?.toString()?.trim()?.takeIf { it.isNotEmpty() }?.let { texts.add(it.take(32)) }
+            }
+            if (descs.size < DIAG_MAX_IDS) {
+                node.contentDescription?.toString()?.trim()?.takeIf { it.isNotEmpty() }?.let { descs.add(it.take(32)) }
+            }
+            for (i in 0 until node.childCount) {
+                val child = node.getChild(i)
+                collect(child, depth + 1)
+                child?.recycle()
+            }
+        }
+        rootInActiveWindow?.let { root ->
+            try {
+                collect(root, 0)
+            } finally {
+                root.recycle()
+            }
+        }
+        return "ids=$ids | texts=$texts | descs=$descs"
+    }
+
+    private val lastDiagLogElapsed = HashMap<String, Long>()
+
+    /** Throttles a diagnostic log line to once every [DIAG_THROTTLE_MS] per target,
+     * so scrolling through Instagram/YouTube doesn't flood logcat. */
+    private inline fun diagLog(target: String, message: () -> String) {
+        val now = SystemClock.elapsedRealtime()
+        val last = lastDiagLogElapsed[target] ?: 0L
+        if (now - last < DIAG_THROTTLE_MS) return
+        lastDiagLogElapsed[target] = now
+        Log.d(TAG, message())
     }
 
     private fun targetForPackage(pkg: String): String? =
@@ -210,11 +271,19 @@ class FeedGuardService : AccessibilityService() {
         // Guards against re-firing the BACK action on every content-changed event
         // that arrives while the exhausted screen is still settling off-screen.
         private const val KICK_DEBOUNCE_MS = 1200L
+        // Diagnostic-only throttles (see diagLog/sampleResourceIds).
+        private const val DIAG_THROTTLE_MS = 3000L
+        private const val DIAG_MAX_IDS = 60
 
-        // Resource-id substrings observed (by multiple independent open-source
-        // app-blockers) to appear only while the Reels/Shorts player itself is
+        // Signals observed to appear only while the Reels/Shorts player itself is
         // showing. Undocumented by Meta/Google; may drift across app versions.
-        private val REELS_NEEDLES = listOf("clips_viewer")
+        // Instagram strips resource-ids on Reels (only search_row/ig_text leak out),
+        // but every reel carries a content-description "Reel by <user>. Double tap…"
+        // whose username tracks the visible reel — confirmed from on-device
+        // diagnostics. "clips_viewer" is kept as a fallback for builds that still
+        // expose it. NOTE: "Reel by " is English; if Instagram's own language is
+        // changed, this needle must be localized too.
+        private val REELS_NEEDLES = listOf("Reel by ", "clips_viewer")
         private val SHORTS_NEEDLES = listOf("reel_recycler", "reel_player_page_container")
 
         private val WHOLE_APP_TARGETS = setOf("blockTikTok", "blockSnapchatStories")
