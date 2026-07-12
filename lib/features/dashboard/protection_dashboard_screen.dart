@@ -131,12 +131,13 @@ class _DashboardBody extends ConsumerWidget {
     await notifier.setSocialFeedTarget(field, true, limitMinutes: minutes);
   }
 
-  /// Simple stepper dialog for "how many minutes per day?" (5-180, steps of 5).
+  /// Simple stepper dialog for "how many minutes per day?" (1-180, steps of 5
+  /// except down to the 1-minute floor, which exists for fast manual testing).
   Future<int?> _askDailyLimitMinutes(BuildContext context, int initial) {
     return showDialog<int>(
       context: context,
       builder: (dialogContext) {
-        var minutes = initial.clamp(5, 180);
+        var minutes = initial.clamp(1, 180);
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
             backgroundColor: const Color(0xFF0A0E18),
@@ -157,8 +158,9 @@ class _DashboardBody extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      onPressed: minutes > 5
-                          ? () => setState(() => minutes -= 5)
+                      onPressed: minutes > 1
+                          ? () => setState(
+                              () => minutes = (minutes - 5).clamp(1, 180))
                           : null,
                       icon: const Icon(Icons.remove_circle_outline,
                           color: Color(0xFF1E5FFF)),
