@@ -54,18 +54,24 @@ class FeedGuardBridge {
     }
   }
 
-  /// Live usage for every target: `{ target: { usedSeconds, remainingSeconds } }`.
-  /// Returns an empty map on any failure.
-  static Future<Map<String, Map<String, int>>> getStatuses() async {
+  /// Live status for every target. Returns an empty map on any failure.
+  static Future<Map<String, FeedGuardStatus>> getStatuses() async {
     try {
       final r = await _channel.invokeMapMethod<String, dynamic>('getStatuses');
       if (r == null) return {};
       return r.map((key, value) {
         final m = Map<String, dynamic>.from(value as Map);
-        return MapEntry(key, {
-          'usedSeconds': (m['usedSeconds'] as num?)?.toInt() ?? 0,
-          'remainingSeconds': (m['remainingSeconds'] as num?)?.toInt() ?? 0,
-        });
+        final lockedMillis = (m['lockedUntilMillis'] as num?)?.toInt() ?? 0;
+        return MapEntry(
+          key,
+          FeedGuardStatus(
+            usedSeconds: (m['usedSeconds'] as num?)?.toInt() ?? 0,
+            remainingSeconds: (m['remainingSeconds'] as num?)?.toInt() ?? 0,
+            lockedUntil: lockedMillis > 0
+                ? DateTime.fromMillisecondsSinceEpoch(lockedMillis)
+                : null,
+          ),
+        );
       });
     } catch (e, st) {
       debugPrint('FeedGuardBridge.getStatuses failed: $e\n$st');
@@ -106,3 +112,22 @@ class FeedGuardBridge {
 
 DateTime _epochDayToDate(int epochDay) =>
     DateTime.utc(1970, 1, 1).add(Duration(days: epochDay));
+
+/// Live native state for one feed-guard target.
+///
+/// [lockedUntil] is non-null while the target is in its 24h anti-circumvention
+/// lock after its daily budget was exhausted — native refuses config changes
+/// for that target until this deadline passes (see [FeedGuardBridge.setTargetConfig]).
+class FeedGuardStatus {
+  const FeedGuardStatus({
+    required this.usedSeconds,
+    required this.remainingSeconds,
+    this.lockedUntil,
+  });
+
+  final int usedSeconds;
+  final int remainingSeconds;
+  final DateTime? lockedUntil;
+
+  bool get isLocked => lockedUntil != null;
+}

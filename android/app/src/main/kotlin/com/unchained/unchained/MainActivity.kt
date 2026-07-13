@@ -205,8 +205,9 @@ class MainActivity : FlutterActivity() {
                         if (target == null || target !in FeedGuardState.TARGETS) {
                             result.success(false)
                         } else {
-                            FeedGuardState.setConfig(this, target, enabled, limitMinutes)
-                            result.success(true)
+                            // Returns false (and leaves the old config in place) if the
+                            // target is currently in its 24h exhaustion lock.
+                            result.success(FeedGuardState.setConfig(this, target, enabled, limitMinutes))
                         }
                     }
                     "getStatuses" -> {
@@ -214,6 +215,7 @@ class MainActivity : FlutterActivity() {
                             mapOf(
                                 "usedSeconds" to FeedGuardState.usedSeconds(this, target),
                                 "remainingSeconds" to FeedGuardState.remainingSeconds(this, target),
+                                "lockedUntilMillis" to FeedGuardState.lockedUntilMillis(this, target),
                             )
                         }
                         result.success(statuses)

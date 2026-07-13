@@ -95,6 +95,20 @@
   "dashboard_block_shorts": "Block YouTube Shorts",
   "dashboard_block_tiktok": "Block TikTok",
   "dashboard_block_snapchat": "Block Snapchat Stories",
+  "feed_guard_locked_tooltip": "24h lock",
+  "feed_guard_locked_sublabel": "Locked · {time} left",
+  "@feed_guard_locked_sublabel": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "feed_guard_locked_message": "Daily limit reached. Locked for 24 hours — unlocks in {time}.",
+  "@feed_guard_locked_message": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "feed_guard_locked_refused": "Can't change this — still in its 24-hour lock.",
   "dashboard_block_shopping": "Block shopping sites",
   "dashboard_block_gambling": "Block gambling sites",
   "dashboard_block_image_search": "Block image & video search",

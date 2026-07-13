@@ -287,6 +287,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboard_block_snapchat => 'Bloquear Historias de Snapchat';
 
   @override
+  String get feed_guard_locked_tooltip => 'Bloqueo 24h';
+
+  @override
+  String feed_guard_locked_sublabel(String time) {
+    return 'Bloqueado · quedan $time';
+  }
+
+  @override
+  String feed_guard_locked_message(String time) {
+    return 'Límite diario alcanzado. Bloqueado por 24 horas — se desbloquea en $time.';
+  }
+
+  @override
+  String get feed_guard_locked_refused =>
+      'No se puede cambiar — todavía en su bloqueo de 24 horas.';
+
+  @override
   String get dashboard_block_shopping => 'Bloquear webs de compras';
 
   @override

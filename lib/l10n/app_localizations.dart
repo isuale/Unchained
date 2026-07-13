@@ -638,6 +638,30 @@ abstract class AppLocalizations {
   /// **'Bloquear Historias de Snapchat'**
   String get dashboard_block_snapchat;
 
+  /// No description provided for @feed_guard_locked_tooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueo 24h'**
+  String get feed_guard_locked_tooltip;
+
+  /// No description provided for @feed_guard_locked_sublabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueado · quedan {time}'**
+  String feed_guard_locked_sublabel(String time);
+
+  /// No description provided for @feed_guard_locked_message.
+  ///
+  /// In es, this message translates to:
+  /// **'Límite diario alcanzado. Bloqueado por 24 horas — se desbloquea en {time}.'**
+  String feed_guard_locked_message(String time);
+
+  /// No description provided for @feed_guard_locked_refused.
+  ///
+  /// In es, this message translates to:
+  /// **'No se puede cambiar — todavía en su bloqueo de 24 horas.'**
+  String get feed_guard_locked_refused;
+
   /// No description provided for @dashboard_block_shopping.
   ///
   /// In es, this message translates to:

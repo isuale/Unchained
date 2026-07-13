@@ -95,6 +95,20 @@
   "dashboard_block_shorts": "Bloquear YouTube Shorts",
   "dashboard_block_tiktok": "Bloquear TikTok",
   "dashboard_block_snapchat": "Bloquear Historias de Snapchat",
+  "feed_guard_locked_tooltip": "Bloqueo 24h",
+  "feed_guard_locked_sublabel": "Bloqueado · quedan {time}",
+  "@feed_guard_locked_sublabel": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "feed_guard_locked_message": "Límite diario alcanzado. Bloqueado por 24 horas — se desbloquea en {time}.",
+  "@feed_guard_locked_message": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "feed_guard_locked_refused": "No se puede cambiar — todavía en su bloqueo de 24 horas.",
   "dashboard_block_shopping": "Bloquear webs de compras",
   "dashboard_block_gambling": "Bloquear apuestas",
   "dashboard_block_image_search": "Bloquear búsqueda de imágenes y vídeos",

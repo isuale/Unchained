@@ -19,6 +19,16 @@ final _secondTickerProvider = StreamProvider<int>((ref) {
   return Stream.periodic(const Duration(seconds: 1), (i) => i);
 });
 
+/// Live feed-guard status for all four targets (usage + 24h exhaustion-lock
+/// deadline), re-fetched from native every second so the dashboard's lock
+/// countdown and re-enabled controls track native truth without needing a
+/// manual refresh.
+final feedGuardStatusesProvider =
+    FutureProvider<Map<String, FeedGuardStatus>>((ref) async {
+  ref.watch(_secondTickerProvider);
+  return FeedGuardBridge.getStatuses();
+});
+
 /// The user's current spot in the plan-driven commitment, recomputed every second.
 ///
 /// For a [CommitmentMode.cycle] this persists the roll-forward into the next
@@ -215,15 +225,22 @@ class BlockingSettingsActions extends Notifier<void> {
   /// blockSnapchatStories) on or off with its daily minute budget, persists
   /// it, and immediately pushes the new config to the native watchdog so
   /// enforcement takes effect without needing an app restart.
-  Future<void> setSocialFeedTarget(
+  ///
+  /// Refused (returns false, no write at all) while the target is in its 24h
+  /// exhaustion lock — otherwise a user could dodge the cooldown by just
+  /// disabling the target or raising its limit the moment it runs out.
+  Future<bool> setSocialFeedTarget(
     String field,
     bool enabled, {
     int? limitMinutes,
   }) async {
+    final statuses = await FeedGuardBridge.getStatuses();
+    if (statuses[field]?.isLocked == true) return false;
+
     final repo = ref.read(blockingSettingsRepositoryProvider);
     await repo.setSocialFeedTarget(field, enabled, limitMinutes: limitMinutes);
     final settings = await repo.getSettings();
-    if (settings == null) return;
+    if (settings == null) return true;
     final minutes = switch (field) {
       'blockReels' => settings.reelsLimitMinutes,
       'blockShorts' => settings.shortsLimitMinutes,
@@ -232,6 +249,7 @@ class BlockingSettingsActions extends Notifier<void> {
       _ => 30,
     };
     await FeedGuardBridge.setTargetConfig(field, enabled, minutes);
+    return true;
   }
 
   /// Turns off the native VPN and wipes the local session so the user can

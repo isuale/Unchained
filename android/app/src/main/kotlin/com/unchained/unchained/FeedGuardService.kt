@@ -36,7 +36,10 @@ import android.widget.Toast
  * events don't fire at a steady rate. Once a target's daily budget (persisted
  * in [FeedGuardState]) is used up, every further detection of that target
  * immediately backs out via [performGlobalAction] — so re-opening the feed
- * just bounces the user straight back out for the rest of the day.
+ * just bounces the user straight back out. [FeedGuardState] then holds that
+ * target locked for a full 24 hours from the moment it was exhausted (not
+ * just until local midnight, and not editable in the meantime) before handing
+ * back a fresh budget.
  */
 class FeedGuardService : AccessibilityService() {
 
@@ -134,7 +137,7 @@ class FeedGuardService : AccessibilityService() {
         mainHandler.post {
             Toast.makeText(
                 applicationContext,
-                "${friendlyName(target)} — daily limit reached",
+                "${friendlyName(target)} — daily limit reached. Locked for 24 hours.",
                 Toast.LENGTH_SHORT,
             ).show()
         }

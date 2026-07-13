@@ -122,13 +122,79 @@ class _DashboardBody extends ConsumerWidget {
     bool value,
   ) async {
     final notifier = ref.read(blockingSettingsActionsProvider.notifier);
+    bool applied;
     if (!value) {
-      await notifier.setSocialFeedTarget(field, false);
-      return;
+      applied = await notifier.setSocialFeedTarget(field, false);
+    } else {
+      final minutes = await _askDailyLimitMinutes(context, currentLimit);
+      if (minutes == null) return;
+      applied = await notifier.setSocialFeedTarget(field, true, limitMinutes: minutes);
     }
-    final minutes = await _askDailyLimitMinutes(context, currentLimit);
-    if (minutes == null) return;
-    await notifier.setSocialFeedTarget(field, true, limitMinutes: minutes);
+    // Normally unreachable — the toggle row hides its Switch entirely while
+    // locked — but guards the rare race where the lock lands between builds.
+    if (!applied && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l.feed_guard_locked_refused),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF0A0F1C),
+        ),
+      );
+    }
+  }
+
+  /// Combines the plan-tier lock (`isFeatureLocked`) with the feed guard's
+  /// own 24h exhaustion lock into a single [ToggleRow], since both use the
+  /// same locked-look/tooltip/tap affordance but need different messaging.
+  Widget _socialFeedToggleRow(
+    BuildContext context,
+    WidgetRef ref, {
+    required String field,
+    required String label,
+    required IconData icon,
+    required bool enabled,
+    required int limitMinutes,
+    required bool protectionOn,
+    required bool planLocked,
+    required DateTime? feedGuardLockedUntil,
+  }) {
+    return ToggleRow(
+      label: label,
+      sublabel: feedGuardLockedUntil != null
+          ? l.feed_guard_locked_sublabel(_formatLockCountdown(feedGuardLockedUntil))
+          : (enabled ? '$limitMinutes min/day' : null),
+      value: enabled,
+      onChanged: (v) => _toggleSocialFeed(context, ref, field, limitMinutes, v),
+      isLocked: planLocked || feedGuardLockedUntil != null,
+      lockedTooltip:
+          planLocked ? l.lock_forever_only : l.feed_guard_locked_tooltip,
+      onLockedTap: planLocked
+          ? () => _navLockedToForever(context)
+          : () => _showFeedGuardLockedMessage(context, feedGuardLockedUntil!),
+      parentEnabled: protectionOn,
+      leadingIcon: icon,
+    );
+  }
+
+  void _showFeedGuardLockedMessage(BuildContext context, DateTime lockedUntil) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content:
+            Text(l.feed_guard_locked_message(_formatLockCountdown(lockedUntil))),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF0A0F1C),
+      ),
+    );
+  }
+
+  /// "3h 12m" / "12m" remaining until [lockedUntil], for the countdown shown
+  /// on a locked feed-guard row.
+  String _formatLockCountdown(DateTime lockedUntil) {
+    final remaining = lockedUntil.difference(DateTime.now());
+    if (remaining.isNegative) return '0m';
+    final hours = remaining.inHours;
+    final minutes = remaining.inMinutes % 60;
+    return hours > 0 ? '${hours}h ${minutes}m' : '${minutes}m';
   }
 
   /// Simple stepper dialog for "how many minutes per day?" (1-180, steps of 5
@@ -316,6 +382,8 @@ class _DashboardBody extends ConsumerWidget {
     final protectionOn = settings.protectionEnabled;
     final reelsShortsSelected = settings.socialMode == 'reelsAndShorts';
     final commitment = ref.watch(commitmentStatusProvider);
+    final feedGuardStatuses =
+        ref.watch(feedGuardStatusesProvider).asData?.value ?? const {};
 
     return SafeArea(
       child: ListView(
@@ -436,65 +504,57 @@ class _DashboardBody extends ConsumerWidget {
                 padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: _FeedGuardPermissionBanner(),
               ),
-              ToggleRow(
+              _socialFeedToggleRow(
+                context,
+                ref,
+                field: 'blockReels',
                 label: l.dashboard_block_reels,
-                sublabel: settings.blockReels
-                    ? '${settings.reelsLimitMinutes} min/day'
-                    : null,
-                value: settings.blockReels,
-                onChanged: (v) => _toggleSocialFeed(
-                    context, ref, 'blockReels', settings.reelsLimitMinutes, v),
-                isLocked: isFeatureLocked('blockReels', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.movie_outlined,
+                icon: Icons.movie_outlined,
+                enabled: settings.blockReels,
+                limitMinutes: settings.reelsLimitMinutes,
+                protectionOn: protectionOn,
+                planLocked: isFeatureLocked('blockReels', activePlan),
+                feedGuardLockedUntil: feedGuardStatuses['blockReels']?.lockedUntil,
               ),
               const _RowSeparator(),
-              ToggleRow(
+              _socialFeedToggleRow(
+                context,
+                ref,
+                field: 'blockShorts',
                 label: l.dashboard_block_shorts,
-                sublabel: settings.blockShorts
-                    ? '${settings.shortsLimitMinutes} min/day'
-                    : null,
-                value: settings.blockShorts,
-                onChanged: (v) => _toggleSocialFeed(context, ref,
-                    'blockShorts', settings.shortsLimitMinutes, v),
-                isLocked: isFeatureLocked('blockShorts', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.smart_display_outlined,
+                icon: Icons.smart_display_outlined,
+                enabled: settings.blockShorts,
+                limitMinutes: settings.shortsLimitMinutes,
+                protectionOn: protectionOn,
+                planLocked: isFeatureLocked('blockShorts', activePlan),
+                feedGuardLockedUntil: feedGuardStatuses['blockShorts']?.lockedUntil,
               ),
               const _RowSeparator(),
-              ToggleRow(
+              _socialFeedToggleRow(
+                context,
+                ref,
+                field: 'blockTikTok',
                 label: l.dashboard_block_tiktok,
-                sublabel: settings.blockTikTok
-                    ? '${settings.tiktokLimitMinutes} min/day'
-                    : null,
-                value: settings.blockTikTok,
-                onChanged: (v) => _toggleSocialFeed(context, ref,
-                    'blockTikTok', settings.tiktokLimitMinutes, v),
-                isLocked: isFeatureLocked('blockTikTok', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.music_note,
+                icon: Icons.music_note,
+                enabled: settings.blockTikTok,
+                limitMinutes: settings.tiktokLimitMinutes,
+                protectionOn: protectionOn,
+                planLocked: isFeatureLocked('blockTikTok', activePlan),
+                feedGuardLockedUntil: feedGuardStatuses['blockTikTok']?.lockedUntil,
               ),
               const _RowSeparator(),
-              ToggleRow(
+              _socialFeedToggleRow(
+                context,
+                ref,
+                field: 'blockSnapchatStories',
                 label: l.dashboard_block_snapchat,
-                sublabel: settings.blockSnapchatStories
-                    ? '${settings.snapchatLimitMinutes} min/day'
-                    : null,
-                value: settings.blockSnapchatStories,
-                onChanged: (v) => _toggleSocialFeed(context, ref,
-                    'blockSnapchatStories', settings.snapchatLimitMinutes, v),
-                isLocked:
-                    isFeatureLocked('blockSnapchatStories', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.camera_alt_outlined,
+                icon: Icons.camera_alt_outlined,
+                enabled: settings.blockSnapchatStories,
+                limitMinutes: settings.snapchatLimitMinutes,
+                protectionOn: protectionOn,
+                planLocked: isFeatureLocked('blockSnapchatStories', activePlan),
+                feedGuardLockedUntil:
+                    feedGuardStatuses['blockSnapchatStories']?.lockedUntil,
               ),
             ],
           ),
