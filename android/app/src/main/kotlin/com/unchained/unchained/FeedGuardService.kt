@@ -287,7 +287,20 @@ class FeedGuardService : AccessibilityService() {
         // expose it. NOTE: "Reel by " is English; if Instagram's own language is
         // changed, this needle must be localized too.
         private val REELS_NEEDLES = listOf("Reel by ", "clips_viewer")
-        private val SHORTS_NEEDLES = listOf("reel_recycler", "reel_player_page_container")
+        // YouTube (like Instagram) exposes NO resource-ids on the Shorts player
+        // (on-device diagnostics show ids=[] the whole time), so the old
+        // reel_recycler/reel_player_page_container ids never matched. It does
+        // expose stable content-descriptions unique to the Shorts player: the
+        // sound pivot "See more videos using this sound" (present on every Short)
+        // and the remix action "Remix this Short along with …". Both are matched
+        // as substrings by nodeTreeMatches. Deliberately NOT the bare nav word
+        // "Shorts", which sits in the bottom nav bar on every YouTube screen and
+        // would false-positive across the whole app. NOTE: these are English; if
+        // YouTube's language is changed, they must be localized too.
+        private val SHORTS_NEEDLES = listOf(
+            "See more videos using this sound",
+            "Remix this Short",
+        )
 
         private val WHOLE_APP_TARGETS = setOf("blockTikTok", "blockSnapchatStories")
 
