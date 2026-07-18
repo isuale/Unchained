@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:unchained/features/dashboard/presentation/settings_screen.dart';
-import 'package:unchained/features/dashboard/protection_dashboard_screen.dart';
-import 'package:unchained/features/dashboard/presentation/blocklist_screen.dart';
-import 'package:unchained/features/dashboard/presentation/progress_screen.dart';
-import 'package:unchained/l10n/app_localizations.dart';
+import 'package:unchained/features/prayer/presentation/prayer_home_screen.dart';
 
+// NOTE: the old content-filter tabs (ProtectionDashboardScreen, BlocklistScreen,
+// ProgressScreen) are retired from the nav for the prayer app-locker pivot. Their
+// files are kept in-tree for one release rather than deleted, so nothing is lost
+// if we need to reference them; they are simply no longer routed here.
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -21,16 +22,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       extendBody: true,
       body: IndexedStack(
         index: _index,
         children: const [
-          ProtectionDashboardScreen(),
-          BlocklistScreen(),
-          ProgressScreen(),
+          PrayerHomeScreen(),
           SettingsScreen(),
         ],
       ),
@@ -52,24 +50,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
             fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: const TextStyle(fontSize: 11),
-          items: [
+          items: const [
             BottomNavigationBarItem(
-              icon: const Icon(Icons.shield_outlined),
-              activeIcon: const Icon(Icons.shield),
-              label: l.nav_blocking,
+              icon: Icon(Icons.volunteer_activism_outlined),
+              activeIcon: Icon(Icons.volunteer_activism),
+              label: 'Oración',
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.block_flipped),
-              label: l.nav_blocklist,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.timeline),
-              label: l.nav_progress,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.settings_outlined),
-              activeIcon: const Icon(Icons.settings),
-              label: l.nav_settings,
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings),
+              label: 'Ajustes',
             ),
           ],
         ),

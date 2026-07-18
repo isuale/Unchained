@@ -22,7 +22,7 @@ final prayerLogProvider = StreamProvider<List<PrayerEntry>>((ref) {
 /// The current "days giving thanks" streak: consecutive days (up to and
 /// including today) on which at least one prayer was completed.
 final prayerStreakProvider = Provider<int>((ref) {
-  final log = ref.watch(prayerLogProvider).valueOrNull ?? const [];
+  final log = ref.watch(prayerLogProvider).asData?.value ?? const [];
   return PrayerRepository.streakFrom(log);
 });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/core/router/app_router.dart';
+import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
@@ -17,6 +18,13 @@ void main() {
     scriptureLockActive.value = true;
     appRouter.go('/lock');
   });
+  // Prayer app-locker pivot: the DNS/VPN content filter is retired. Tear down
+  // any still-running blocking VPN on launch so no content filtering remains
+  // active from a previous version. The blocking code stays in-tree for one
+  // release but is no longer offered in the UI. Fire-and-forget; a channel
+  // failure is swallowed inside BlockingService and returns false.
+  BlockingService.stop();
+
   runApp(const ProviderScope(child: MyApp()));
   // Cold-start path: if the watchdog launched us specifically to show the lock,
   // pull that fact once the engine is ready (a pushed showLock can be lost if it
