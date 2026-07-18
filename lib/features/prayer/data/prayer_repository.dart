@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/core/database/user_assessment_repository.dart';
+import 'package:unchained/features/prayer/domain/prayers.dart';
 
 /// Single access point for the prayer app-locker's persisted state: which apps
 /// are locked behind prayer, and the history of completed prayers.
@@ -24,6 +25,11 @@ final prayerLogProvider = StreamProvider<List<PrayerEntry>>((ref) {
 /// chosen apps are locked.
 final lockAllAppsProvider = StreamProvider<bool>((ref) {
   return ref.watch(prayerRepositoryProvider).watchLockAllApps();
+});
+
+/// Live prayer-content language (en/es/pt).
+final prayerLanguageProvider = StreamProvider<Lang>((ref) {
+  return ref.watch(prayerRepositoryProvider).watchLanguage();
 });
 
 /// The current "days giving thanks" streak: consecutive days (up to and
@@ -52,6 +58,19 @@ class PrayerRepository {
   Future<void> setLockAllApps(bool value) {
     return (_db.update(_db.blockingSettings)..where((t) => t.id.equals(1)))
         .write(BlockingSettingsCompanion(prayerLockAllApps: Value(value)));
+  }
+
+  // --- Language ---
+
+  Stream<Lang> watchLanguage() {
+    return (_db.select(_db.blockingSettings)..where((t) => t.id.equals(1)))
+        .watchSingleOrNull()
+        .map((row) => langFromCode(row?.prayerLanguage));
+  }
+
+  Future<void> setLanguage(Lang lang) {
+    return (_db.update(_db.blockingSettings)..where((t) => t.id.equals(1)))
+        .write(BlockingSettingsCompanion(prayerLanguage: Value(lang.name)));
   }
 
   // --- Locked apps ---

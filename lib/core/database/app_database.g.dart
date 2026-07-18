@@ -892,6 +892,18 @@ class $BlockingSettingsTable extends BlockingSettings
     requiredDuringInsert: false,
     defaultValue: const Constant(24),
   );
+  static const VerificationMeta _prayerLanguageMeta = const VerificationMeta(
+    'prayerLanguage',
+  );
+  @override
+  late final GeneratedColumn<String> prayerLanguage = GeneratedColumn<String>(
+    'prayer_language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('es'),
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -942,6 +954,7 @@ class $BlockingSettingsTable extends BlockingSettings
     customAllowlist,
     prayerLockAllApps,
     prayerUnlockHours,
+    prayerLanguage,
     updatedAt,
   ];
   @override
@@ -1265,6 +1278,15 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
       );
     }
+    if (data.containsKey('prayer_language')) {
+      context.handle(
+        _prayerLanguageMeta,
+        prayerLanguage.isAcceptableOrUnknown(
+          data['prayer_language']!,
+          _prayerLanguageMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -1424,6 +1446,10 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.int,
         data['${effectivePrefix}prayer_unlock_hours'],
       )!,
+      prayerLanguage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prayer_language'],
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -1474,6 +1500,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final String? customAllowlist;
   final bool prayerLockAllApps;
   final int prayerUnlockHours;
+  final String prayerLanguage;
   final DateTime updatedAt;
   const BlockingSetting({
     required this.id,
@@ -1512,6 +1539,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     this.customAllowlist,
     required this.prayerLockAllApps,
     required this.prayerUnlockHours,
+    required this.prayerLanguage,
     required this.updatedAt,
   });
   @override
@@ -1573,6 +1601,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     }
     map['prayer_lock_all_apps'] = Variable<bool>(prayerLockAllApps);
     map['prayer_unlock_hours'] = Variable<int>(prayerUnlockHours);
+    map['prayer_language'] = Variable<String>(prayerLanguage);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -1629,6 +1658,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           : Value(customAllowlist),
       prayerLockAllApps: Value(prayerLockAllApps),
       prayerUnlockHours: Value(prayerUnlockHours),
+      prayerLanguage: Value(prayerLanguage),
       updatedAt: Value(updatedAt),
     );
   }
@@ -1701,6 +1731,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       customAllowlist: serializer.fromJson<String?>(json['customAllowlist']),
       prayerLockAllApps: serializer.fromJson<bool>(json['prayerLockAllApps']),
       prayerUnlockHours: serializer.fromJson<int>(json['prayerUnlockHours']),
+      prayerLanguage: serializer.fromJson<String>(json['prayerLanguage']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -1750,6 +1781,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'customAllowlist': serializer.toJson<String?>(customAllowlist),
       'prayerLockAllApps': serializer.toJson<bool>(prayerLockAllApps),
       'prayerUnlockHours': serializer.toJson<int>(prayerUnlockHours),
+      'prayerLanguage': serializer.toJson<String>(prayerLanguage),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -1791,6 +1823,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     Value<String?> customAllowlist = const Value.absent(),
     bool? prayerLockAllApps,
     int? prayerUnlockHours,
+    String? prayerLanguage,
     DateTime? updatedAt,
   }) => BlockingSetting(
     id: id ?? this.id,
@@ -1845,6 +1878,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
         : this.customAllowlist,
     prayerLockAllApps: prayerLockAllApps ?? this.prayerLockAllApps,
     prayerUnlockHours: prayerUnlockHours ?? this.prayerUnlockHours,
+    prayerLanguage: prayerLanguage ?? this.prayerLanguage,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   BlockingSetting copyWithCompanion(BlockingSettingsCompanion data) {
@@ -1956,6 +1990,9 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       prayerUnlockHours: data.prayerUnlockHours.present
           ? data.prayerUnlockHours.value
           : this.prayerUnlockHours,
+      prayerLanguage: data.prayerLanguage.present
+          ? data.prayerLanguage.value
+          : this.prayerLanguage,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -2003,6 +2040,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write('customAllowlist: $customAllowlist, ')
           ..write('prayerLockAllApps: $prayerLockAllApps, ')
           ..write('prayerUnlockHours: $prayerUnlockHours, ')
+          ..write('prayerLanguage: $prayerLanguage, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -2046,6 +2084,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     customAllowlist,
     prayerLockAllApps,
     prayerUnlockHours,
+    prayerLanguage,
     updatedAt,
   ]);
   @override
@@ -2090,6 +2129,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.customAllowlist == this.customAllowlist &&
           other.prayerLockAllApps == this.prayerLockAllApps &&
           other.prayerUnlockHours == this.prayerUnlockHours &&
+          other.prayerLanguage == this.prayerLanguage &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -2130,6 +2170,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<String?> customAllowlist;
   final Value<bool> prayerLockAllApps;
   final Value<int> prayerUnlockHours;
+  final Value<String> prayerLanguage;
   final Value<DateTime> updatedAt;
   const BlockingSettingsCompanion({
     this.id = const Value.absent(),
@@ -2168,6 +2209,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.customAllowlist = const Value.absent(),
     this.prayerLockAllApps = const Value.absent(),
     this.prayerUnlockHours = const Value.absent(),
+    this.prayerLanguage = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   BlockingSettingsCompanion.insert({
@@ -2207,6 +2249,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.customAllowlist = const Value.absent(),
     this.prayerLockAllApps = const Value.absent(),
     this.prayerUnlockHours = const Value.absent(),
+    this.prayerLanguage = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   static Insertable<BlockingSetting> custom({
@@ -2246,6 +2289,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<String>? customAllowlist,
     Expression<bool>? prayerLockAllApps,
     Expression<int>? prayerUnlockHours,
+    Expression<String>? prayerLanguage,
     Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
@@ -2301,6 +2345,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       if (customAllowlist != null) 'custom_allowlist': customAllowlist,
       if (prayerLockAllApps != null) 'prayer_lock_all_apps': prayerLockAllApps,
       if (prayerUnlockHours != null) 'prayer_unlock_hours': prayerUnlockHours,
+      if (prayerLanguage != null) 'prayer_language': prayerLanguage,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
@@ -2342,6 +2387,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<String?>? customAllowlist,
     Value<bool>? prayerLockAllApps,
     Value<int>? prayerUnlockHours,
+    Value<String>? prayerLanguage,
     Value<DateTime>? updatedAt,
   }) {
     return BlockingSettingsCompanion(
@@ -2386,6 +2432,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       customAllowlist: customAllowlist ?? this.customAllowlist,
       prayerLockAllApps: prayerLockAllApps ?? this.prayerLockAllApps,
       prayerUnlockHours: prayerUnlockHours ?? this.prayerUnlockHours,
+      prayerLanguage: prayerLanguage ?? this.prayerLanguage,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -2521,6 +2568,9 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     if (prayerUnlockHours.present) {
       map['prayer_unlock_hours'] = Variable<int>(prayerUnlockHours.value);
     }
+    if (prayerLanguage.present) {
+      map['prayer_language'] = Variable<String>(prayerLanguage.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -2570,6 +2620,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write('customAllowlist: $customAllowlist, ')
           ..write('prayerLockAllApps: $prayerLockAllApps, ')
           ..write('prayerUnlockHours: $prayerUnlockHours, ')
+          ..write('prayerLanguage: $prayerLanguage, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -3602,6 +3653,7 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<String?> customAllowlist,
       Value<bool> prayerLockAllApps,
       Value<int> prayerUnlockHours,
+      Value<String> prayerLanguage,
       Value<DateTime> updatedAt,
     });
 typedef $$BlockingSettingsTableUpdateCompanionBuilder =
@@ -3642,6 +3694,7 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<String?> customAllowlist,
       Value<bool> prayerLockAllApps,
       Value<int> prayerUnlockHours,
+      Value<String> prayerLanguage,
       Value<DateTime> updatedAt,
     });
 
@@ -3831,6 +3884,11 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<int> get prayerUnlockHours => $composableBuilder(
     column: $table.prayerUnlockHours,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get prayerLanguage => $composableBuilder(
+    column: $table.prayerLanguage,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4030,6 +4088,11 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get prayerLanguage => $composableBuilder(
+    column: $table.prayerLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -4224,6 +4287,11 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get prayerLanguage => $composableBuilder(
+    column: $table.prayerLanguage,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
@@ -4302,6 +4370,7 @@ class $$BlockingSettingsTableTableManager
                 Value<String?> customAllowlist = const Value.absent(),
                 Value<bool> prayerLockAllApps = const Value.absent(),
                 Value<int> prayerUnlockHours = const Value.absent(),
+                Value<String> prayerLanguage = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion(
                 id: id,
@@ -4340,6 +4409,7 @@ class $$BlockingSettingsTableTableManager
                 customAllowlist: customAllowlist,
                 prayerLockAllApps: prayerLockAllApps,
                 prayerUnlockHours: prayerUnlockHours,
+                prayerLanguage: prayerLanguage,
                 updatedAt: updatedAt,
               ),
           createCompanionCallback:
@@ -4381,6 +4451,7 @@ class $$BlockingSettingsTableTableManager
                 Value<String?> customAllowlist = const Value.absent(),
                 Value<bool> prayerLockAllApps = const Value.absent(),
                 Value<int> prayerUnlockHours = const Value.absent(),
+                Value<String> prayerLanguage = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion.insert(
                 id: id,
@@ -4419,6 +4490,7 @@ class $$BlockingSettingsTableTableManager
                 customAllowlist: customAllowlist,
                 prayerLockAllApps: prayerLockAllApps,
                 prayerUnlockHours: prayerUnlockHours,
+                prayerLanguage: prayerLanguage,
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0

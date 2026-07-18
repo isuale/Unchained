@@ -6,16 +6,16 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/domain/prayer_strings.dart';
 import 'package:unchained/features/prayer/domain/prayers.dart';
 
 /// Why the gate is up.
 enum PrayerGateMode {
-  /// Opened voluntarily from "Rezar ahora". The user may leave any time; only a
-  /// finished 20-minute prayer counts toward the streak.
+  /// Opened voluntarily from "Rezar ahora". Only a finished prayer counts.
   voluntary,
 
-  /// Raised by opening a locked app (native, wired in a later phase). There is
-  /// no way off until the prayer is finished; finishing opens the 24h window.
+  /// Raised by opening a locked app (native, wired in a later phase). No way
+  /// off until the prayer is finished; finishing opens the 24h window.
   enforced,
 }
 
@@ -32,10 +32,10 @@ class PrayerGateArgs {
   final String? triggerPackage;
 }
 
-/// Full-screen, back-proof prayer session. A 20-minute countdown runs while the
-/// screen is in the foreground (it pauses if the app is backgrounded, so
-/// leaving freezes progress rather than earning the apps). "Amén" only becomes
-/// tappable at 0:00; tapping it logs the prayer and lifts the gate.
+/// Full-screen, back-proof prayer session. A countdown runs while the screen is
+/// foreground (it pauses if the app is backgrounded, so leaving freezes
+/// progress). The Rosary must be prayed in full; thanksgiving unlocks its
+/// finish button after a 2-minute minimum for those who pray faster.
 class PrayerGateScreen extends ConsumerStatefulWidget {
   const PrayerGateScreen({super.key, required this.args});
 
@@ -54,33 +54,32 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   static const _border = Color(0xFF1B2435);
   static const _dim = Color(0xFF8A94A6);
 
-  late final PrayerGuide _guide;
-  // Session length comes from the chosen prayer: the Rosary is a full 20-minute
-  // session, thanksgiving is a short 5. Set once from the guide in initState.
+  late final String _type;
   late final Duration _duration;
+  late final int _minSeconds;
+  // The Rosary's mysteries, defaulted to today's set; null for thanksgiving.
+  MysterySet? _set;
+
   Timer? _timer;
   late int _secondsLeft;
   bool _completed = false;
 
   bool get _done => _secondsLeft <= 0;
-
-  // Minimum time praying before the finish button unlocks. Stops an instant
-  // skip, but lets someone who prays faster leave after a couple of minutes
-  // instead of waiting out the whole session.
-  static const int _minExitSeconds = 120;
   int get _elapsed => _duration.inSeconds - _secondsLeft;
-  bool get _canFinish => _done || _elapsed >= _minExitSeconds;
+  bool get _canFinish => _done || _elapsed >= _minSeconds;
 
   @override
   void initState() {
     super.initState();
-    _guide = guideFor(widget.args.prayerType);
-    _duration = Duration(minutes: _guide.minutes);
+    _type = widget.args.prayerType;
+    _duration = Duration(minutes: fullMinutesFor(_type));
+    _minSeconds = minMinutesFor(_type) * 60;
     _secondsLeft = _duration.inSeconds;
+    _set = _type == 'rosary'
+        ? mysterySetForWeekday(DateTime.now().weekday)
+        : null;
+
     WidgetsBinding.instance.addObserver(this);
-    // Hide the app's owner-credit footer for the whole session so the user sees
-    // only the prayer. Deferred so toggling the ancestor listener never fires
-    // during build. Reuses the same notifier the Scripture lock uses.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scriptureLockActive.value = true;
     });
@@ -99,9 +98,6 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Pause the countdown when the app leaves the foreground and resume it on
-    // return — so backgrounding the app can't run the clock down for free, but
-    // an interruption doesn't wipe a nearly-finished prayer either.
     if (state == AppLifecycleState.resumed) {
       if (!_done && !_completed) _startTimer();
     } else {
@@ -121,14 +117,14 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     });
   }
 
-  Future<void> _complete() async {
+  Future<void> _complete(Lang lang) async {
     if (_completed || !_canFinish) return;
     setState(() => _completed = true);
     _timer?.cancel();
 
     await ref.read(prayerRepositoryProvider).logPrayer(
           triggerPackage: widget.args.triggerPackage,
-          prayerType: _guide.type,
+          prayerType: _type,
           durationSeconds: _elapsed,
           completedAt: DateTime.now(),
         );
@@ -136,8 +132,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Gracias a Dios · Oración completada'),
+      SnackBar(
+        content: Text(PS.completedToast(lang)),
         behavior: SnackBarBehavior.floating,
         backgroundColor: _card,
       ),
@@ -154,6 +150,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   @override
   Widget build(BuildContext context) {
+    final lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
+    final guide = buildGuide(_type, lang, set: _set);
     final fraction = 1 - (_secondsLeft / _duration.inSeconds);
 
     return PopScope(
@@ -166,13 +164,17 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _header(),
+                _header(guide.title),
+                if (_set != null) ...[
+                  const SizedBox(height: 10),
+                  _mysteryBar(lang),
+                ],
                 const SizedBox(height: 14),
-                Expanded(child: _prayerBody()),
+                Expanded(child: _prayerBody(guide)),
                 const SizedBox(height: 12),
-                _progress(fraction),
+                _progress(lang, fraction),
                 const SizedBox(height: 12),
-                _amenButton(),
+                _amenButton(lang),
               ],
             ),
           ),
@@ -181,7 +183,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     );
   }
 
-  Widget _header() {
+  Widget _header(String title) {
     return Row(
       children: [
         const Icon(Icons.volunteer_activism, color: _gold, size: 24),
@@ -190,15 +192,10 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Gracias a Dios',
-                style: GoogleFonts.dmSerifDisplay(
-                    color: Colors.white, fontSize: 24),
-              ),
-              Text(
-                _guide.title,
-                style: GoogleFonts.inter(color: _dim, fontSize: 13),
-              ),
+              Text('Gracias a Dios',
+                  style: GoogleFonts.dmSerifDisplay(
+                      color: Colors.white, fontSize: 24)),
+              Text(title, style: GoogleFonts.inter(color: _dim, fontSize: 13)),
             ],
           ),
         ),
@@ -214,7 +211,98 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     );
   }
 
-  Widget _prayerBody() {
+  /// The two "top features" for the Rosary: which mysteries (tap to change) and
+  /// a "today" marker when the set matches the weekday's traditional mysteries.
+  Widget _mysteryBar(Lang lang) {
+    final set = _set!;
+    final isToday = mysterySetForWeekday(DateTime.now().weekday).type == set.type;
+    return InkWell(
+      onTap: () => _pickMysteries(lang),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _border),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.auto_awesome, color: _gold, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                tr(set.name, lang),
+                style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+            if (isToday)
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _accent.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(PS.today(lang),
+                    style: GoogleFonts.inter(color: _accent, fontSize: 11)),
+              ),
+            const Icon(Icons.expand_more, color: _dim, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _pickMysteries(Lang lang) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        final todayType =
+            mysterySetForWeekday(DateTime.now().weekday).type;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Text(PS.changeMysteries(lang),
+                  style: GoogleFonts.dmSerifDisplay(
+                      color: Colors.white, fontSize: 20)),
+              const SizedBox(height: 8),
+              for (final s in allMysterySets)
+                ListTile(
+                  leading: Icon(Icons.auto_awesome,
+                      color: s.type == _set?.type ? _gold : _dim),
+                  title: Text(tr(s.name, lang),
+                      style: GoogleFonts.inter(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                  trailing: s.type == todayType
+                      ? Text(PS.today(lang),
+                          style:
+                              GoogleFonts.inter(color: _accent, fontSize: 12))
+                      : null,
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    setState(() => _set = s);
+                  },
+                ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _prayerBody(PrayerGuide guide) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -224,33 +312,24 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
         border: Border.all(color: _border),
       ),
       child: ListView.separated(
-        itemCount: _guide.steps.length,
-        separatorBuilder: (_, _) => const Divider(
-          color: _border,
-          height: 28,
-        ),
+        itemCount: guide.steps.length,
+        separatorBuilder: (_, _) => const Divider(color: _border, height: 28),
         itemBuilder: (context, i) {
-          final step = _guide.steps[i];
+          final step = guide.steps[i];
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                step.heading,
-                style: GoogleFonts.inter(
-                  color: _gold,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              Text(step.heading,
+                  style: GoogleFonts.inter(
+                      color: _gold,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700)),
               const SizedBox(height: 6),
-              Text(
-                step.body,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFFC9D2E0),
-                  fontSize: 15,
-                  height: 1.5,
-                ),
-              ),
+              Text(step.body,
+                  style: GoogleFonts.inter(
+                      color: const Color(0xFFC9D2E0),
+                      fontSize: 15,
+                      height: 1.5)),
             ],
           );
         },
@@ -258,7 +337,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     );
   }
 
-  Widget _progress(double fraction) {
+  Widget _progress(Lang lang, double fraction) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -274,10 +353,10 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
         const SizedBox(height: 6),
         Text(
           _done
-              ? 'Oración completada. Pulsa Amén para continuar.'
+              ? PS.completedHint(lang)
               : _canFinish
-                  ? 'Puedes terminar cuando quieras. El tiempo se pausa si sales.'
-                  : 'Ora al menos 2 minutos. El tiempo se pausa si sales de la app.',
+                  ? PS.canFinishNow(lang)
+                  : PS.prayAtLeast(lang, _minSeconds ~/ 60),
           style: GoogleFonts.inter(color: _dim, fontSize: 12),
           textAlign: TextAlign.center,
         ),
@@ -285,28 +364,26 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     );
   }
 
-  Widget _amenButton() {
+  Widget _amenButton(Lang lang) {
     final label = _done
-        ? 'Amén'
+        ? PS.amen(lang)
         : _canFinish
-            ? 'He terminado · Amén'
-            : 'Ora para continuar · ${_minExitSeconds - _elapsed}s';
+            ? PS.finishedAmen(lang)
+            : PS.prayToContinue(lang, _minSeconds - _elapsed);
     return SizedBox(
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: _canFinish ? _complete : null,
-        icon: Icon(_canFinish ? Icons.check_circle : Icons.lock_clock, size: 22),
-        label: Text(
-          label,
-          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
+        onPressed: _canFinish ? () => _complete(lang) : null,
+        icon:
+            Icon(_canFinish ? Icons.check_circle : Icons.lock_clock, size: 22),
+        label: Text(label,
+            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
         style: ElevatedButton.styleFrom(
           backgroundColor: _canFinish ? _good : _card,
           foregroundColor: Colors.white,
           disabledBackgroundColor: _card,
           disabledForegroundColor: _dim,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),
     );

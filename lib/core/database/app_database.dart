@@ -127,6 +127,9 @@ class BlockingSettings extends Table {
       boolean().withDefault(const Constant(false))();
   IntColumn get prayerUnlockHours =>
       integer().withDefault(const Constant(24))();
+  // Prayer content language: 'en' | 'es' | 'pt'.
+  TextColumn get prayerLanguage =>
+      text().withDefault(const Constant('es'))();
 
   DateTimeColumn get updatedAt =>
       dateTime().clientDefault(() => DateTime.now())();
@@ -181,7 +184,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -254,6 +257,11 @@ class AppDatabase extends _$AppDatabase {
                 blockingSettings, blockingSettings.prayerLockAllApps);
             await m.addColumn(
                 blockingSettings, blockingSettings.prayerUnlockHours);
+          }
+          // v11: prayer content language (en/es/pt).
+          if (from < 11) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.prayerLanguage);
           }
         },
         beforeOpen: (details) async {
