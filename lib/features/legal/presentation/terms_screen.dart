@@ -53,8 +53,8 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
   Future<void> _accept() async {
     await ref.read(blockingSettingsRepositoryProvider).setTermsAccepted(true);
     if (!mounted) return;
-    // Land on the Protección (blocking) tab, not the prayer home.
-    context.go('/dashboard', extra: 1);
+    // Land on the dashboard; tab 0 is now the Protección (blocking) tab.
+    context.go('/dashboard');
   }
 
   Future<void> _continueAtOwnRisk() async {

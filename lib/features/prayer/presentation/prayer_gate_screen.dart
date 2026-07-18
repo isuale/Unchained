@@ -145,8 +145,9 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     // elapses. Always do this, however the gate was raised.
     await AppLockService.openUnlockWindow(24);
 
-    // Reset the in-app stack to the control panel (dashboard's Protección tab).
-    router.go('/dashboard', extra: 1);
+    // Reset the in-app stack to the control panel (dashboard's Protección tab,
+    // now tab 0).
+    router.go('/dashboard', extra: 0);
 
     // If a locked app raised this gate, drop back to the phone so the user
     // lands on the app they were opening — now unlocked for 24h.
