@@ -44,8 +44,29 @@ class DomainListsActions {
     );
   }
 
+  /// One-time upgrade of any older blocklist entries that were stored as a
+  /// specific subdomain (e.g. `pt.xgroovy.com`) to the whole registrable site
+  /// (`xgroovy.com`), so the parent and sibling subdomains get blocked too.
+  /// Rewrites the stored list only when something actually changed.
+  Future<void> _migrateBlocklistToWholeSite() async {
+    final settings = await _repo.getSettings();
+    final current = parseDomainList(settings?.customBlocklist);
+    if (current.isEmpty) return;
+    final seen = <String>{};
+    final upgraded = <String>[];
+    for (final d in current) {
+      final base = registrableDomain(d);
+      if (seen.add(base)) upgraded.add(base);
+    }
+    final changed = upgraded.length != current.length ||
+        !List.generate(current.length, (i) => current[i] == upgraded[i])
+            .every((e) => e);
+    if (changed) await _repo.setCustomBlocklist(upgraded);
+  }
+
   Future<DomainListResult> addToBlocklist(String raw) async {
-    final domain = normalizeDomain(raw);
+    // Reduce to the whole site so blocking any part blocks every subdomain.
+    final domain = normalizeBlockDomain(raw);
     if (domain == null) return DomainListResult.invalid;
     final settings = await _repo.getSettings();
     final current = parseDomainList(settings?.customBlocklist);
@@ -82,7 +103,11 @@ class DomainListsActions {
 
   /// Pushes whatever is stored to the native engine. Call on app start so a
   /// freshly launched VPN service has the user's lists even before any edit.
-  Future<void> syncToNative() => _syncNative();
+  /// Upgrades any legacy subdomain-only entries to the whole site first.
+  Future<void> syncToNative() async {
+    await _migrateBlocklistToWholeSite();
+    await _syncNative();
+  }
 }
 
 final domainListsActionsProvider = Provider<DomainListsActions>((ref) {

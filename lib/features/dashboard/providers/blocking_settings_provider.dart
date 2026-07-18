@@ -6,7 +6,7 @@ import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
 import 'package:unchained/features/dashboard/data/feed_guard_bridge.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
-import 'package:unchained/features/dashboard/domain/domain_lists.dart';
+import 'package:unchained/features/dashboard/providers/domain_lists_provider.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 
 final blockingSettingsProvider = StreamProvider<BlockingSetting>((ref) {
@@ -106,13 +106,9 @@ class BlockingSettingsActions extends Notifier<void> {
   /// Pushes the user's stored custom block/allow lists to the native engine on
   /// startup, so a freshly launched VPN service has them even before any edit.
   Future<void> _syncUserLists() async {
-    final repo = ref.read(blockingSettingsRepositoryProvider);
-    final settings = await repo.getSettings();
-    if (settings == null) return;
-    await BlockingService.setUserLists(
-      blocklist: parseDomainList(settings.customBlocklist),
-      allowlist: parseDomainList(settings.customAllowlist),
-    );
+    // Routes through the actions provider so legacy subdomain-only blocklist
+    // entries are upgraded to the whole site before being pushed to native.
+    await ref.read(domainListsActionsProvider).syncToNative();
   }
 
   Future<void> _reconcileWithNative() async {
