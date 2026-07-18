@@ -121,20 +121,23 @@ private fun matchesAny(lowerDomain: String, list: Set<String>): Boolean {
     return false
 }
 
-private fun isAllowed(lowerDomain: String): Boolean =
-    matchesAny(lowerDomain, ALLOWLIST) || matchesAny(lowerDomain, USER_ALLOWLIST)
-
 private fun isBlocked(domain: String): Boolean {
     if (domain.isEmpty()) return false
     val lower = domain.lowercase()
-    // DoH bootstrap is blocked unconditionally, even past the allowlist: if a
+    // DoH bootstrap is blocked unconditionally, even past every list: if a
     // browser's encrypted resolver comes up it tunnels around every rule below.
     if (matchesAny(lower, DOH_BOOTSTRAP)) return true
-    // Allowlist wins: a listed domain (or its subdomains) is never blocked.
-    if (isAllowed(lower)) return false
+    // The user's OWN choices come first, so he can block (or un-block) ANY
+    // domain himself — even one the built-in safelist would otherwise protect
+    // (youtube.com, reddit.com, tiktok.com, …). Without this, a user block of a
+    // safelisted site was silently swallowed by the allowlist below and the
+    // site kept loading. A user un-block wins over a user block if both match.
+    if (matchesAny(lower, USER_ALLOWLIST)) return false
+    if (matchesAny(lower, USER_BLOCKLIST)) return true
+    // Built-in safelist un-blocks; then the built-in porn blocklists block.
+    if (matchesAny(lower, ALLOWLIST)) return false
     return matchesAny(lower, BLOCKLIST) ||
-        matchesAny(lower, BUILTIN_EXTRA) ||
-        matchesAny(lower, USER_BLOCKLIST)
+        matchesAny(lower, BUILTIN_EXTRA)
 }
 
 class BlockingService : VpnService() {
