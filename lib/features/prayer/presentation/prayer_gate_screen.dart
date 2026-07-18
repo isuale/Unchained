@@ -140,8 +140,9 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     }
     // Phase 5 (native enforcement) opens the 24-hour unlock window here.
 
-    // Go INTO the app's control panel (the dashboard), landing on the Ajustes/
-    // controls tab (index 1) rather than the prayer home the user just left.
+    // Go INTO the app's control panel: the dashboard's Protección tab (index 1),
+    // where protection, the block list, the progress graphic and settings live —
+    // not the prayer home the user just left.
     router.go('/dashboard', extra: 1);
   }
 
