@@ -100,6 +100,15 @@ const _gloryBe = {
       'princípio, agora e sempre, pelos séculos dos séculos. Amém.',
 };
 
+// Said at the end of each mystery, BEFORE the Fátima prayer.
+const _oMaria = {
+  Lang.es: 'Oh María, concebida sin pecado, ruega por nosotros que recurrimos '
+      'a Ti.',
+  Lang.en: 'O Mary, conceived without sin, pray for us who have recourse to '
+      'thee.',
+  Lang.pt: 'Ó Maria, concebida sem pecado, rogai por nós que recorremos a Vós.',
+};
+
 const _fatima = {
   Lang.es: 'Oh Jesús mío, perdónanos nuestros pecados, líbranos del fuego del '
       'infierno, lleva al cielo a todas las almas, especialmente a las más '
@@ -289,7 +298,7 @@ PrayerGuide buildRosary(Lang lang, MysterySet set) {
     steps.add(PrayerStep(tr(_hTenHail, lang), tr(_hailMary, lang)));
     steps.add(PrayerStep(
       tr(_hGloryFatima, lang),
-      '${tr(_gloryBe, lang)}\n\n${tr(_fatima, lang)}',
+      '${tr(_gloryBe, lang)}\n\n${tr(_oMaria, lang)}\n\n${tr(_fatima, lang)}',
     ));
   }
   steps.add(PrayerStep(tr(_hSalve, lang), tr(_hailHolyQueen, lang)));

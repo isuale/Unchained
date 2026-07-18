@@ -119,27 +119,38 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   Future<void> _complete(Lang lang) async {
     if (_completed || !_canFinish) return;
+    // Capture router + messenger BEFORE the async gap. Using `context` after an
+    // await can silently no-op if the element is torn down; grabbing these now
+    // guarantees we always return to the control panel once the prayer is done.
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     setState(() => _completed = true);
     _timer?.cancel();
+    scriptureLockActive.value = false; // restore the footer/chrome on the way out
 
-    await ref.read(prayerRepositoryProvider).logPrayer(
-          triggerPackage: widget.args.triggerPackage,
-          prayerType: _type,
-          durationSeconds: _elapsed,
-          completedAt: DateTime.now(),
-        );
+    try {
+      await ref.read(prayerRepositoryProvider).logPrayer(
+            triggerPackage: widget.args.triggerPackage,
+            prayerType: _type,
+            durationSeconds: _elapsed,
+            completedAt: DateTime.now(),
+          );
+    } catch (e, st) {
+      // Never let a logging failure trap the user on the prayer screen.
+      debugPrint('logPrayer failed: $e\n$st');
+    }
     // Phase 5 (native enforcement) opens the 24-hour unlock window here.
 
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
         content: Text(PS.completedToast(lang)),
         behavior: SnackBarBehavior.floating,
         backgroundColor: _card,
       ),
     );
-    // Leave the gate and bring the control panel back.
-    context.go('/dashboard');
+    // Leave the gate and bring the control panel back — always.
+    router.go('/dashboard');
   }
 
   String get _clock {
