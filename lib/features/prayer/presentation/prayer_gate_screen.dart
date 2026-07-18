@@ -64,6 +64,13 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   bool get _done => _secondsLeft <= 0;
 
+  // Minimum time praying before the finish button unlocks. Stops an instant
+  // skip, but lets someone who prays faster leave after a couple of minutes
+  // instead of waiting out the whole session.
+  static const int _minExitSeconds = 120;
+  int get _elapsed => _duration.inSeconds - _secondsLeft;
+  bool get _canFinish => _done || _elapsed >= _minExitSeconds;
+
   @override
   void initState() {
     super.initState();
@@ -115,14 +122,14 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   }
 
   Future<void> _complete() async {
-    if (_completed || !_done) return;
+    if (_completed || !_canFinish) return;
     setState(() => _completed = true);
     _timer?.cancel();
 
     await ref.read(prayerRepositoryProvider).logPrayer(
           triggerPackage: widget.args.triggerPackage,
           prayerType: _guide.type,
-          durationSeconds: _duration.inSeconds,
+          durationSeconds: _elapsed,
           completedAt: DateTime.now(),
         );
     // Phase 5 (native enforcement) opens the 24-hour unlock window here.
@@ -135,7 +142,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
         backgroundColor: _card,
       ),
     );
-    if (context.canPop()) context.pop();
+    // Leave the gate and bring the control panel back.
+    context.go('/dashboard');
   }
 
   String get _clock {
@@ -146,7 +154,6 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   @override
   Widget build(BuildContext context) {
-    final voluntary = widget.args.mode == PrayerGateMode.voluntary;
     final fraction = 1 - (_secondsLeft / _duration.inSeconds);
 
     return PopScope(
@@ -159,7 +166,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _header(voluntary),
+                _header(),
                 const SizedBox(height: 14),
                 Expanded(child: _prayerBody()),
                 const SizedBox(height: 12),
@@ -174,7 +181,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     );
   }
 
-  Widget _header(bool voluntary) {
+  Widget _header() {
     return Row(
       children: [
         const Icon(Icons.volunteer_activism, color: _gold, size: 24),
@@ -203,13 +210,6 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
             fontWeight: FontWeight.w700,
           ),
         ),
-        if (voluntary && !_done)
-          TextButton(
-            onPressed: () {
-              if (context.canPop()) context.pop();
-            },
-            child: Text('Salir', style: GoogleFonts.inter(color: _dim)),
-          ),
       ],
     );
   }
@@ -275,8 +275,9 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
         Text(
           _done
               ? 'Oración completada. Pulsa Amén para continuar.'
-              : 'Ora durante ${_duration.inMinutes} minutos. El tiempo se pausa '
-                  'si sales de la app.',
+              : _canFinish
+                  ? 'Puedes terminar cuando quieras. El tiempo se pausa si sales.'
+                  : 'Ora al menos 2 minutos. El tiempo se pausa si sales de la app.',
           style: GoogleFonts.inter(color: _dim, fontSize: 12),
           textAlign: TextAlign.center,
         ),
@@ -285,17 +286,22 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   }
 
   Widget _amenButton() {
+    final label = _done
+        ? 'Amén'
+        : _canFinish
+            ? 'He terminado · Amén'
+            : 'Ora para continuar · ${_minExitSeconds - _elapsed}s';
     return SizedBox(
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: _done ? _complete : null,
-        icon: Icon(_done ? Icons.check_circle : Icons.lock_clock, size: 22),
+        onPressed: _canFinish ? _complete : null,
+        icon: Icon(_canFinish ? Icons.check_circle : Icons.lock_clock, size: 22),
         label: Text(
-          _done ? 'Amén' : 'Ora para continuar…',
+          label,
           style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _done ? _good : _card,
+          backgroundColor: _canFinish ? _good : _card,
           foregroundColor: Colors.white,
           disabledBackgroundColor: _card,
           disabledForegroundColor: _dim,
