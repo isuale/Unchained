@@ -71,7 +71,14 @@ class PlanActivationOverlay {
         ?.termsAccepted ==
         true;
     if (!context.mounted) return;
-    context.go(accepted ? '/dashboard' : '/terms');
+    // After paying, land on the Protección (blocking) tab first, not the
+    // prayer home. If terms aren't accepted yet, the terms gate handles the
+    // same landing once the user agrees.
+    if (accepted) {
+      context.go('/dashboard', extra: 1);
+    } else {
+      context.go('/terms');
+    }
   }
 }
 
