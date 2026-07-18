@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -117,13 +118,11 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     });
   }
 
-  Future<void> _complete(Lang lang) async {
+  Future<void> _complete() async {
     if (_completed || !_canFinish) return;
-    // Capture router + messenger BEFORE the async gap. Using `context` after an
-    // await can silently no-op if the element is torn down; grabbing these now
-    // guarantees we always return to the control panel once the prayer is done.
+    // Capture the router BEFORE the async gap so resetting the in-app stack
+    // can't be lost if the element is torn down while logging.
     final router = GoRouter.of(context);
-    final messenger = ScaffoldMessenger.of(context);
 
     setState(() => _completed = true);
     _timer?.cancel();
@@ -142,15 +141,13 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     }
     // Phase 5 (native enforcement) opens the 24-hour unlock window here.
 
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(PS.completedToast(lang)),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: _card,
-      ),
-    );
-    // Leave the gate and bring the control panel back — always.
+    // Reset the in-app stack to the home so reopening the app never lands back
+    // on this finished gate...
     router.go('/dashboard');
+    // ...then let the user OUT to their phone (and now-unlocked apps) by
+    // sending the app to the background — the same "let you out" the lock
+    // screen uses.
+    await SystemNavigator.pop();
   }
 
   String get _clock {
@@ -384,7 +381,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     return SizedBox(
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: _canFinish ? () => _complete(lang) : null,
+        onPressed: _canFinish ? _complete : null,
         icon:
             Icon(_canFinish ? Icons.check_circle : Icons.lock_clock, size: 22),
         label: Text(label,
