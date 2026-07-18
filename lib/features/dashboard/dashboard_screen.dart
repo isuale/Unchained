@@ -7,14 +7,18 @@ import 'package:unchained/features/prayer/presentation/prayer_home_screen.dart';
 // files are kept in-tree for one release rather than deleted, so nothing is lost
 // if we need to reference them; they are simply no longer routed here.
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({super.key, this.initialTab = 0});
+
+  /// Which bottom-nav tab to open on: 0 = Oración, 1 = Ajustes. Finishing a
+  /// prayer lands on 1 (the control/settings side of the panel).
+  final int initialTab;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _index = 0;
+  late int _index = widget.initialTab;
 
   static const _bg = Color(0xFF0A0E18);
   static const _active = Color(0xFF1E5FFF);

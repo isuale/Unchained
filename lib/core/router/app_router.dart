@@ -67,7 +67,9 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/dashboard',
-      builder: (context, state) => const DashboardScreen(),
+      builder: (context, state) => DashboardScreen(
+        initialTab: state.extra is int ? state.extra as int : 0,
+      ),
     ),
     GoRoute(
       path: '/accountability',

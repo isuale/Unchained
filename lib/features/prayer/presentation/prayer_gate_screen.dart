@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -120,8 +119,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   Future<void> _complete() async {
     if (_completed || !_canFinish) return;
-    // Capture the router BEFORE the async gap so resetting the in-app stack
-    // can't be lost if the element is torn down while logging.
+    // Capture the router BEFORE the async gap so navigation can't be lost if
+    // the element is torn down while logging.
     final router = GoRouter.of(context);
 
     setState(() => _completed = true);
@@ -141,13 +140,9 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     }
     // Phase 5 (native enforcement) opens the 24-hour unlock window here.
 
-    // Reset the in-app stack to the home so reopening the app never lands back
-    // on this finished gate...
-    router.go('/dashboard');
-    // ...then let the user OUT to their phone (and now-unlocked apps) by
-    // sending the app to the background — the same "let you out" the lock
-    // screen uses.
-    await SystemNavigator.pop();
+    // Go INTO the app's control panel (the dashboard), landing on the Ajustes/
+    // controls tab (index 1) rather than the prayer home the user just left.
+    router.go('/dashboard', extra: 1);
   }
 
   String get _clock {
