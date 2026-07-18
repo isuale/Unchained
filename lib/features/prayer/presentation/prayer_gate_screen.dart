@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/guard/lock_visibility.dart';
+import 'package:unchained/features/prayer/data/app_lock_service.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
 import 'package:unchained/features/prayer/domain/prayer_strings.dart';
 import 'package:unchained/features/prayer/domain/prayers.dart';
@@ -138,12 +140,19 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
       // Never let a logging failure trap the user on the prayer screen.
       debugPrint('logPrayer failed: $e\n$st');
     }
-    // Phase 5 (native enforcement) opens the 24-hour unlock window here.
 
-    // Go INTO the app's control panel: the dashboard's Protección tab (index 1),
-    // where protection, the block list, the progress graphic and settings live —
-    // not the prayer home the user just left.
+    // Praying opens the 24-hour window: all locked apps become usable until it
+    // elapses. Always do this, however the gate was raised.
+    await AppLockService.openUnlockWindow(24);
+
+    // Reset the in-app stack to the control panel (dashboard's Protección tab).
     router.go('/dashboard', extra: 1);
+
+    // If a locked app raised this gate, drop back to the phone so the user
+    // lands on the app they were opening — now unlocked for 24h.
+    if (widget.args.mode == PrayerGateMode.enforced) {
+      await SystemNavigator.pop();
+    }
   }
 
   String get _clock {

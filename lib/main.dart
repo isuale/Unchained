@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/core/router/app_router.dart';
-import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
+import 'package:unchained/features/prayer/data/app_lock_service.dart';
+import 'package:unchained/features/prayer/presentation/prayer_gate_screen.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 import 'package:unchained/shared/app_credits.dart';
 
@@ -18,22 +19,38 @@ void main() {
     scriptureLockActive.value = true;
     appRouter.go('/lock');
   });
-  // Prayer app-locker pivot: the DNS/VPN content filter is retired. Tear down
-  // any still-running blocking VPN on launch so no content filtering remains
-  // active from a previous version. The blocking code stays in-tree for one
-  // release but is no longer offered in the UI. Fire-and-forget; a channel
-  // failure is swallowed inside BlockingService and returns false.
-  BlockingService.stop();
+  // Prayer app-locker: the native watchdog calls this when a locked app is
+  // opened, and we raise the prayer gate in enforced mode over it.
+  AppLockService.registerPrayerHandler((package) {
+    appRouter.push(
+      '/pray',
+      extra: PrayerGateArgs(
+        mode: PrayerGateMode.enforced,
+        triggerPackage: package,
+      ),
+    );
+  });
 
   runApp(const ProviderScope(child: MyApp()));
-  // Cold-start path: if the watchdog launched us specifically to show the lock,
-  // pull that fact once the engine is ready (a pushed showLock can be lost if it
-  // fires before the handler above is registered). Without this, opening App info
-  // while the app is closed lands the user on the dashboard, not the 800 letters.
+  // Cold-start path: if the watchdog launched us specifically to show the lock
+  // (or the prayer gate), pull that fact once the engine is ready — a pushed
+  // showLock/showPrayer can be lost if it fires before the handlers above are
+  // registered. The uninstall lock takes priority over a prayer.
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     if (await UninstallGuardService.consumePendingLock()) {
       scriptureLockActive.value = true;
       appRouter.go('/lock');
+      return;
+    }
+    final package = await AppLockService.consumePendingPrayer();
+    if (package != null) {
+      appRouter.push(
+        '/pray',
+        extra: PrayerGateArgs(
+          mode: PrayerGateMode.enforced,
+          triggerPackage: package,
+        ),
+      );
     }
   });
 }

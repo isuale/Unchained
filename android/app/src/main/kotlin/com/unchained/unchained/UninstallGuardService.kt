@@ -2,6 +2,7 @@ package com.unchained.unchained
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -41,7 +42,6 @@ class UninstallGuardService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
-        if (!GuardState.isEnabled(this)) return
 
         val type = event.eventType
         if (type != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED &&
@@ -51,8 +51,18 @@ class UninstallGuardService : AccessibilityService() {
         }
 
         val pkg = event.packageName?.toString() ?: return
-        // Never react to ourselves (the lock screen itself, or our setup deep-links).
+        // Never react to ourselves (the lock/prayer screen itself, or our deep-links).
         if (pkg == packageName) return
+
+        // Prayer app-lock: raise the prayer gate when a locked app is brought to
+        // the foreground. Runs independently of the uninstall guard, but only on
+        // a real app switch (WINDOW_STATE_CHANGED), never on content churn.
+        if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            maybeLockApp(pkg)
+        }
+
+        // Everything below is the uninstall guard, which requires it to be on.
+        if (!GuardState.isEnabled(this)) return
 
         val watched = pkg in SETTINGS_PACKAGES || pkg in INSTALLER_PACKAGES || pkg in STORE_PACKAGES
         if (watched) Log.d(TAG, "watched window pkg=$pkg type=$type")
@@ -136,6 +146,62 @@ class UninstallGuardService : AccessibilityService() {
         return false
     }
 
+    /**
+     * If [pkg] is a locked app and we're outside the unlock window, bring the
+     * Flutter prayer gate ([MainActivity] routed to `/pray`) to the front over
+     * it. Debounced so one launch doesn't fire repeatedly.
+     */
+    private fun maybeLockApp(pkg: String) {
+        if (!AppLockState.shouldLock(this, pkg, exemptPackages())) return
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastPrayerLaunchElapsed < PRAYER_DEBOUNCE_MS) return
+        lastPrayerLaunchElapsed = now
+        Log.d(TAG, "APP-LOCK: raising prayer gate over $pkg")
+        launchPrayer(pkg)
+    }
+
+    private fun launchPrayer(pkg: String) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+            )
+            putExtra(MainActivity.EXTRA_SHOW_PRAYER, true)
+            putExtra(MainActivity.EXTRA_PRAYER_PACKAGE, pkg)
+        }
+        startActivity(intent)
+    }
+
+    /**
+     * Packages the app-lock never gates: ourselves, the system UI / framework,
+     * the current launcher (locking Home would trap the user), and the Settings
+     * / installer surfaces (so the phone stays usable even in "lock all" mode).
+     * Cached after first resolution.
+     */
+    private fun exemptPackages(): Set<String> {
+        cachedExempt?.let { return it }
+        val set = HashSet<String>()
+        set.add(packageName)
+        set.add("com.android.systemui")
+        set.add("android")
+        set.addAll(SETTINGS_PACKAGES)
+        set.addAll(INSTALLER_PACKAGES)
+        defaultLauncher()?.let { set.add(it) }
+        cachedExempt = set
+        return set
+    }
+
+    private fun defaultLauncher(): String? = try {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        packageManager
+            .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+            ?.activityInfo
+            ?.packageName
+    } catch (e: Exception) {
+        null
+    }
+
     private fun launchLock() {
         val intent = Intent(this, MainActivity::class.java).apply {
             // CLEAR_TOP (vs. the old REORDER_TO_FRONT) forces a real bring-to-front of
@@ -188,7 +254,15 @@ class UninstallGuardService : AccessibilityService() {
         /** Wait for the BACK transition to settle before launching the lock. */
         private const val LAUNCH_DELAY_MS = 150L
 
+        // Debounce for the prayer gate so one app open raises it once, not on
+        // every follow-up window event within the same app.
+        private const val PRAYER_DEBOUNCE_MS = 1500L
+
         private var lastTriggerElapsed = 0L
+        private var lastPrayerLaunchElapsed = 0L
+
+        // Resolved once: the packages the app-lock must never gate.
+        private var cachedExempt: Set<String>? = null
 
         // Our user-visible label (see android:label in the manifest). Lowercase.
         private val APP_LABELS = listOf("unchained")

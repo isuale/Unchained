@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:unchained/features/prayer/data/app_lock_service.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
 import 'package:unchained/features/prayer/domain/prayer_strings.dart';
 import 'package:unchained/features/prayer/domain/prayers.dart';
@@ -26,6 +27,8 @@ class PrayerHomeScreen extends ConsumerWidget {
     final prayers = ref.watch(prayerLogProvider).asData?.value ?? const [];
     final lockAll = ref.watch(lockAllAppsProvider).asData?.value ?? false;
     final lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
+    // Keep the native watchdog's locked-app config in sync with the DB.
+    ref.watch(appLockSyncProvider);
 
     return Scaffold(
       backgroundColor: Colors.black,

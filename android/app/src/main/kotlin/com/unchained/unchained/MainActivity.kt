@@ -23,11 +23,15 @@ class MainActivity : FlutterActivity() {
     private val guardChannelName = "unchained/guard"
     private val feedGuardChannelName = "unchained/feed_guard"
     private val appsChannelName = "unchained/apps"
+    private val appLockChannelName = "unchained/applock"
     private var pendingPrepareResult: MethodChannel.Result? = null
 
     private var guardChannel: MethodChannel? = null
+    private var appLockChannel: MethodChannel? = null
     // Set when the watchdog launched us before the Flutter engine/channel was ready.
     private var pendingShowLock = false
+    // The locked package that raised the prayer gate, if launched before ready.
+    private var pendingPrayerPackage: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +51,9 @@ class MainActivity : FlutterActivity() {
         if (intent?.getBooleanExtra(EXTRA_SHOW_LOCK, false) == true) {
             pendingShowLock = true
         }
+        if (intent?.getBooleanExtra(EXTRA_SHOW_PRAYER, false) == true) {
+            pendingPrayerPackage = intent?.getStringExtra(EXTRA_PRAYER_PACKAGE)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -55,6 +62,11 @@ class MainActivity : FlutterActivity() {
         if (intent.getBooleanExtra(EXTRA_SHOW_LOCK, false)) {
             // Engine is already up on a re-launch; deliver immediately.
             guardChannel?.invokeMethod("showLock", null) ?: run { pendingShowLock = true }
+        }
+        if (intent.getBooleanExtra(EXTRA_SHOW_PRAYER, false)) {
+            val p = intent.getStringExtra(EXTRA_PRAYER_PACKAGE)
+            appLockChannel?.invokeMethod("showPrayer", p)
+                ?: run { pendingPrayerPackage = p }
         }
     }
 
@@ -254,9 +266,49 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
+        appLockChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            appLockChannelName
+        ).also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "setConfig" -> {
+                        val lockAll = call.argument<Boolean>("lockAll") ?: false
+                        val pkgs = call.argument<List<String>>("packages") ?: emptyList()
+                        AppLockState.setConfig(applicationContext, lockAll, pkgs.toSet())
+                        result.success(true)
+                    }
+                    "openUnlockWindow" -> {
+                        val hours = call.argument<Int>("hours") ?: 24
+                        AppLockState.openUnlockWindow(applicationContext, hours)
+                        result.success(true)
+                    }
+                    "consumePendingPrayer" -> {
+                        // Cold-start safety net, mirroring consumePendingLock: if the
+                        // watchdog cold-launched us to pray, report the package once and
+                        // clear the intent extra so a later normal open won't re-trigger.
+                        val p = pendingPrayerPackage
+                            ?: if (intent?.getBooleanExtra(EXTRA_SHOW_PRAYER, false) == true) {
+                                intent?.getStringExtra(EXTRA_PRAYER_PACKAGE)
+                            } else {
+                                null
+                            }
+                        pendingPrayerPackage = null
+                        intent?.removeExtra(EXTRA_SHOW_PRAYER)
+                        result.success(p)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
+
         if (pendingShowLock) {
             pendingShowLock = false
             guardChannel?.invokeMethod("showLock", null)
+        }
+        pendingPrayerPackage?.let { p ->
+            pendingPrayerPackage = null
+            appLockChannel?.invokeMethod("showPrayer", p)
         }
     }
 
@@ -312,6 +364,8 @@ class MainActivity : FlutterActivity() {
 
     companion object {
         const val EXTRA_SHOW_LOCK = "com.unchained.unchained.SHOW_LOCK"
+        const val EXTRA_SHOW_PRAYER = "com.unchained.unchained.SHOW_PRAYER"
+        const val EXTRA_PRAYER_PACKAGE = "com.unchained.unchained.PRAYER_PACKAGE"
         private const val REQ_VPN = 7001
         private const val REQ_NOTIF = 7002
         private const val REQ_DEVICE_ADMIN = 7003
