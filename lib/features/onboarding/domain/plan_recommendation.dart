@@ -34,21 +34,33 @@ int calculateTotalScore(Map<String, String> selectedAnswers) {
 /// protected span and the fewer/no breaks; the most severe cases run as a
 /// never-ending [CommitmentMode.cycle].
 ///
+/// The protected span scales across six tiers from 14 up to 90 days, so a user's
+/// answers genuinely change how long their plan lasts instead of everyone
+/// landing on the same 90-day cycle.
+///
 /// This is intentionally a pure, deterministic function so the AI plan works
 /// offline, instantly and privately. A real model call could later be dropped
 /// in behind this same signature.
 CommitmentSchedule aiScheduleFor(int percentage) {
-  if (percentage <= 10) {
+  if (percentage <= 20) {
     return const CommitmentSchedule(
-        mode: CommitmentMode.fixed, totalDays: 7, breakCount: 2);
+        mode: CommitmentMode.fixed, totalDays: 14, breakCount: 2);
   }
-  if (percentage <= 50) {
+  if (percentage <= 40) {
     return const CommitmentSchedule(
-        mode: CommitmentMode.fixed, totalDays: 21, breakCount: 1);
+        mode: CommitmentMode.fixed, totalDays: 30, breakCount: 1);
   }
-  if (percentage <= 80) {
+  if (percentage <= 60) {
     return const CommitmentSchedule(
-        mode: CommitmentMode.cycle, totalDays: 45, breakCount: 1);
+        mode: CommitmentMode.fixed, totalDays: 45, breakCount: 1);
+  }
+  if (percentage <= 75) {
+    return const CommitmentSchedule(
+        mode: CommitmentMode.cycle, totalDays: 60, breakCount: 1);
+  }
+  if (percentage <= 90) {
+    return const CommitmentSchedule(
+        mode: CommitmentMode.cycle, totalDays: 75, breakCount: 0);
   }
   return const CommitmentSchedule(
       mode: CommitmentMode.cycle, totalDays: 90, breakCount: 0);
