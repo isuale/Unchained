@@ -191,11 +191,11 @@ const gozosos = MysterySet(
   'gozosos',
   {Lang.es: 'Misterios Gozosos', Lang.en: 'Joyful Mysteries', Lang.pt: 'Mistérios Gozosos'},
   [
-    {Lang.es: 'La Anunciación del Ángel a María', Lang.en: 'The Annunciation', Lang.pt: 'A Anunciação'},
-    {Lang.es: 'La Visitación de María a Isabel', Lang.en: 'The Visitation', Lang.pt: 'A Visitação'},
-    {Lang.es: 'El Nacimiento de Jesús', Lang.en: 'The Nativity of Jesus', Lang.pt: 'O Nascimento de Jesus'},
-    {Lang.es: 'La Presentación de Jesús en el templo', Lang.en: 'The Presentation in the Temple', Lang.pt: 'A Apresentação no Templo'},
-    {Lang.es: 'El Niño Jesús hallado en el templo', Lang.en: 'Finding Jesus in the Temple', Lang.pt: 'O Encontro do Menino no Templo'},
+    {Lang.es: 'La anunciación del ángel a la Virgen Nuestra Señora', Lang.en: 'The Annunciation of the angel to the Virgin Mary', Lang.pt: 'A anunciação do anjo à Virgem Nossa Senhora'},
+    {Lang.es: 'La visitación de Nuestra Señora a su prima santa Isabel', Lang.en: 'The Visitation of Our Lady to her cousin Saint Elizabeth', Lang.pt: 'A visitação de Nossa Senhora à sua prima santa Isabel'},
+    {Lang.es: 'El nacimiento del Hijo de Dios en Belén', Lang.en: 'The Nativity of the Son of God in Bethlehem', Lang.pt: 'O nascimento do Filho de Deus em Belém'},
+    {Lang.es: 'La presentación de Jesús en el Templo', Lang.en: 'The Presentation of Jesus in the Temple', Lang.pt: 'A apresentação de Jesus no Templo'},
+    {Lang.es: 'El Niño Dios perdido y hallado en el Templo', Lang.en: 'The Child Jesus lost and found in the Temple', Lang.pt: 'O Menino Deus perdido e achado no Templo'},
   ],
 );
 
@@ -203,11 +203,11 @@ const dolorosos = MysterySet(
   'dolorosos',
   {Lang.es: 'Misterios Dolorosos', Lang.en: 'Sorrowful Mysteries', Lang.pt: 'Mistérios Dolorosos'},
   [
-    {Lang.es: 'La Oración de Jesús en el huerto', Lang.en: 'The Agony in the Garden', Lang.pt: 'A Agonia no Horto'},
-    {Lang.es: 'La Flagelación del Señor', Lang.en: 'The Scourging at the Pillar', Lang.pt: 'A Flagelação'},
-    {Lang.es: 'La Coronación de espinas', Lang.en: 'The Crowning with Thorns', Lang.pt: 'A Coroação de Espinhos'},
-    {Lang.es: 'Jesús con la cruz a cuestas', Lang.en: 'The Carrying of the Cross', Lang.pt: 'Jesus a caminho do Calvário'},
-    {Lang.es: 'La Crucifixión y muerte de Jesús', Lang.en: 'The Crucifixion', Lang.pt: 'A Crucificação e Morte de Jesus'},
+    {Lang.es: 'La oración de Jesús en el Huerto', Lang.en: 'The Agony of Jesus in the Garden', Lang.pt: 'A oração de Jesus no Horto'},
+    {Lang.es: 'La flagelación del Señor', Lang.en: 'The Scourging at the Pillar', Lang.pt: 'A flagelação'},
+    {Lang.es: 'La coronación de espinas', Lang.en: 'The Crowning with Thorns', Lang.pt: 'A coroação de espinhos'},
+    {Lang.es: 'Jesús con la cruz a cuestas', Lang.en: 'Jesus carrying the Cross', Lang.pt: 'Jesus com a cruz às costas'},
+    {Lang.es: 'Jesús muere en la cruz', Lang.en: 'Jesus dies on the Cross', Lang.pt: 'Jesus morre na cruz'},
   ],
 );
 
@@ -215,11 +215,11 @@ const gloriosos = MysterySet(
   'gloriosos',
   {Lang.es: 'Misterios Gloriosos', Lang.en: 'Glorious Mysteries', Lang.pt: 'Mistérios Gloriosos'},
   [
-    {Lang.es: 'La Resurrección del Señor', Lang.en: 'The Resurrection', Lang.pt: 'A Ressurreição'},
-    {Lang.es: 'La Ascensión del Señor', Lang.en: 'The Ascension', Lang.pt: 'A Ascensão'},
-    {Lang.es: 'La Venida del Espíritu Santo', Lang.en: 'The Descent of the Holy Spirit', Lang.pt: 'A Vinda do Espírito Santo'},
-    {Lang.es: 'La Asunción de María', Lang.en: 'The Assumption of Mary', Lang.pt: 'A Assunção de Maria'},
-    {Lang.es: 'La Coronación de María', Lang.en: 'The Coronation of Mary', Lang.pt: 'A Coroação de Maria'},
+    {Lang.es: 'La resurrección del Señor', Lang.en: 'The Resurrection of the Lord', Lang.pt: 'A ressurreição do Senhor'},
+    {Lang.es: 'La ascensión de Jesús al cielo', Lang.en: 'The Ascension of Jesus into Heaven', Lang.pt: 'A ascensão de Jesus ao céu'},
+    {Lang.es: 'La venida del Espíritu Santo', Lang.en: 'The Descent of the Holy Spirit', Lang.pt: 'A vinda do Espírito Santo'},
+    {Lang.es: 'La asunción de Nuestra Señora', Lang.en: 'The Assumption of Our Lady', Lang.pt: 'A assunção de Nossa Senhora'},
+    {Lang.es: 'La coronación de María Santísima', Lang.en: 'The Coronation of Mary Most Holy', Lang.pt: 'A coroação de Maria Santíssima'},
   ],
 );
 
@@ -227,11 +227,11 @@ const luminosos = MysterySet(
   'luminosos',
   {Lang.es: 'Misterios Luminosos', Lang.en: 'Luminous Mysteries', Lang.pt: 'Mistérios Luminosos'},
   [
-    {Lang.es: 'El Bautismo de Jesús en el Jordán', Lang.en: 'The Baptism in the Jordan', Lang.pt: 'O Batismo no Jordão'},
-    {Lang.es: 'Las bodas de Caná', Lang.en: 'The Wedding at Cana', Lang.pt: 'As Bodas de Caná'},
-    {Lang.es: 'El anuncio del Reino de Dios', Lang.en: 'The Proclamation of the Kingdom', Lang.pt: 'O Anúncio do Reino'},
-    {Lang.es: 'La Transfiguración del Señor', Lang.en: 'The Transfiguration', Lang.pt: 'A Transfiguração'},
-    {Lang.es: 'La Institución de la Eucaristía', Lang.en: 'The Institution of the Eucharist', Lang.pt: 'A Instituição da Eucaristia'},
+    {Lang.es: 'El bautismo en el Jordán', Lang.en: 'The Baptism in the Jordan', Lang.pt: 'O batismo no Jordão'},
+    {Lang.es: 'La autorrevelación en las bodas de Caná', Lang.en: 'The self-revelation at the wedding of Cana', Lang.pt: 'A autorrevelação nas bodas de Caná'},
+    {Lang.es: 'El anuncio del reino de Dios con invitación a la conversión', Lang.en: 'The proclamation of the Kingdom of God with the call to conversion', Lang.pt: 'O anúncio do reino de Deus com convite à conversão'},
+    {Lang.es: 'La transfiguración', Lang.en: 'The Transfiguration', Lang.pt: 'A transfiguração'},
+    {Lang.es: 'La institución de la Eucaristía', Lang.en: 'The Institution of the Eucharist', Lang.pt: 'A instituição da Eucaristia'},
   ],
 );
 
