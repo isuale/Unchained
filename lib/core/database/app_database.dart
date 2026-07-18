@@ -119,6 +119,15 @@ class BlockingSettings extends Table {
   TextColumn get customBlocklist => text().nullable()();
   TextColumn get customAllowlist => text().nullable()();
 
+  // Prayer app-locker. When [prayerLockAllApps] is true, every launchable app
+  // is locked behind prayer and the per-app LockedApps selection is ignored;
+  // when false, only the apps in LockedApps are locked. [prayerUnlockHours] is
+  // how long all apps stay open after a completed prayer (default 24h).
+  BoolColumn get prayerLockAllApps =>
+      boolean().withDefault(const Constant(false))();
+  IntColumn get prayerUnlockHours =>
+      integer().withDefault(const Constant(24))();
+
   DateTimeColumn get updatedAt =>
       dateTime().clientDefault(() => DateTime.now())();
 
@@ -172,7 +181,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -238,6 +247,13 @@ class AppDatabase extends _$AppDatabase {
           if (from < 9) {
             await m.createTable(lockedApps);
             await m.createTable(prayerLog);
+          }
+          // v10: lock-all-apps mode + unlock-window length for the app-locker.
+          if (from < 10) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.prayerLockAllApps);
+            await m.addColumn(
+                blockingSettings, blockingSettings.prayerUnlockHours);
           }
         },
         beforeOpen: (details) async {

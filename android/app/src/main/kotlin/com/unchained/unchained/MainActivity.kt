@@ -22,6 +22,7 @@ class MainActivity : FlutterActivity() {
     private val channelName = "unchained/blocking"
     private val guardChannelName = "unchained/guard"
     private val feedGuardChannelName = "unchained/feed_guard"
+    private val appsChannelName = "unchained/apps"
     private var pendingPrepareResult: MethodChannel.Result? = null
 
     private var guardChannel: MethodChannel? = null
@@ -227,6 +228,27 @@ class MainActivity : FlutterActivity() {
                             }
                         }
                         result.success(history)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, appsChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getInstalledApps" -> {
+                        // Enumerating + rendering every launcher icon is too heavy
+                        // for the main thread; do it on a background thread and post
+                        // the reply back on the main looper (MethodChannel requires
+                        // result callbacks on the platform thread).
+                        Thread {
+                            val apps = try {
+                                InstalledApps.list(applicationContext)
+                            } catch (e: Exception) {
+                                emptyList()
+                            }
+                            runOnUiThread { result.success(apps) }
+                        }.start()
                     }
                     else -> result.notImplemented()
                 }

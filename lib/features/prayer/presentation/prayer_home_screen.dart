@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
 
@@ -25,6 +26,7 @@ class PrayerHomeScreen extends ConsumerWidget {
     final streak = ref.watch(prayerStreakProvider);
     final lockedApps = ref.watch(lockedAppsProvider).asData?.value ?? const [];
     final prayers = ref.watch(prayerLogProvider).asData?.value ?? const [];
+    final lockAll = ref.watch(lockAllAppsProvider).asData?.value ?? false;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -71,14 +73,16 @@ class PrayerHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            _lockedAppsButton(context, lockedApps.length),
+            _lockedAppsButton(context, lockAll ? -1 : lockedApps.length),
 
             const SizedBox(height: 28),
             Center(
               child: Text(
-                lockedApps.isEmpty
-                    ? 'Aún no has bloqueado ninguna app.'
-                    : '${lockedApps.length} app(s) bloqueada(s) tras la oración.',
+                lockAll
+                    ? 'Todas las apps están bloqueadas tras la oración.'
+                    : lockedApps.isEmpty
+                        ? 'Aún no has bloqueado ninguna app.'
+                        : '${lockedApps.length} app(s) bloqueada(s) tras la oración.',
                 style: GoogleFonts.inter(color: _dim, fontSize: 12),
               ),
             ),
@@ -152,14 +156,18 @@ class PrayerHomeScreen extends ConsumerWidget {
   }
 
   Widget _lockedAppsButton(BuildContext context, int count) {
+    final label = count < 0
+        ? 'Apps bloqueadas · Todas'
+        : count == 0
+            ? 'Apps bloqueadas'
+            : 'Apps bloqueadas · $count';
     return SizedBox(
       height: 56,
       child: OutlinedButton.icon(
-        onPressed: () =>
-            _soon(context, 'El selector de apps a bloquear llega pronto.'),
+        onPressed: () => context.push('/apps'),
         icon: const Icon(Icons.lock_outline, size: 22),
         label: Text(
-          'Apps bloqueadas',
+          label,
           style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(

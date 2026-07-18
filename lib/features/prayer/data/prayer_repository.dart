@@ -19,6 +19,13 @@ final prayerLogProvider = StreamProvider<List<PrayerEntry>>((ref) {
   return ref.watch(prayerRepositoryProvider).watchPrayerLog();
 });
 
+/// Live "lock every app" flag. True = all launchable apps are locked behind
+/// prayer (the [lockedAppsProvider] selection is ignored); false = only the
+/// chosen apps are locked.
+final lockAllAppsProvider = StreamProvider<bool>((ref) {
+  return ref.watch(prayerRepositoryProvider).watchLockAllApps();
+});
+
 /// The current "days giving thanks" streak: consecutive days (up to and
 /// including today) on which at least one prayer was completed.
 final prayerStreakProvider = Provider<int>((ref) {
@@ -30,6 +37,22 @@ class PrayerRepository {
   PrayerRepository(this._db);
 
   final AppDatabase _db;
+
+  // --- Lock mode (all apps vs. selected apps) ---
+
+  /// Whether every launchable app is locked behind prayer. Reads the settings
+  /// singleton (id = 1), which is guaranteed to exist by the database's
+  /// `_ensureSettingsRow`; defaults to false if somehow absent.
+  Stream<bool> watchLockAllApps() {
+    return (_db.select(_db.blockingSettings)..where((t) => t.id.equals(1)))
+        .watchSingleOrNull()
+        .map((row) => row?.prayerLockAllApps ?? false);
+  }
+
+  Future<void> setLockAllApps(bool value) {
+    return (_db.update(_db.blockingSettings)..where((t) => t.id.equals(1)))
+        .write(BlockingSettingsCompanion(prayerLockAllApps: Value(value)));
+  }
 
   // --- Locked apps ---
 

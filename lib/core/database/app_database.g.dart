@@ -865,6 +865,33 @@ class $BlockingSettingsTable extends BlockingSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _prayerLockAllAppsMeta = const VerificationMeta(
+    'prayerLockAllApps',
+  );
+  @override
+  late final GeneratedColumn<bool> prayerLockAllApps = GeneratedColumn<bool>(
+    'prayer_lock_all_apps',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("prayer_lock_all_apps" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _prayerUnlockHoursMeta = const VerificationMeta(
+    'prayerUnlockHours',
+  );
+  @override
+  late final GeneratedColumn<int> prayerUnlockHours = GeneratedColumn<int>(
+    'prayer_unlock_hours',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(24),
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -913,6 +940,8 @@ class $BlockingSettingsTable extends BlockingSettings
     termsAccepted,
     customBlocklist,
     customAllowlist,
+    prayerLockAllApps,
+    prayerUnlockHours,
     updatedAt,
   ];
   @override
@@ -1218,6 +1247,24 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
       );
     }
+    if (data.containsKey('prayer_lock_all_apps')) {
+      context.handle(
+        _prayerLockAllAppsMeta,
+        prayerLockAllApps.isAcceptableOrUnknown(
+          data['prayer_lock_all_apps']!,
+          _prayerLockAllAppsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('prayer_unlock_hours')) {
+      context.handle(
+        _prayerUnlockHoursMeta,
+        prayerUnlockHours.isAcceptableOrUnknown(
+          data['prayer_unlock_hours']!,
+          _prayerUnlockHoursMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -1369,6 +1416,14 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.string,
         data['${effectivePrefix}custom_allowlist'],
       ),
+      prayerLockAllApps: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}prayer_lock_all_apps'],
+      )!,
+      prayerUnlockHours: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}prayer_unlock_hours'],
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -1417,6 +1472,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final bool termsAccepted;
   final String? customBlocklist;
   final String? customAllowlist;
+  final bool prayerLockAllApps;
+  final int prayerUnlockHours;
   final DateTime updatedAt;
   const BlockingSetting({
     required this.id,
@@ -1453,6 +1510,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     required this.termsAccepted,
     this.customBlocklist,
     this.customAllowlist,
+    required this.prayerLockAllApps,
+    required this.prayerUnlockHours,
     required this.updatedAt,
   });
   @override
@@ -1512,6 +1571,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     if (!nullToAbsent || customAllowlist != null) {
       map['custom_allowlist'] = Variable<String>(customAllowlist);
     }
+    map['prayer_lock_all_apps'] = Variable<bool>(prayerLockAllApps);
+    map['prayer_unlock_hours'] = Variable<int>(prayerUnlockHours);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -1566,6 +1627,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       customAllowlist: customAllowlist == null && nullToAbsent
           ? const Value.absent()
           : Value(customAllowlist),
+      prayerLockAllApps: Value(prayerLockAllApps),
+      prayerUnlockHours: Value(prayerUnlockHours),
       updatedAt: Value(updatedAt),
     );
   }
@@ -1636,6 +1699,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       termsAccepted: serializer.fromJson<bool>(json['termsAccepted']),
       customBlocklist: serializer.fromJson<String?>(json['customBlocklist']),
       customAllowlist: serializer.fromJson<String?>(json['customAllowlist']),
+      prayerLockAllApps: serializer.fromJson<bool>(json['prayerLockAllApps']),
+      prayerUnlockHours: serializer.fromJson<int>(json['prayerUnlockHours']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -1683,6 +1748,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'termsAccepted': serializer.toJson<bool>(termsAccepted),
       'customBlocklist': serializer.toJson<String?>(customBlocklist),
       'customAllowlist': serializer.toJson<String?>(customAllowlist),
+      'prayerLockAllApps': serializer.toJson<bool>(prayerLockAllApps),
+      'prayerUnlockHours': serializer.toJson<int>(prayerUnlockHours),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -1722,6 +1789,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     bool? termsAccepted,
     Value<String?> customBlocklist = const Value.absent(),
     Value<String?> customAllowlist = const Value.absent(),
+    bool? prayerLockAllApps,
+    int? prayerUnlockHours,
     DateTime? updatedAt,
   }) => BlockingSetting(
     id: id ?? this.id,
@@ -1774,6 +1843,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     customAllowlist: customAllowlist.present
         ? customAllowlist.value
         : this.customAllowlist,
+    prayerLockAllApps: prayerLockAllApps ?? this.prayerLockAllApps,
+    prayerUnlockHours: prayerUnlockHours ?? this.prayerUnlockHours,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   BlockingSetting copyWithCompanion(BlockingSettingsCompanion data) {
@@ -1879,6 +1950,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       customAllowlist: data.customAllowlist.present
           ? data.customAllowlist.value
           : this.customAllowlist,
+      prayerLockAllApps: data.prayerLockAllApps.present
+          ? data.prayerLockAllApps.value
+          : this.prayerLockAllApps,
+      prayerUnlockHours: data.prayerUnlockHours.present
+          ? data.prayerUnlockHours.value
+          : this.prayerUnlockHours,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -1924,6 +2001,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write('termsAccepted: $termsAccepted, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
+          ..write('prayerLockAllApps: $prayerLockAllApps, ')
+          ..write('prayerUnlockHours: $prayerUnlockHours, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -1965,6 +2044,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     termsAccepted,
     customBlocklist,
     customAllowlist,
+    prayerLockAllApps,
+    prayerUnlockHours,
     updatedAt,
   ]);
   @override
@@ -2007,6 +2088,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.termsAccepted == this.termsAccepted &&
           other.customBlocklist == this.customBlocklist &&
           other.customAllowlist == this.customAllowlist &&
+          other.prayerLockAllApps == this.prayerLockAllApps &&
+          other.prayerUnlockHours == this.prayerUnlockHours &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -2045,6 +2128,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<bool> termsAccepted;
   final Value<String?> customBlocklist;
   final Value<String?> customAllowlist;
+  final Value<bool> prayerLockAllApps;
+  final Value<int> prayerUnlockHours;
   final Value<DateTime> updatedAt;
   const BlockingSettingsCompanion({
     this.id = const Value.absent(),
@@ -2081,6 +2166,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.termsAccepted = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
+    this.prayerLockAllApps = const Value.absent(),
+    this.prayerUnlockHours = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   BlockingSettingsCompanion.insert({
@@ -2118,6 +2205,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.termsAccepted = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
+    this.prayerLockAllApps = const Value.absent(),
+    this.prayerUnlockHours = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   static Insertable<BlockingSetting> custom({
@@ -2155,6 +2244,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<bool>? termsAccepted,
     Expression<String>? customBlocklist,
     Expression<String>? customAllowlist,
+    Expression<bool>? prayerLockAllApps,
+    Expression<int>? prayerUnlockHours,
     Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
@@ -2208,6 +2299,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       if (termsAccepted != null) 'terms_accepted': termsAccepted,
       if (customBlocklist != null) 'custom_blocklist': customBlocklist,
       if (customAllowlist != null) 'custom_allowlist': customAllowlist,
+      if (prayerLockAllApps != null) 'prayer_lock_all_apps': prayerLockAllApps,
+      if (prayerUnlockHours != null) 'prayer_unlock_hours': prayerUnlockHours,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
@@ -2247,6 +2340,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<bool>? termsAccepted,
     Value<String?>? customBlocklist,
     Value<String?>? customAllowlist,
+    Value<bool>? prayerLockAllApps,
+    Value<int>? prayerUnlockHours,
     Value<DateTime>? updatedAt,
   }) {
     return BlockingSettingsCompanion(
@@ -2289,6 +2384,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       termsAccepted: termsAccepted ?? this.termsAccepted,
       customBlocklist: customBlocklist ?? this.customBlocklist,
       customAllowlist: customAllowlist ?? this.customAllowlist,
+      prayerLockAllApps: prayerLockAllApps ?? this.prayerLockAllApps,
+      prayerUnlockHours: prayerUnlockHours ?? this.prayerUnlockHours,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -2418,6 +2515,12 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     if (customAllowlist.present) {
       map['custom_allowlist'] = Variable<String>(customAllowlist.value);
     }
+    if (prayerLockAllApps.present) {
+      map['prayer_lock_all_apps'] = Variable<bool>(prayerLockAllApps.value);
+    }
+    if (prayerUnlockHours.present) {
+      map['prayer_unlock_hours'] = Variable<int>(prayerUnlockHours.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -2465,6 +2568,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write('termsAccepted: $termsAccepted, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
+          ..write('prayerLockAllApps: $prayerLockAllApps, ')
+          ..write('prayerUnlockHours: $prayerUnlockHours, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -3495,6 +3600,8 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<bool> termsAccepted,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
+      Value<bool> prayerLockAllApps,
+      Value<int> prayerUnlockHours,
       Value<DateTime> updatedAt,
     });
 typedef $$BlockingSettingsTableUpdateCompanionBuilder =
@@ -3533,6 +3640,8 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<bool> termsAccepted,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
+      Value<bool> prayerLockAllApps,
+      Value<int> prayerUnlockHours,
       Value<DateTime> updatedAt,
     });
 
@@ -3712,6 +3821,16 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<String> get customAllowlist => $composableBuilder(
     column: $table.customAllowlist,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get prayerLockAllApps => $composableBuilder(
+    column: $table.prayerLockAllApps,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get prayerUnlockHours => $composableBuilder(
+    column: $table.prayerUnlockHours,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3901,6 +4020,16 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get prayerLockAllApps => $composableBuilder(
+    column: $table.prayerLockAllApps,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get prayerUnlockHours => $composableBuilder(
+    column: $table.prayerUnlockHours,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -4085,6 +4214,16 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get prayerLockAllApps => $composableBuilder(
+    column: $table.prayerLockAllApps,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get prayerUnlockHours => $composableBuilder(
+    column: $table.prayerUnlockHours,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
@@ -4161,6 +4300,8 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> termsAccepted = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
+                Value<bool> prayerLockAllApps = const Value.absent(),
+                Value<int> prayerUnlockHours = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion(
                 id: id,
@@ -4197,6 +4338,8 @@ class $$BlockingSettingsTableTableManager
                 termsAccepted: termsAccepted,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,
+                prayerLockAllApps: prayerLockAllApps,
+                prayerUnlockHours: prayerUnlockHours,
                 updatedAt: updatedAt,
               ),
           createCompanionCallback:
@@ -4236,6 +4379,8 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> termsAccepted = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
+                Value<bool> prayerLockAllApps = const Value.absent(),
+                Value<int> prayerUnlockHours = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BlockingSettingsCompanion.insert(
                 id: id,
@@ -4272,6 +4417,8 @@ class $$BlockingSettingsTableTableManager
                 termsAccepted: termsAccepted,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,
+                prayerLockAllApps: prayerLockAllApps,
+                prayerUnlockHours: prayerUnlockHours,
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
