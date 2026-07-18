@@ -12,6 +12,7 @@ class ToggleRow extends StatelessWidget {
     this.leadingIcon,
     this.parentEnabled = true,
     this.onLockedTap,
+    this.onLongPress,
   });
 
   final String label;
@@ -23,6 +24,10 @@ class ToggleRow extends StatelessWidget {
   final IconData? leadingIcon;
   final bool parentEnabled;
   final VoidCallback? onLockedTap;
+
+  /// Optional long-press handler. Used by the dev-only "reset daily budget"
+  /// affordance on the social-feed rows; null (and inert) in normal builds.
+  final VoidCallback? onLongPress;
 
   static const _accent = Color(0xFF1E5FFF);
   static const _gold = Color(0xFFFFB800);
@@ -110,11 +115,12 @@ class ToggleRow extends StatelessWidget {
       child: content,
     );
 
-    if (tappable) {
+    if (tappable || onLongPress != null) {
       return Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onLockedTap,
+          onTap: tappable ? onLockedTap : null,
+          onLongPress: onLongPress,
           child: wrapped,
         ),
       );

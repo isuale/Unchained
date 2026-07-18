@@ -54,6 +54,22 @@ class FeedGuardBridge {
     }
   }
 
+  /// Dev-only: clears one target's daily usage and drops its 24h exhaustion
+  /// lock so the budget is fresh again immediately. Bypasses the
+  /// anti-circumvention cooldown on purpose — only ever call from a
+  /// [kDevTools]-gated path. Returns false on any failure.
+  static Future<bool> resetTarget(String target) async {
+    try {
+      final r = await _channel.invokeMethod<bool>('resetTarget', {
+        'target': target,
+      });
+      return r ?? false;
+    } catch (e, st) {
+      debugPrint('FeedGuardBridge.resetTarget failed: $e\n$st');
+      return false;
+    }
+  }
+
   /// Live status for every target. Returns an empty map on any failure.
   static Future<Map<String, FeedGuardStatus>> getStatuses() async {
     try {

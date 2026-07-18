@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/app_database.dart';
+import 'package:unchained/core/dev_flags.dart';
 import 'package:unchained/features/dashboard/data/feed_guard_bridge.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/domain/streak_progress.dart';
@@ -173,6 +174,60 @@ class _DashboardBody extends ConsumerWidget {
           : () => _showFeedGuardLockedMessage(context, feedGuardLockedUntil!),
       parentEnabled: protectionOn,
       leadingIcon: icon,
+      // Dev-only: long-press resets this target's daily budget + 24h lock.
+      // Compiled out entirely in normal builds (kDevTools == false).
+      onLongPress:
+          kDevTools ? () => _confirmResetFeedGuard(context, ref, field, label) : null,
+    );
+  }
+
+  /// Dev-only (DEV_TOOLS) hard reset of one feed-guard target: clears today's
+  /// usage and drops the 24h exhaustion lock so the budget is fresh again,
+  /// bypassing the anti-circumvention cooldown for testing.
+  Future<void> _confirmResetFeedGuard(
+    BuildContext context,
+    WidgetRef ref,
+    String field,
+    String label,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF0A0E18),
+        title: const Text(
+          'Reset daily budget?',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'DEV: clears today\'s usage and the 24h lock for "$label" so it\'s '
+          'usable again immediately. Past-day history is kept.',
+          style: const TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel',
+                style: TextStyle(color: Color(0xFF888888))),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Reset',
+                style: TextStyle(color: Color(0xFF1E5FFF))),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final ok = await FeedGuardBridge.resetTarget(field);
+    // Force an immediate refresh (the provider also re-polls every second).
+    ref.invalidate(feedGuardStatusesProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? '$label budget reset' : 'Reset failed'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF0A0F1C),
+      ),
     );
   }
 

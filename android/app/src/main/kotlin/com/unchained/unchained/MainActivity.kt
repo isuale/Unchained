@@ -223,6 +223,18 @@ class MainActivity : FlutterActivity() {
                             result.success(FeedGuardState.setConfig(this, target, enabled, limitMinutes))
                         }
                     }
+                    "resetTarget" -> {
+                        // DEV_TOOLS-gated on the Dart side: clears a target's
+                        // usage and drops its 24h exhaustion lock. Bypasses the
+                        // anti-circumvention cooldown on purpose, for testing.
+                        val target = call.argument<String>("target")
+                        if (target == null || target !in FeedGuardState.TARGETS) {
+                            result.success(false)
+                        } else {
+                            FeedGuardState.resetTarget(this, target)
+                            result.success(true)
+                        }
+                    }
                     "getStatuses" -> {
                         val statuses = FeedGuardState.TARGETS.associateWith { target ->
                             mapOf(

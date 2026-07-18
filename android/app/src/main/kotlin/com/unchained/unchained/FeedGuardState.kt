@@ -83,6 +83,22 @@ object FeedGuardState {
     fun isBudgetExhausted(context: Context, target: String): Boolean =
         remainingSeconds(context, target) <= 0
 
+    /**
+     * Dev-only hard reset for a single target: clears the current period's usage
+     * and drops the 24h exhaustion lock ([keyExhaustedAt]) so the budget is fresh
+     * again immediately, without waiting out the cooldown. Past-day [keyHistory]
+     * is left intact so the progress chart keeps its record. This deliberately
+     * bypasses the anti-circumvention lock, so its only caller is the DEV_TOOLS
+     * -gated reset path — never expose it on a normal user control.
+     */
+    fun resetTarget(context: Context, target: String) {
+        prefs(context).edit()
+            .putInt(keyUsed(target), 0)
+            .putLong(keyExhaustedAt(target), 0L)
+            .putLong(keyResetDay(target), DayHistory.today())
+            .apply()
+    }
+
     /** Millis since epoch when the current 24h lock ends, or 0 if [target] isn't locked. */
     fun lockedUntilMillis(context: Context, target: String): Long {
         rolloverIfNeeded(context, target)
