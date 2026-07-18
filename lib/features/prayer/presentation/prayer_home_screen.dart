@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/presentation/prayer_gate_screen.dart';
 
 /// The home of the prayer app-locker: a permanently-present act of thanks
 /// ("Gracias a Dios"), the giving-thanks streak, and entry points to pray or
@@ -69,7 +70,7 @@ class PrayerHomeScreen extends ConsumerWidget {
             _primaryButton(
               icon: Icons.self_improvement,
               label: 'Rezar ahora',
-              onTap: () => _soon(context, 'La oración guiada llega pronto.'),
+              onTap: () => _choosePrayer(context),
             ),
             const SizedBox(height: 12),
 
@@ -181,13 +182,58 @@ class PrayerHomeScreen extends ConsumerWidget {
     );
   }
 
-  void _soon(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: _card,
+  /// Ask which prayer to pray, then open the 20-minute gate for it.
+  void _choosePrayer(BuildContext context) {
+    // Capture the router up front: after the sheet closes, its own context is
+    // defunct and can't be used to navigate.
+    final router = GoRouter.of(context);
+
+    void start(String prayerType) {
+      Navigator.of(context).pop(); // close the sheet
+      router.push('/pray', extra: PrayerGateArgs(prayerType: prayerType));
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Text(
+                '¿Qué quieres rezar?',
+                style: GoogleFonts.dmSerifDisplay(
+                    color: Colors.white, fontSize: 20),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: const Icon(Icons.brightness_7, color: _gold),
+                title: Text('Santo Rosario',
+                    style: GoogleFonts.inter(
+                        color: Colors.white, fontWeight: FontWeight.w600)),
+                subtitle: Text('Oración completa · 20 min',
+                    style: GoogleFonts.inter(color: _dim, fontSize: 12)),
+                onTap: () => start('rosary'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.favorite, color: _accent),
+                title: Text('Acción de Gracias',
+                    style: GoogleFonts.inter(
+                        color: Colors.white, fontWeight: FontWeight.w600)),
+                subtitle: Text('Salmos y gratitud · 20 min',
+                    style: GoogleFonts.inter(color: _dim, fontSize: 12)),
+                onTap: () => start('thanksgiving'),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
     );
   }
 }

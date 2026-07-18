@@ -12,6 +12,7 @@ import 'package:unchained/features/plans/presentation/free_trial_plan_screen.dar
 import 'package:unchained/features/plans/presentation/monthly_plan_screen.dart';
 import 'package:unchained/features/plans/presentation/monthly_setup_screen.dart';
 import 'package:unchained/features/prayer/presentation/app_picker_screen.dart';
+import 'package:unchained/features/prayer/presentation/prayer_gate_screen.dart';
 import 'package:unchained/features/splash/presentation/splash_screen.dart';
 import 'package:unchained/features/welcome/presentation/welcome_screen.dart';
 
@@ -75,6 +76,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/apps',
       builder: (context, state) => const AppPickerScreen(),
+    ),
+    GoRoute(
+      path: '/pray',
+      builder: (context, state) => PrayerGateScreen(
+        args: state.extra is PrayerGateArgs
+            ? state.extra as PrayerGateArgs
+            : const PrayerGateArgs(),
+      ),
     ),
     GoRoute(
       path: '/lock',
