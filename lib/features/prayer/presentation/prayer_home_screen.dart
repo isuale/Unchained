@@ -225,7 +225,7 @@ class PrayerHomeScreen extends ConsumerWidget {
                 title: Text('Acción de Gracias',
                     style: GoogleFonts.inter(
                         color: Colors.white, fontWeight: FontWeight.w600)),
-                subtitle: Text('Salmos y gratitud · 20 min',
+                subtitle: Text('Salmos y gratitud · 5 min',
                     style: GoogleFonts.inter(color: _dim, fontSize: 12)),
                 onTap: () => start('thanksgiving'),
               ),

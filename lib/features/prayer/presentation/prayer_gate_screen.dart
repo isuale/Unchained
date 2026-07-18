@@ -47,10 +47,6 @@ class PrayerGateScreen extends ConsumerStatefulWidget {
 
 class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     with WidgetsBindingObserver {
-  // The length of a prayer session. This is the product value; lower it only
-  // for manual testing of the finish/unlock flow.
-  static const Duration _duration = Duration(minutes: 20);
-
   static const _accent = Color(0xFF1E5FFF);
   static const _gold = Color(0xFFE9B949);
   static const _good = Color(0xFF34C759);
@@ -59,8 +55,11 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   static const _dim = Color(0xFF8A94A6);
 
   late final PrayerGuide _guide;
+  // Session length comes from the chosen prayer: the Rosary is a full 20-minute
+  // session, thanksgiving is a short 5. Set once from the guide in initState.
+  late final Duration _duration;
   Timer? _timer;
-  int _secondsLeft = _duration.inSeconds;
+  late int _secondsLeft;
   bool _completed = false;
 
   bool get _done => _secondsLeft <= 0;
@@ -69,6 +68,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   void initState() {
     super.initState();
     _guide = guideFor(widget.args.prayerType);
+    _duration = Duration(minutes: _guide.minutes);
+    _secondsLeft = _duration.inSeconds;
     WidgetsBinding.instance.addObserver(this);
     // Hide the app's owner-credit footer for the whole session so the user sees
     // only the prayer. Deferred so toggling the ancestor listener never fires
@@ -274,7 +275,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
         Text(
           _done
               ? 'Oración completada. Pulsa Amén para continuar.'
-              : 'Ora durante los 20 minutos. El tiempo se pausa si sales de la app.',
+              : 'Ora durante ${_duration.inMinutes} minutos. El tiempo se pausa '
+                  'si sales de la app.',
           style: GoogleFonts.inter(color: _dim, fontSize: 12),
           textAlign: TextAlign.center,
         ),

@@ -11,11 +11,16 @@ class PrayerStep {
 
 /// A named prayer guide (a sequence of steps to pray through).
 class PrayerGuide {
-  const PrayerGuide(this.type, this.title, this.steps);
+  const PrayerGuide(this.type, this.title, this.minutes, this.steps);
 
   /// Stored on each PrayerLog row: 'rosary' | 'thanksgiving'.
   final String type;
   final String title;
+
+  /// How long the gate's countdown runs for this prayer, in minutes. The
+  /// Rosary is a full session; thanksgiving is meant to be short.
+  final int minutes;
+
   final List<PrayerStep> steps;
 }
 
@@ -68,7 +73,7 @@ const _hailHolyQueen =
 
 /// The Santo Rosario: opening prayers, then five decades, then the closing.
 /// Praying it attentively fills roughly the twenty minutes of the gate.
-const rosaryGuide = PrayerGuide('rosary', 'Santo Rosario', [
+const rosaryGuide = PrayerGuide('rosary', 'Santo Rosario', 20, [
   PrayerStep('Señal de la Cruz', _signOfCross),
   PrayerStep('Credo', _creed),
   PrayerStep('Padre Nuestro', _ourFather),
@@ -96,7 +101,7 @@ const rosaryGuide = PrayerGuide('rosary', 'Santo Rosario', [
 ]);
 
 /// A shorter guide of thanksgiving — psalms and words of gratitude to God.
-const thanksgivingGuide = PrayerGuide('thanksgiving', 'Acción de Gracias', [
+const thanksgivingGuide = PrayerGuide('thanksgiving', 'Acción de Gracias', 5, [
   PrayerStep('Señal de la Cruz', _signOfCross),
   PrayerStep('Salmo 100',
       'Aclamad a Dios con alegría, habitantes de toda la tierra; servid al '
