@@ -82,6 +82,50 @@ private val DOH_BOOTSTRAP = setOf(
     "mozilla.cloudflare-dns.com",
 )
 
+// Well-known DNS-over-HTTPS / DNS-over-TLS resolver IP addresses. A browser with
+// "secure DNS" turned on sends its DNS lookups ENCRYPTED to one of these on port
+// 443 (DoH) or 853 (DoT), which our port-53 filter can't read — so the block gets
+// bypassed. Sinkholing the bootstrap HOSTNAMES above only helps if the browser
+// looks the resolver up by name first; a browser that already has the IP (built-in
+// default, or a user-typed IP) skips that. So we also blackhole the IPs directly:
+// startVpn() adds a /32 route for each so their packets enter the tun, and
+// handlePacket() drops the 443/853 ones. The browser's encrypted DNS then fails and
+// it falls back to plaintext DNS — which we DO filter. Plain DNS (port 53) to these
+// same IPs still flows through the normal DNS handler and is filtered like any query.
+// IPv4 only (the tunnel is IPv4-only); the app's own upstream uses a protect()ed
+// socket so routing these in never breaks our own lookups.
+private val DOH_RESOLVER_IP_STRINGS = listOf(
+    "1.1.1.1", "1.0.0.1", "1.1.1.2", "1.0.0.2", "1.1.1.3", "1.0.0.3",       // Cloudflare
+    "8.8.8.8", "8.8.4.4",                                                    // Google
+    "9.9.9.9", "149.112.112.112", "9.9.9.11", "149.112.112.11",             // Quad9
+    "9.9.9.10", "149.112.112.10",                                           // Quad9 (unsecured/ECS)
+    "94.140.14.14", "94.140.15.15", "94.140.14.15", "94.140.15.16",         // AdGuard
+    "208.67.222.222", "208.67.220.220", "208.67.222.123", "208.67.220.123", // OpenDNS
+    "185.228.168.9", "185.228.169.9", "185.228.168.10", "185.228.169.11",   // CleanBrowsing
+    "76.76.2.0", "76.76.10.0", "76.76.19.19", "76.223.122.150",             // ControlD
+    "45.90.28.0", "45.90.30.0",                                             // NextDNS anycast
+    "194.242.2.2", "194.242.2.3",                                          // Mullvad
+    "193.110.81.0", "185.253.5.0",                                         // dns0.eu
+)
+
+// Same IPs packed into 32-bit ints for an allocation-free lookup on the read loop.
+private val DOH_RESOLVER_IPS: Set<Int> =
+    DOH_RESOLVER_IP_STRINGS.mapNotNull { ipv4StringToInt(it) }.toHashSet()
+
+/// Packs a dotted-quad IPv4 string ("1.1.1.1") into a big-endian Int, or null if it
+/// isn't a well-formed IPv4 literal. Used once at startup to build [DOH_RESOLVER_IPS].
+private fun ipv4StringToInt(ip: String): Int? {
+    val parts = ip.split('.')
+    if (parts.size != 4) return null
+    var result = 0
+    for (p in parts) {
+        val n = p.toIntOrNull() ?: return null
+        if (n < 0 || n > 255) return null
+        result = (result shl 8) or n
+    }
+    return result
+}
+
 // SharedPreferences storage for the user's custom lists (see UserLists).
 const val LISTS_PREFS = "unchained_user_lists"
 const val KEY_USER_BLOCKLIST = "user_blocklist"
@@ -342,6 +386,16 @@ class BlockingService : VpnService() {
             .setSession("Unchained")
             .setBlocking(true)
             .setMtu(1500)
+        // Pull each known encrypted-DNS resolver into the tunnel (host route /32) so
+        // handlePacket() can drop its DoH/DoT traffic. Without these routes that traffic
+        // would skip the tun entirely and bypass the block. Bad literals are skipped.
+        for (ip in DOH_RESOLVER_IP_STRINGS) {
+            try {
+                builder.addRoute(ip, 32)
+            } catch (e: Exception) {
+                Log.e(TAG, "Skipping bad DoH route $ip", e)
+            }
+        }
         vpnInterface = builder.establish()
         Log.d(TAG, "VPN interface established: ${vpnInterface != null}")
 
@@ -482,7 +536,21 @@ class BlockingService : VpnService() {
 
         val ihl = (buf[0].toInt() and 0xF) * 4
         val protocol = buf[9].toInt() and 0xFF
-        if (protocol != 17) return  // not UDP
+
+        // DoH / DoT blackhole. TCP (6) or UDP (17) headed to a known encrypted-DNS
+        // resolver on 443 (DoH / DoH3-QUIC) or 853 (DoT): drop it. These IPs are routed
+        // into the tun in startVpn(); dropping their encrypted-DNS packets forces the
+        // browser back onto plaintext DNS, which the block below filters. Plain DNS
+        // (port 53) to the same IPs falls through to the normal handler and is filtered.
+        if ((protocol == 6 || protocol == 17) && length >= ihl + 4) {
+            val dstIpInt = readU32(buf, 16)
+            if (DOH_RESOLVER_IPS.contains(dstIpInt)) {
+                val dPort = readU16(buf, ihl + 2)  // dst port sits at the same offset in TCP & UDP
+                if (dPort == 443 || dPort == 853) return  // drop encrypted DNS
+            }
+        }
+
+        if (protocol != 17) return  // not UDP (the DNS path below is UDP only)
 
         val udpStart = ihl
         val srcPort = readU16(buf, udpStart)
@@ -618,6 +686,14 @@ class BlockingService : VpnService() {
 
     private fun readU16(buf: ByteArray, offset: Int): Int =
         ((buf[offset].toInt() and 0xFF) shl 8) or (buf[offset + 1].toInt() and 0xFF)
+
+    /// Reads 4 bytes big-endian as an Int (used to match a packet's IPv4 address
+    /// against the packed [DOH_RESOLVER_IPS] set).
+    private fun readU32(buf: ByteArray, offset: Int): Int =
+        ((buf[offset].toInt() and 0xFF) shl 24) or
+            ((buf[offset + 1].toInt() and 0xFF) shl 16) or
+            ((buf[offset + 2].toInt() and 0xFF) shl 8) or
+            (buf[offset + 3].toInt() and 0xFF)
 
     private fun writeU16(buf: ByteArray, offset: Int, value: Int) {
         buf[offset] = ((value shr 8) and 0xFF).toByte()
