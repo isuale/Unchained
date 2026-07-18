@@ -2471,6 +2471,746 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   }
 }
 
+class $LockedAppsTable extends LockedApps
+    with TableInfo<$LockedAppsTable, LockedApp> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LockedAppsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _packageNameMeta = const VerificationMeta(
+    'packageName',
+  );
+  @override
+  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
+    'package_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _appLabelMeta = const VerificationMeta(
+    'appLabel',
+  );
+  @override
+  late final GeneratedColumn<String> appLabel = GeneratedColumn<String>(
+    'app_label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    packageName,
+    appLabel,
+    enabled,
+    addedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'locked_apps';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LockedApp> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('package_name')) {
+      context.handle(
+        _packageNameMeta,
+        packageName.isAcceptableOrUnknown(
+          data['package_name']!,
+          _packageNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_packageNameMeta);
+    }
+    if (data.containsKey('app_label')) {
+      context.handle(
+        _appLabelMeta,
+        appLabel.isAcceptableOrUnknown(data['app_label']!, _appLabelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_appLabelMeta);
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {packageName},
+  ];
+  @override
+  LockedApp map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LockedApp(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      packageName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}package_name'],
+      )!,
+      appLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_label'],
+      )!,
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LockedAppsTable createAlias(String alias) {
+    return $LockedAppsTable(attachedDatabase, alias);
+  }
+}
+
+class LockedApp extends DataClass implements Insertable<LockedApp> {
+  final int id;
+  final String packageName;
+  final String appLabel;
+  final bool enabled;
+  final DateTime addedAt;
+  const LockedApp({
+    required this.id,
+    required this.packageName,
+    required this.appLabel,
+    required this.enabled,
+    required this.addedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['package_name'] = Variable<String>(packageName);
+    map['app_label'] = Variable<String>(appLabel);
+    map['enabled'] = Variable<bool>(enabled);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    return map;
+  }
+
+  LockedAppsCompanion toCompanion(bool nullToAbsent) {
+    return LockedAppsCompanion(
+      id: Value(id),
+      packageName: Value(packageName),
+      appLabel: Value(appLabel),
+      enabled: Value(enabled),
+      addedAt: Value(addedAt),
+    );
+  }
+
+  factory LockedApp.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LockedApp(
+      id: serializer.fromJson<int>(json['id']),
+      packageName: serializer.fromJson<String>(json['packageName']),
+      appLabel: serializer.fromJson<String>(json['appLabel']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'packageName': serializer.toJson<String>(packageName),
+      'appLabel': serializer.toJson<String>(appLabel),
+      'enabled': serializer.toJson<bool>(enabled),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+    };
+  }
+
+  LockedApp copyWith({
+    int? id,
+    String? packageName,
+    String? appLabel,
+    bool? enabled,
+    DateTime? addedAt,
+  }) => LockedApp(
+    id: id ?? this.id,
+    packageName: packageName ?? this.packageName,
+    appLabel: appLabel ?? this.appLabel,
+    enabled: enabled ?? this.enabled,
+    addedAt: addedAt ?? this.addedAt,
+  );
+  LockedApp copyWithCompanion(LockedAppsCompanion data) {
+    return LockedApp(
+      id: data.id.present ? data.id.value : this.id,
+      packageName: data.packageName.present
+          ? data.packageName.value
+          : this.packageName,
+      appLabel: data.appLabel.present ? data.appLabel.value : this.appLabel,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LockedApp(')
+          ..write('id: $id, ')
+          ..write('packageName: $packageName, ')
+          ..write('appLabel: $appLabel, ')
+          ..write('enabled: $enabled, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, packageName, appLabel, enabled, addedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LockedApp &&
+          other.id == this.id &&
+          other.packageName == this.packageName &&
+          other.appLabel == this.appLabel &&
+          other.enabled == this.enabled &&
+          other.addedAt == this.addedAt);
+}
+
+class LockedAppsCompanion extends UpdateCompanion<LockedApp> {
+  final Value<int> id;
+  final Value<String> packageName;
+  final Value<String> appLabel;
+  final Value<bool> enabled;
+  final Value<DateTime> addedAt;
+  const LockedAppsCompanion({
+    this.id = const Value.absent(),
+    this.packageName = const Value.absent(),
+    this.appLabel = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.addedAt = const Value.absent(),
+  });
+  LockedAppsCompanion.insert({
+    this.id = const Value.absent(),
+    required String packageName,
+    required String appLabel,
+    this.enabled = const Value.absent(),
+    this.addedAt = const Value.absent(),
+  }) : packageName = Value(packageName),
+       appLabel = Value(appLabel);
+  static Insertable<LockedApp> custom({
+    Expression<int>? id,
+    Expression<String>? packageName,
+    Expression<String>? appLabel,
+    Expression<bool>? enabled,
+    Expression<DateTime>? addedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (packageName != null) 'package_name': packageName,
+      if (appLabel != null) 'app_label': appLabel,
+      if (enabled != null) 'enabled': enabled,
+      if (addedAt != null) 'added_at': addedAt,
+    });
+  }
+
+  LockedAppsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? packageName,
+    Value<String>? appLabel,
+    Value<bool>? enabled,
+    Value<DateTime>? addedAt,
+  }) {
+    return LockedAppsCompanion(
+      id: id ?? this.id,
+      packageName: packageName ?? this.packageName,
+      appLabel: appLabel ?? this.appLabel,
+      enabled: enabled ?? this.enabled,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (packageName.present) {
+      map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (appLabel.present) {
+      map['app_label'] = Variable<String>(appLabel.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LockedAppsCompanion(')
+          ..write('id: $id, ')
+          ..write('packageName: $packageName, ')
+          ..write('appLabel: $appLabel, ')
+          ..write('enabled: $enabled, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PrayerLogTable extends PrayerLog
+    with TableInfo<$PrayerLogTable, PrayerEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PrayerLogTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _triggerPackageMeta = const VerificationMeta(
+    'triggerPackage',
+  );
+  @override
+  late final GeneratedColumn<String> triggerPackage = GeneratedColumn<String>(
+    'trigger_package',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _prayerTypeMeta = const VerificationMeta(
+    'prayerType',
+  );
+  @override
+  late final GeneratedColumn<String> prayerType = GeneratedColumn<String>(
+    'prayer_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationSecondsMeta = const VerificationMeta(
+    'durationSeconds',
+  );
+  @override
+  late final GeneratedColumn<int> durationSeconds = GeneratedColumn<int>(
+    'duration_seconds',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    triggerPackage,
+    prayerType,
+    durationSeconds,
+    completedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'prayer_log';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PrayerEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('trigger_package')) {
+      context.handle(
+        _triggerPackageMeta,
+        triggerPackage.isAcceptableOrUnknown(
+          data['trigger_package']!,
+          _triggerPackageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('prayer_type')) {
+      context.handle(
+        _prayerTypeMeta,
+        prayerType.isAcceptableOrUnknown(data['prayer_type']!, _prayerTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_prayerTypeMeta);
+    }
+    if (data.containsKey('duration_seconds')) {
+      context.handle(
+        _durationSecondsMeta,
+        durationSeconds.isAcceptableOrUnknown(
+          data['duration_seconds']!,
+          _durationSecondsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_durationSecondsMeta);
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_completedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PrayerEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PrayerEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      triggerPackage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trigger_package'],
+      ),
+      prayerType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prayer_type'],
+      )!,
+      durationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_seconds'],
+      )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PrayerLogTable createAlias(String alias) {
+    return $PrayerLogTable(attachedDatabase, alias);
+  }
+}
+
+class PrayerEntry extends DataClass implements Insertable<PrayerEntry> {
+  final int id;
+
+  /// The package whose launch triggered this prayer, or null for a voluntary
+  /// "Rezar ahora" started from the home screen.
+  final String? triggerPackage;
+
+  /// Which prayer was prayed: 'thanksgiving' | 'rosary'.
+  final String prayerType;
+
+  /// How long the prayer gate stayed on-screen, in seconds.
+  final int durationSeconds;
+  final DateTime completedAt;
+  const PrayerEntry({
+    required this.id,
+    this.triggerPackage,
+    required this.prayerType,
+    required this.durationSeconds,
+    required this.completedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || triggerPackage != null) {
+      map['trigger_package'] = Variable<String>(triggerPackage);
+    }
+    map['prayer_type'] = Variable<String>(prayerType);
+    map['duration_seconds'] = Variable<int>(durationSeconds);
+    map['completed_at'] = Variable<DateTime>(completedAt);
+    return map;
+  }
+
+  PrayerLogCompanion toCompanion(bool nullToAbsent) {
+    return PrayerLogCompanion(
+      id: Value(id),
+      triggerPackage: triggerPackage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(triggerPackage),
+      prayerType: Value(prayerType),
+      durationSeconds: Value(durationSeconds),
+      completedAt: Value(completedAt),
+    );
+  }
+
+  factory PrayerEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PrayerEntry(
+      id: serializer.fromJson<int>(json['id']),
+      triggerPackage: serializer.fromJson<String?>(json['triggerPackage']),
+      prayerType: serializer.fromJson<String>(json['prayerType']),
+      durationSeconds: serializer.fromJson<int>(json['durationSeconds']),
+      completedAt: serializer.fromJson<DateTime>(json['completedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'triggerPackage': serializer.toJson<String?>(triggerPackage),
+      'prayerType': serializer.toJson<String>(prayerType),
+      'durationSeconds': serializer.toJson<int>(durationSeconds),
+      'completedAt': serializer.toJson<DateTime>(completedAt),
+    };
+  }
+
+  PrayerEntry copyWith({
+    int? id,
+    Value<String?> triggerPackage = const Value.absent(),
+    String? prayerType,
+    int? durationSeconds,
+    DateTime? completedAt,
+  }) => PrayerEntry(
+    id: id ?? this.id,
+    triggerPackage: triggerPackage.present
+        ? triggerPackage.value
+        : this.triggerPackage,
+    prayerType: prayerType ?? this.prayerType,
+    durationSeconds: durationSeconds ?? this.durationSeconds,
+    completedAt: completedAt ?? this.completedAt,
+  );
+  PrayerEntry copyWithCompanion(PrayerLogCompanion data) {
+    return PrayerEntry(
+      id: data.id.present ? data.id.value : this.id,
+      triggerPackage: data.triggerPackage.present
+          ? data.triggerPackage.value
+          : this.triggerPackage,
+      prayerType: data.prayerType.present
+          ? data.prayerType.value
+          : this.prayerType,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayerEntry(')
+          ..write('id: $id, ')
+          ..write('triggerPackage: $triggerPackage, ')
+          ..write('prayerType: $prayerType, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('completedAt: $completedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, triggerPackage, prayerType, durationSeconds, completedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PrayerEntry &&
+          other.id == this.id &&
+          other.triggerPackage == this.triggerPackage &&
+          other.prayerType == this.prayerType &&
+          other.durationSeconds == this.durationSeconds &&
+          other.completedAt == this.completedAt);
+}
+
+class PrayerLogCompanion extends UpdateCompanion<PrayerEntry> {
+  final Value<int> id;
+  final Value<String?> triggerPackage;
+  final Value<String> prayerType;
+  final Value<int> durationSeconds;
+  final Value<DateTime> completedAt;
+  const PrayerLogCompanion({
+    this.id = const Value.absent(),
+    this.triggerPackage = const Value.absent(),
+    this.prayerType = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
+    this.completedAt = const Value.absent(),
+  });
+  PrayerLogCompanion.insert({
+    this.id = const Value.absent(),
+    this.triggerPackage = const Value.absent(),
+    required String prayerType,
+    required int durationSeconds,
+    required DateTime completedAt,
+  }) : prayerType = Value(prayerType),
+       durationSeconds = Value(durationSeconds),
+       completedAt = Value(completedAt);
+  static Insertable<PrayerEntry> custom({
+    Expression<int>? id,
+    Expression<String>? triggerPackage,
+    Expression<String>? prayerType,
+    Expression<int>? durationSeconds,
+    Expression<DateTime>? completedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (triggerPackage != null) 'trigger_package': triggerPackage,
+      if (prayerType != null) 'prayer_type': prayerType,
+      if (durationSeconds != null) 'duration_seconds': durationSeconds,
+      if (completedAt != null) 'completed_at': completedAt,
+    });
+  }
+
+  PrayerLogCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? triggerPackage,
+    Value<String>? prayerType,
+    Value<int>? durationSeconds,
+    Value<DateTime>? completedAt,
+  }) {
+    return PrayerLogCompanion(
+      id: id ?? this.id,
+      triggerPackage: triggerPackage ?? this.triggerPackage,
+      prayerType: prayerType ?? this.prayerType,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (triggerPackage.present) {
+      map['trigger_package'] = Variable<String>(triggerPackage.value);
+    }
+    if (prayerType.present) {
+      map['prayer_type'] = Variable<String>(prayerType.value);
+    }
+    if (durationSeconds.present) {
+      map['duration_seconds'] = Variable<int>(durationSeconds.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayerLogCompanion(')
+          ..write('id: $id, ')
+          ..write('triggerPackage: $triggerPackage, ')
+          ..write('prayerType: $prayerType, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('completedAt: $completedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2480,6 +3220,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BlockingSettingsTable blockingSettings = $BlockingSettingsTable(
     this,
   );
+  late final $LockedAppsTable lockedApps = $LockedAppsTable(this);
+  late final $PrayerLogTable prayerLog = $PrayerLogTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2487,6 +3229,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     userAssessments,
     blockingSettings,
+    lockedApps,
+    prayerLog,
   ];
 }
 
@@ -3555,6 +4299,401 @@ typedef $$BlockingSettingsTableProcessedTableManager =
       BlockingSetting,
       PrefetchHooks Function()
     >;
+typedef $$LockedAppsTableCreateCompanionBuilder =
+    LockedAppsCompanion Function({
+      Value<int> id,
+      required String packageName,
+      required String appLabel,
+      Value<bool> enabled,
+      Value<DateTime> addedAt,
+    });
+typedef $$LockedAppsTableUpdateCompanionBuilder =
+    LockedAppsCompanion Function({
+      Value<int> id,
+      Value<String> packageName,
+      Value<String> appLabel,
+      Value<bool> enabled,
+      Value<DateTime> addedAt,
+    });
+
+class $$LockedAppsTableFilterComposer
+    extends Composer<_$AppDatabase, $LockedAppsTable> {
+  $$LockedAppsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appLabel => $composableBuilder(
+    column: $table.appLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LockedAppsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LockedAppsTable> {
+  $$LockedAppsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get appLabel => $composableBuilder(
+    column: $table.appLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LockedAppsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LockedAppsTable> {
+  $$LockedAppsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get appLabel =>
+      $composableBuilder(column: $table.appLabel, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+}
+
+class $$LockedAppsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LockedAppsTable,
+          LockedApp,
+          $$LockedAppsTableFilterComposer,
+          $$LockedAppsTableOrderingComposer,
+          $$LockedAppsTableAnnotationComposer,
+          $$LockedAppsTableCreateCompanionBuilder,
+          $$LockedAppsTableUpdateCompanionBuilder,
+          (
+            LockedApp,
+            BaseReferences<_$AppDatabase, $LockedAppsTable, LockedApp>,
+          ),
+          LockedApp,
+          PrefetchHooks Function()
+        > {
+  $$LockedAppsTableTableManager(_$AppDatabase db, $LockedAppsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LockedAppsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LockedAppsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LockedAppsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> packageName = const Value.absent(),
+                Value<String> appLabel = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => LockedAppsCompanion(
+                id: id,
+                packageName: packageName,
+                appLabel: appLabel,
+                enabled: enabled,
+                addedAt: addedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String packageName,
+                required String appLabel,
+                Value<bool> enabled = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => LockedAppsCompanion.insert(
+                id: id,
+                packageName: packageName,
+                appLabel: appLabel,
+                enabled: enabled,
+                addedAt: addedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LockedAppsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LockedAppsTable,
+      LockedApp,
+      $$LockedAppsTableFilterComposer,
+      $$LockedAppsTableOrderingComposer,
+      $$LockedAppsTableAnnotationComposer,
+      $$LockedAppsTableCreateCompanionBuilder,
+      $$LockedAppsTableUpdateCompanionBuilder,
+      (LockedApp, BaseReferences<_$AppDatabase, $LockedAppsTable, LockedApp>),
+      LockedApp,
+      PrefetchHooks Function()
+    >;
+typedef $$PrayerLogTableCreateCompanionBuilder =
+    PrayerLogCompanion Function({
+      Value<int> id,
+      Value<String?> triggerPackage,
+      required String prayerType,
+      required int durationSeconds,
+      required DateTime completedAt,
+    });
+typedef $$PrayerLogTableUpdateCompanionBuilder =
+    PrayerLogCompanion Function({
+      Value<int> id,
+      Value<String?> triggerPackage,
+      Value<String> prayerType,
+      Value<int> durationSeconds,
+      Value<DateTime> completedAt,
+    });
+
+class $$PrayerLogTableFilterComposer
+    extends Composer<_$AppDatabase, $PrayerLogTable> {
+  $$PrayerLogTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get triggerPackage => $composableBuilder(
+    column: $table.triggerPackage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get prayerType => $composableBuilder(
+    column: $table.prayerType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PrayerLogTableOrderingComposer
+    extends Composer<_$AppDatabase, $PrayerLogTable> {
+  $$PrayerLogTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get triggerPackage => $composableBuilder(
+    column: $table.triggerPackage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get prayerType => $composableBuilder(
+    column: $table.prayerType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PrayerLogTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PrayerLogTable> {
+  $$PrayerLogTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get triggerPackage => $composableBuilder(
+    column: $table.triggerPackage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get prayerType => $composableBuilder(
+    column: $table.prayerType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$PrayerLogTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PrayerLogTable,
+          PrayerEntry,
+          $$PrayerLogTableFilterComposer,
+          $$PrayerLogTableOrderingComposer,
+          $$PrayerLogTableAnnotationComposer,
+          $$PrayerLogTableCreateCompanionBuilder,
+          $$PrayerLogTableUpdateCompanionBuilder,
+          (
+            PrayerEntry,
+            BaseReferences<_$AppDatabase, $PrayerLogTable, PrayerEntry>,
+          ),
+          PrayerEntry,
+          PrefetchHooks Function()
+        > {
+  $$PrayerLogTableTableManager(_$AppDatabase db, $PrayerLogTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PrayerLogTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PrayerLogTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PrayerLogTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> triggerPackage = const Value.absent(),
+                Value<String> prayerType = const Value.absent(),
+                Value<int> durationSeconds = const Value.absent(),
+                Value<DateTime> completedAt = const Value.absent(),
+              }) => PrayerLogCompanion(
+                id: id,
+                triggerPackage: triggerPackage,
+                prayerType: prayerType,
+                durationSeconds: durationSeconds,
+                completedAt: completedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> triggerPackage = const Value.absent(),
+                required String prayerType,
+                required int durationSeconds,
+                required DateTime completedAt,
+              }) => PrayerLogCompanion.insert(
+                id: id,
+                triggerPackage: triggerPackage,
+                prayerType: prayerType,
+                durationSeconds: durationSeconds,
+                completedAt: completedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PrayerLogTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PrayerLogTable,
+      PrayerEntry,
+      $$PrayerLogTableFilterComposer,
+      $$PrayerLogTableOrderingComposer,
+      $$PrayerLogTableAnnotationComposer,
+      $$PrayerLogTableCreateCompanionBuilder,
+      $$PrayerLogTableUpdateCompanionBuilder,
+      (
+        PrayerEntry,
+        BaseReferences<_$AppDatabase, $PrayerLogTable, PrayerEntry>,
+      ),
+      PrayerEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3563,4 +4702,8 @@ class $AppDatabaseManager {
       $$UserAssessmentsTableTableManager(_db, _db.userAssessments);
   $$BlockingSettingsTableTableManager get blockingSettings =>
       $$BlockingSettingsTableTableManager(_db, _db.blockingSettings);
+  $$LockedAppsTableTableManager get lockedApps =>
+      $$LockedAppsTableTableManager(_db, _db.lockedApps);
+  $$PrayerLogTableTableManager get prayerLog =>
+      $$PrayerLogTableTableManager(_db, _db.prayerLog);
 }

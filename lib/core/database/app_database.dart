@@ -126,13 +126,53 @@ class BlockingSettings extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [UserAssessments, BlockingSettings])
+/// Apps the user has chosen to lock behind prayer. Opening any enabled locked
+/// app while the phone is "locked" raises the 20-minute prayer gate; finishing
+/// a prayer unlocks ALL of these together for the grace window. Matched by
+/// [packageName] against the foreground app in the native accessibility watchdog.
+@DataClassName('LockedApp')
+class LockedApps extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get packageName => text()();
+  TextColumn get appLabel => text()();
+  BoolColumn get enabled => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get addedAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+
+  // One row per package: re-adding an app updates the existing row.
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {packageName},
+      ];
+}
+
+/// Append-only history of completed prayer sessions, one row per finished
+/// prayer. Powers the "days giving thanks" streak on the prayer home.
+@DataClassName('PrayerEntry')
+class PrayerLog extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// The package whose launch triggered this prayer, or null for a voluntary
+  /// "Rezar ahora" started from the home screen.
+  TextColumn get triggerPackage => text().nullable()();
+
+  /// Which prayer was prayed: 'thanksgiving' | 'rosary'.
+  TextColumn get prayerType => text()();
+
+  /// How long the prayer gate stayed on-screen, in seconds.
+  IntColumn get durationSeconds => integer()();
+
+  DateTimeColumn get completedAt => dateTime()();
+}
+
+@DriftDatabase(
+    tables: [UserAssessments, BlockingSettings, LockedApps, PrayerLog])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -192,6 +232,12 @@ class AppDatabase extends _$AppDatabase {
                 blockingSettings, blockingSettings.tiktokLimitMinutes);
             await m.addColumn(
                 blockingSettings, blockingSettings.snapchatLimitMinutes);
+          }
+          // v9: prayer app-locker — the apps locked behind prayer, and the
+          // completed-prayer history that powers the streak.
+          if (from < 9) {
+            await m.createTable(lockedApps);
+            await m.createTable(prayerLog);
           }
         },
         beforeOpen: (details) async {
