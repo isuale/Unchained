@@ -296,6 +296,48 @@ class BlockingService : VpnService() {
         fun desiredEnabled(context: android.content.Context): Boolean =
             context.getSharedPreferences(PROTECTION_PREFS, Context.MODE_PRIVATE)
                 .getBoolean(KEY_SHOULD_RUN, false)
+
+        /// Brings the tunnel back up if the user meant it to be on and it isn't.
+        ///
+        /// Called from every place that can notice a restart has happened without
+        /// the user asking for one: [BootReceiver] on BOOT_COMPLETED, and
+        /// [UninstallGuardService] when the system binds it at boot (that path
+        /// matters because aggressive OEM battery managers on Xiaomi/Huawei/Oppo
+        /// withhold BOOT_COMPLETED from apps the user hasn't allowlisted for
+        /// autostart, but still start bound accessibility services).
+        ///
+        /// Returns true if a start was dispatched. Safe to call repeatedly —
+        /// [startVpn] no-ops when the interface is already up.
+        fun restoreIfDesired(context: android.content.Context, reason: String): Boolean {
+            if (!desiredEnabled(context)) return false
+            if (isRunning) return false
+
+            // Null means VPN consent is already granted. Non-null means the system
+            // wants to show a consent dialog, which needs an activity we don't have
+            // here — bail and let the normal in-app prepare() flow ask on next launch.
+            if (VpnService.prepare(context) != null) {
+                Log.w(TAG, "restore[$reason]: VPN consent not held; cannot auto-start")
+                return false
+            }
+
+            val svc = Intent(context, BlockingService::class.java).setAction(ACTION_START)
+            return try {
+                // Background foreground-service starts are restricted on Android 12+,
+                // but both callers are exempt: a BOOT_COMPLETED receiver by the boot
+                // exemption, and the guard service because the app holds
+                // SYSTEM_ALERT_WINDOW (required for the uninstall lock anyway).
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(svc)
+                } else {
+                    context.startService(svc)
+                }
+                Log.i(TAG, "restore[$reason]: protection restarted")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "restore[$reason]: failed to restart protection", e)
+                false
+            }
+        }
     }
 
     override fun onCreate() {

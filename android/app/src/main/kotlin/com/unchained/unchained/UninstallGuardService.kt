@@ -38,6 +38,11 @@ class UninstallGuardService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         Log.d(TAG, "service connected; guardEnabled=${GuardState.isEnabled(this)}")
+        // Second line of defence for restoring protection after a reboot. The
+        // system binds accessibility services at boot even on OEMs that suppress
+        // BOOT_COMPLETED for non-allowlisted apps, so this catches restarts the
+        // boot receiver never hears about. No-ops if the tunnel is already up.
+        BlockingService.restoreIfDesired(this, "guard-connected")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
