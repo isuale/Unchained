@@ -112,13 +112,22 @@ class BlockingSettingsActions extends Notifier<void> {
   }
 
   Future<void> _reconcileWithNative() async {
-    final actuallyRunning = await BlockingService.isRunning();
+    var actuallyRunning = await BlockingService.isRunning();
     // The uninstall guard is owned natively (it survives even if the app is
     // killed), so its switch must reflect that truth, not a stale DB flag.
     final guardEnabled = await UninstallGuardService.isGuardEnabled();
     final repo = ref.read(blockingSettingsRepositoryProvider);
     final settings = await repo.getSettings();
     if (settings == null) return;
+    // Reconcile *toward* protection, not away from it. If the DB says protection
+    // is on but the tunnel isn't up, something killed it without the user asking
+    // (a reboot the boot receiver couldn't cover, an OS kill, a VPN revoke) —
+    // restart it rather than quietly recording "off", which would turn any such
+    // event into a free escape hatch.
+    if (settings.protectionEnabled && !actuallyRunning) {
+      final granted = await BlockingService.prepare();
+      if (granted) actuallyRunning = await BlockingService.start();
+    }
     if (settings.protectionEnabled != actuallyRunning) {
       await repo.toggleField('protectionEnabled', actuallyRunning);
     }

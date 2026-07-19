@@ -131,6 +131,11 @@ const val LISTS_PREFS = "unchained_user_lists"
 const val KEY_USER_BLOCKLIST = "user_blocklist"
 const val KEY_USER_ALLOWLIST = "user_allowlist"
 
+// SharedPreferences storage for "protection is supposed to be running", so the
+// boot receiver can restore the tunnel after a restart (see setDesiredEnabled).
+const val PROTECTION_PREFS = "unchained_protection"
+const val KEY_SHOULD_RUN = "should_run"
+
 // Domains that must always pass through, even if a blocklist rule would match
 // them. Loaded once at service start from assets/allowlist.txt (one domain per
 // line). Checked BEFORE the blocklist, so it can only ever un-block — it never
@@ -268,6 +273,29 @@ class BlockingService : VpnService() {
             USER_BLOCKLIST = prefs.getStringSet(KEY_USER_BLOCKLIST, emptySet())?.toHashSet() ?: hashSetOf()
             USER_ALLOWLIST = prefs.getStringSet(KEY_USER_ALLOWLIST, emptySet())?.toHashSet() ?: hashSetOf()
         }
+
+        /// Records whether protection is *meant* to be on, in native prefs.
+        ///
+        /// The real setting lives in the Drift DB, but that is only readable from
+        /// Dart — and after a reboot nothing Dart-side is running. [BootReceiver]
+        /// needs a native-readable copy to know it should bring the tunnel back,
+        /// so we mirror the user's intent here on every explicit start/stop.
+        ///
+        /// This is *intent*, not liveness: it is deliberately NOT cleared by
+        /// [stopVpn], because that also runs on onDestroy/onRevoke (the OS killing
+        /// us or a reboot tearing us down). Clearing it there would let a reboot
+        /// count as "the user turned protection off" — the exact escape hatch this
+        /// closes.
+        fun setDesiredEnabled(context: android.content.Context, enabled: Boolean) {
+            context.getSharedPreferences(PROTECTION_PREFS, Context.MODE_PRIVATE).edit()
+                .putBoolean(KEY_SHOULD_RUN, enabled)
+                .apply()
+        }
+
+        /// Whether protection was left on the last time the user chose.
+        fun desiredEnabled(context: android.content.Context): Boolean =
+            context.getSharedPreferences(PROTECTION_PREFS, Context.MODE_PRIVATE)
+                .getBoolean(KEY_SHOULD_RUN, false)
     }
 
     override fun onCreate() {
@@ -333,9 +361,14 @@ class BlockingService : VpnService() {
         Log.d(TAG, "onStartCommand action=$action")
 
         if (action == ACTION_STOP) {
+            // An explicit stop is the user's intent — don't restore on next boot.
+            setDesiredEnabled(this, false)
             stopVpn()
             return START_NOT_STICKY
         }
+
+        // An explicit start is the user's intent — restore this on next boot.
+        setDesiredEnabled(this, true)
 
         // startForeground MUST be called within 5 seconds. Call before anything that can throw.
         // Use the 2-arg overload so the foregroundServiceType comes from the manifest
