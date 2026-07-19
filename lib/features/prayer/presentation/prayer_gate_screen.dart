@@ -178,7 +178,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _header(guide.title),
+                _header(guide.title, lang),
                 if (_set != null) ...[
                   const SizedBox(height: 10),
                   _mysteryBar(lang),
@@ -197,7 +197,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     );
   }
 
-  Widget _header(String title) {
+  Widget _header(String title, Lang lang) {
     return Row(
       children: [
         const Icon(Icons.volunteer_activism, color: _gold, size: 24),
@@ -206,13 +206,15 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Gracias a Dios',
+              Text(PS.thanksTitle(lang),
                   style: GoogleFonts.dmSerifDisplay(
                       color: Colors.white, fontSize: 24)),
               Text(title, style: GoogleFonts.inter(color: _dim, fontSize: 13)),
             ],
           ),
         ),
+        _languageButton(lang),
+        const SizedBox(width: 8),
         Text(
           _clock,
           style: GoogleFonts.robotoMono(
@@ -222,6 +224,75 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
           ),
         ),
       ],
+    );
+  }
+
+  /// Compact chip that opens the language picker, so a user who can't read or
+  /// pronounce one language can pray this locked screen in another — without
+  /// having to leave the gate (which they can't, when an app raised it).
+  Widget _languageButton(Lang lang) {
+    return InkWell(
+      onTap: () => _pickLanguage(lang),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.language, color: _dim, size: 16),
+            const SizedBox(width: 6),
+            Text(PS.langName(lang),
+                style: GoogleFonts.inter(color: Colors.white, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _pickLanguage(Lang current) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Text(PS.language(current),
+                  style: GoogleFonts.dmSerifDisplay(
+                      color: Colors.white, fontSize: 20)),
+              const SizedBox(height: 8),
+              for (final l in Lang.values)
+                ListTile(
+                  leading: Icon(Icons.language,
+                      color: l == current ? _accent : _dim),
+                  title: Text(PS.langName(l),
+                      style: GoogleFonts.inter(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                  trailing: l == current
+                      ? const Icon(Icons.check, color: _accent)
+                      : null,
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    // Persist to the shared setting; the provider watch rebuilds
+                    // the gate with the prayer text in the new language.
+                    ref.read(prayerRepositoryProvider).setLanguage(l);
+                  },
+                ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
     );
   }
 
