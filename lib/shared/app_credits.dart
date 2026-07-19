@@ -11,6 +11,11 @@ class AppCredits {
   static const String supportEmail = 'imblueale@gmail.com';
   static const String bugReportSubject = 'Unchained — Bug report';
 
+  /// Attribution for the app that inspired this one. Deliberately worded as
+  /// "inspired by" rather than a bare name: Unchained is not affiliated with,
+  /// endorsed by, or a product of BlockerX, and the footer must not suggest it is.
+  static const String inspirationCredit = 'Inspired by BlockerX';
+
   /// Opens the user's mail app with a pre-filled message to the support address.
   /// Silently no-ops if no mail client is available, so it is safe to call from
   /// anywhere without a Scaffold/SnackBar context.
@@ -71,6 +76,14 @@ class AppFooter extends StatelessWidget {
                     decoration: TextDecoration.underline,
                     decorationColor: _link,
                   ),
+                ),
+              ),
+              const Text(
+                '  ·  ${AppCredits.inspirationCredit}',
+                style: TextStyle(
+                  color: _muted,
+                  fontSize: 10.5,
+                  height: 1.2,
                 ),
               ),
             ],
