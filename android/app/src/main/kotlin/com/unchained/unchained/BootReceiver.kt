@@ -18,7 +18,10 @@ import android.util.Log
 class BootReceiver : BroadcastReceiver() {
 
     companion object {
-        const val TAG = "BootReceiver"
+        // NOT "BootReceiver": the Android framework has its own
+        // com.android.server.BootReceiver logging under that exact tag, so
+        // filtering logcat on it returns the system's lines mixed with ours.
+        const val TAG = "UnchainedBoot"
     }
 
     override fun onReceive(context: Context, intent: Intent?) {

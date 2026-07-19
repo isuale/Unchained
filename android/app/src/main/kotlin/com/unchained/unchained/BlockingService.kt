@@ -131,6 +131,12 @@ const val LISTS_PREFS = "unchained_user_lists"
 const val KEY_USER_BLOCKLIST = "user_blocklist"
 const val KEY_USER_ALLOWLIST = "user_allowlist"
 
+// Logs every resolved domain to logcat. Development only — leave this false in
+// anything the user runs. It writes the user's full browsing history to a buffer
+// any app with READ_LOGS (and anyone with adb) can read, and the sheer volume
+// rotates the log buffer fast enough to destroy unrelated diagnostics.
+private const val VERBOSE_DNS_LOG = false
+
 // SharedPreferences storage for "protection is supposed to be running", so the
 // boot receiver can restore the tunnel after a restart (see setDesiredEnabled).
 const val PROTECTION_PREFS = "unchained_protection"
@@ -640,7 +646,7 @@ class BlockingService : VpnService() {
         val dnsPayload = buf.copyOfRange(dnsStart, length)
 
         val domain = extractFirstQuestionName(dnsPayload)
-        Log.d(TAG, "DNS query: '$domain'")
+        if (VERBOSE_DNS_LOG) Log.d(TAG, "DNS query: '$domain'")
 
         // Blocked domains are answered immediately (no network needed) right here.
         if (isBlocked(domain)) {
