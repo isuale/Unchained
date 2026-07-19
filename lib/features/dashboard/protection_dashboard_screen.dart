@@ -614,49 +614,6 @@ class _DashboardBody extends ConsumerWidget {
             ],
           ),
 
-          // Content
-          _SectionWrapper(
-            title: SectionTitle(
-              title: l.dashboard_section_content,
-              comingSoonLabel: l.dashboard_coming_soon,
-            ),
-            children: [
-              ToggleRow(
-                label: l.dashboard_block_shopping,
-                value: settings.blockShopping,
-                onChanged: (v) => _toggle(ref, 'blockShopping', v),
-                isLocked: isFeatureLocked('blockShopping', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.shopping_bag_outlined,
-              ),
-              const _RowSeparator(),
-              ToggleRow(
-                label: l.dashboard_block_gambling,
-                value: settings.blockGambling,
-                onChanged: (v) => _toggle(ref, 'blockGambling', v),
-                isLocked: isFeatureLocked('blockGambling', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.casino_outlined,
-              ),
-              const _RowSeparator(),
-              ToggleRow(
-                label: l.dashboard_block_image_search,
-                value: settings.blockImageVideoSearch,
-                onChanged: (v) => _toggle(ref, 'blockImageVideoSearch', v),
-                isLocked:
-                    isFeatureLocked('blockImageVideoSearch', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.image_search,
-              ),
-            ],
-          ),
-
           // App control
           _SectionWrapper(
             title: SectionTitle(
