@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/guard/domain/bible_passages.dart';
 import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
+import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/domain/prayer_strings.dart';
+import 'package:unchained/features/prayer/domain/prayers.dart';
 
 /// Why the lock is showing.
 enum LockMode {
@@ -20,16 +24,17 @@ enum LockMode {
 /// Full-screen, back-proof gate: copy out 800 characters of Scripture within four
 /// minutes. Run out of time and what you typed is wiped and a fresh passage begins.
 /// There is no other way off this screen (except Cancel in [LockMode.disable]).
-class ScriptureLockScreen extends StatefulWidget {
+class ScriptureLockScreen extends ConsumerStatefulWidget {
   const ScriptureLockScreen({super.key, this.mode = LockMode.block});
 
   final LockMode mode;
 
   @override
-  State<ScriptureLockScreen> createState() => _ScriptureLockScreenState();
+  ConsumerState<ScriptureLockScreen> createState() =>
+      _ScriptureLockScreenState();
 }
 
-class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
+class _ScriptureLockScreenState extends ConsumerState<ScriptureLockScreen> {
   static const Duration _limit = Duration(minutes: 4);
   /// How many characters of the passage the user must copy to pass. Every
   /// passage in [BiblePassages] is longer than this, so it is always reachable.
@@ -42,7 +47,18 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focus = FocusNode();
 
-  late String _passage;
+  /// Which of the (language-independent) passages this attempt uses. The text
+  /// shown is [BiblePassages.at] of this index in the current [_lang], so
+  /// switching language keeps the same passage.
+  late int _passageIndex;
+
+  /// The language of the passage the user is copying. Kept in sync with the
+  /// shared [prayerLanguageProvider] on every build; defaults to Spanish.
+  Lang _lang = Lang.es;
+
+  /// The current passage in the selected language.
+  String get _passage => BiblePassages.at(_passageIndex, _lang);
+
   Timer? _timer;
   int _secondsLeft = _limit.inSeconds;
   bool _passed = false;
@@ -58,7 +74,7 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scriptureLockActive.value = true;
     });
-    _passage = BiblePassages.random();
+    _passageIndex = BiblePassages.randomIndex();
     _controller.addListener(_onChanged);
     _startTimer();
   }
@@ -89,7 +105,8 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
   /// Time's up: wipe everything and begin again with a fresh passage.
   void _restart() {
     _controller.clear();
-    setState(() => _passage = BiblePassages.random(previous: _passage));
+    setState(() =>
+        _passageIndex = BiblePassages.randomIndex(previous: _passageIndex));
     _startTimer();
   }
 
@@ -157,6 +174,16 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Drive the passage + UI language from the same setting the prayer screens
+    // use, so a change in either place carries over. When the user switches
+    // language mid-challenge, wipe what they typed (it was in the old language).
+    ref.listen(prayerLanguageProvider, (prev, next) {
+      final was = prev?.asData?.value;
+      final now = next.asData?.value;
+      if (now != null && was != null && now != was) _controller.clear();
+    });
+    _lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
+
     final matched = _matched;
     final total = _challenge.length;
     final urgent = _secondsLeft <= 20;
@@ -178,14 +205,16 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
                     Expanded(
                       child: Text(
                         widget.mode == LockMode.disable
-                            ? 'Turn off protection'
-                            : 'Stay unchained',
+                            ? PS.turnOffProtection(_lang)
+                            : PS.stayUnchained(_lang),
                         style: GoogleFonts.dmSerifDisplay(
                           color: Colors.white,
                           fontSize: 22,
                         ),
                       ),
                     ),
+                    _languageButton(),
+                    const SizedBox(width: 8),
                     Text(
                       _clock,
                       style: GoogleFonts.robotoMono(
@@ -198,8 +227,7 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Copy these 800 letters of Scripture exactly to continue. If the '
-                  'timer runs out, it clears and you start over.',
+                  PS.copyScripture(_lang),
                   style: GoogleFonts.inter(color: _dim, fontSize: 13),
                 ),
                 const SizedBox(height: 14),
@@ -237,7 +265,7 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
                     style: GoogleFonts.inter(color: Colors.white, fontSize: 15, height: 1.4),
                     cursorColor: _accent,
                     decoration: InputDecoration(
-                      hintText: 'Type the passage here…',
+                      hintText: PS.typePassageHere(_lang),
                       hintStyle: GoogleFonts.inter(color: _dim),
                       filled: true,
                       fillColor: const Color(0xFF070A12),
@@ -263,7 +291,7 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
                     child: TextButton(
                       onPressed: () => Navigator.of(context).maybePop(),
                       child: Text(
-                        'Cancel',
+                        PS.cancel(_lang),
                         style: GoogleFonts.inter(color: _dim),
                       ),
                     ),
@@ -273,6 +301,80 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Compact chip in the header that opens the language picker, so a user who
+  /// can't read/pronounce one language can copy the passage in another.
+  Widget _languageButton() {
+    return InkWell(
+      onTap: _pickLanguage,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0E18),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFF1B2435)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.language, color: _dim, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              PS.langName(_lang),
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _pickLanguage() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF0A0E18),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Text(
+                PS.language(_lang),
+                style: GoogleFonts.dmSerifDisplay(
+                    color: Colors.white, fontSize: 20),
+              ),
+              const SizedBox(height: 8),
+              for (final l in Lang.values)
+                ListTile(
+                  leading: Icon(Icons.language,
+                      color: l == _lang ? _accent : _dim),
+                  title: Text(
+                    PS.langName(l),
+                    style: GoogleFonts.inter(
+                        color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                  trailing: l == _lang
+                      ? const Icon(Icons.check, color: _accent)
+                      : null,
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    // Persist to the shared setting; the provider watch rebuilds
+                    // this screen with the passage in the new language.
+                    ref.read(prayerRepositoryProvider).setLanguage(l);
+                  },
+                ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -314,7 +416,7 @@ class _ScriptureLockScreenState extends State<ScriptureLockScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          '$matched / $total characters',
+          PS.charactersCount(_lang, matched, total),
           style: GoogleFonts.robotoMono(color: _dim, fontSize: 12),
         ),
       ],

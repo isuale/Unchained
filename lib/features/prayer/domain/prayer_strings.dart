@@ -61,6 +61,19 @@ class PS {
   static String changeMysteries(Lang l) => _p(l, 'Mysteries', 'Misterios', 'Mistérios');
   static String today(Lang l) => _p(l, 'Today', 'Hoy', 'Hoje');
 
+  // Uninstall-protection scripture lock screen
+  static String stayUnchained(Lang l) => _p(l, 'Stay unchained', 'Permanece libre', 'Permanece livre');
+  static String turnOffProtection(Lang l) => _p(l, 'Turn off protection', 'Desactivar la protección', 'Desativar a proteção');
+  static String copyScripture(Lang l) => _p(
+        l,
+        'Copy these 800 letters of Scripture exactly to continue. If the timer runs out, it clears and you start over.',
+        'Copia exactamente estas 800 letras de la Escritura para continuar. Si el tiempo se agota, se borra y vuelves a empezar.',
+        'Copia exatamente estas 800 letras da Escritura para continuar. Se o tempo acabar, apaga-se e recomeças.',
+      );
+  static String typePassageHere(Lang l) => _p(l, 'Type the passage here…', 'Escribe el pasaje aquí…', 'Escreve a passagem aqui…');
+  static String charactersCount(Lang l, int matched, int total) => _p(l, '$matched / $total characters', '$matched / $total caracteres', '$matched / $total caracteres');
+  static String cancel(Lang l) => _p(l, 'Cancel', 'Cancelar', 'Cancelar');
+
   // Language picker
   static String language(Lang l) => _p(l, 'Language', 'Idioma', 'Idioma');
   static String langName(Lang l) => switch (l) {
