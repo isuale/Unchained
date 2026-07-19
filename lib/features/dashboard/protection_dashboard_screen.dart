@@ -645,17 +645,6 @@ class _DashboardBody extends ConsumerWidget {
                 parentEnabled: protectionOn,
                 leadingIcon: Icons.apps,
               ),
-              const _RowSeparator(),
-              ToggleRow(
-                label: l.dashboard_block_in_app_browsers,
-                value: settings.blockInAppBrowsers,
-                onChanged: (v) => _toggle(ref, 'blockInAppBrowsers', v),
-                isLocked: isFeatureLocked('blockInAppBrowsers', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
-                parentEnabled: protectionOn,
-                leadingIcon: Icons.web,
-              ),
             ],
           ),
 
