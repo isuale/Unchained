@@ -45,10 +45,21 @@ class PlanActivationOverlay {
         advanceCycle(mode, days, breaks, settings?.commitmentStartedAt, now);
     final status = computeStatus(
         mode, days, breaks, rolledStart ?? settings?.commitmentStartedAt, now);
+    // Captured before setActivePlan overwrites it, so we can tell a genuine
+    // plan CHANGE (was some other plan) apart from a first-time activation
+    // (was null) or simply re-confirming the same plan (unchanged).
+    final previousPlan = settings?.activePlan;
 
     await ref.read(activePlanActionsProvider.notifier).setActivePlan(plan);
     if (!status.isActive) {
       await repo.setCommitmentSchedule(schedule ?? CommitmentSchedule.none);
+    }
+    // Switching to a different plan than the one already active requires
+    // re-accepting the Terms & Conditions before the control panel is
+    // reachable again — the same gate a first-time activation already goes
+    // through below, since termsAccepted starts false on a fresh install.
+    if (previousPlan != null && previousPlan != plan.name) {
+      await repo.setTermsAccepted(false);
     }
 
     if (!context.mounted) return;
