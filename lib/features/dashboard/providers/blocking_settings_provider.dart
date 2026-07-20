@@ -93,6 +93,7 @@ class BlockingSettingsActions extends Notifier<void> {
     final repo = ref.read(blockingSettingsRepositoryProvider);
     final settings = await repo.getSettings();
     if (settings == null) return;
+    await FeedGuardBridge.setSocialMode(settings.socialMode);
     await FeedGuardBridge.setTargetConfig(
         'blockReels', settings.blockReels, settings.reelsLimitMinutes);
     await FeedGuardBridge.setTargetConfig(
@@ -222,8 +223,13 @@ class BlockingSettingsActions extends Notifier<void> {
         .setStrictness(level);
   }
 
-  Future<void> setSocialMode(String mode) {
-    return ref.read(blockingSettingsRepositoryProvider).setSocialMode(mode);
+  /// Persists the Social section's mode and immediately pushes it to the
+  /// native feed-guard watchdog, so switching to 'allSocial' takes effect
+  /// (Instagram/YouTube become whole-app timers, like TikTok/Snapchat already
+  /// are) without needing an app restart.
+  Future<void> setSocialMode(String mode) async {
+    await ref.read(blockingSettingsRepositoryProvider).setSocialMode(mode);
+    await FeedGuardBridge.setSocialMode(mode);
   }
 
   /// Turns one Social feed block (blockReels/blockShorts/blockTikTok/

@@ -275,6 +275,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboard_social_mode_all => 'Toda red social';
 
   @override
+  String get social_mode_all_warning_title => '¿Bloquear la app entera?';
+
+  @override
+  String get social_mode_all_warning_body =>
+      'Ahora mismo, Instagram y YouTube solo se bloquean mientras estás viendo Reels o Shorts — el resto de la app sigue abierto. Cambiar a \"Toda red social\" cambia eso: cuando se acabe el límite diario de hoy, TODA la app se bloqueará por el resto del día, no solo Reels o Shorts — igual que funciona Límites de tiempo en apps. ¿Estás seguro?';
+
+  @override
+  String get social_mode_all_warning_confirm => 'Bloquear la app entera';
+
+  @override
   String get dashboard_block_reels => 'Bloquear Reels de Instagram';
 
   @override

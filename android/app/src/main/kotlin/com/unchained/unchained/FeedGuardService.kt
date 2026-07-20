@@ -261,11 +261,15 @@ class FeedGuardService : AccessibilityService() {
         TARGET_PACKAGES.entries.firstOrNull { pkg in it.value }?.key
             ?: pkg.takeIf { FeedGuardState.appLimitPackages(this).contains(it) }
 
-    /** Only Reels/Shorts need a sub-screen match; every other target (the two
-     * whole-app feeds plus every user-picked App Time Limits package) is
-     * satisfied by foreground presence alone. */
+    /** Reels/Shorts need a sub-screen match ONLY in 'reelsAndShorts' social
+     * mode. In 'allSocial' mode the user has chosen to treat Instagram/YouTube
+     * like TikTok/Snapchat already are — the whole app counts against the
+     * budget, so foreground presence alone is enough, same as every other
+     * target (the two whole-app feeds plus every user-picked App Time Limits
+     * package). See [FeedGuardState.socialMode]. */
     private fun needsSubScreenMatch(target: String): Boolean =
-        target == "blockReels" || target == "blockShorts"
+        (target == "blockReels" || target == "blockShorts") &&
+            FeedGuardState.socialMode(this) == "reelsAndShorts"
 
     private fun needlesFor(target: String): List<String> = when (target) {
         "blockReels" -> REELS_NEEDLES

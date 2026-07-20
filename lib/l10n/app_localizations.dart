@@ -614,6 +614,24 @@ abstract class AppLocalizations {
   /// **'Toda red social'**
   String get dashboard_social_mode_all;
 
+  /// No description provided for @social_mode_all_warning_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Bloquear la app entera?'**
+  String get social_mode_all_warning_title;
+
+  /// No description provided for @social_mode_all_warning_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora mismo, Instagram y YouTube solo se bloquean mientras estás viendo Reels o Shorts — el resto de la app sigue abierto. Cambiar a \"Toda red social\" cambia eso: cuando se acabe el límite diario de hoy, TODA la app se bloqueará por el resto del día, no solo Reels o Shorts — igual que funciona Límites de tiempo en apps. ¿Estás seguro?'**
+  String get social_mode_all_warning_body;
+
+  /// No description provided for @social_mode_all_warning_confirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloquear la app entera'**
+  String get social_mode_all_warning_confirm;
+
   /// No description provided for @dashboard_block_reels.
   ///
   /// In es, this message translates to:

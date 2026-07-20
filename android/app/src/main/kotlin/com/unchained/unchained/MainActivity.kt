@@ -212,6 +212,11 @@ class MainActivity : FlutterActivity() {
                         )
                         result.success(true)
                     }
+                    "setSocialMode" -> {
+                        val mode = call.argument<String>("mode") ?: "reelsAndShorts"
+                        FeedGuardState.setSocialMode(this, mode)
+                        result.success(true)
+                    }
                     "setTargetConfig" -> {
                         val target = call.argument<String>("target")
                         val enabled = call.argument<Boolean>("enabled") ?: false

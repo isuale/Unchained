@@ -39,6 +39,20 @@ object FeedGuardState {
     private const val MAX_HISTORY_DAYS = 14
     private const val LOCK_DURATION_MS = 24L * 60 * 60 * 1000
     private const val KEY_APP_LIMIT_PACKAGES = "app_limit_packages"
+    private const val KEY_SOCIAL_MODE = "social_mode"
+
+    /** 'reelsAndShorts' (default): Instagram/YouTube are only tracked while the
+     * Reels/Shorts player itself is on screen. 'allSocial': once the daily
+     * budget for blockReels/blockShorts is used up, the WHOLE app is blocked
+     * for the rest of the day — same as TikTok/Snapchat already behave —
+     * because the whole app now counts against that budget, not just the
+     * feed sub-screen. See [FeedGuardService.needsSubScreenMatch]. */
+    fun socialMode(context: Context): String =
+        prefs(context).getString(KEY_SOCIAL_MODE, "reelsAndShorts") ?: "reelsAndShorts"
+
+    fun setSocialMode(context: Context, mode: String) {
+        prefs(context).edit().putString(KEY_SOCIAL_MODE, mode).apply()
+    }
 
     fun isEnabled(context: Context, target: String): Boolean =
         prefs(context).getBoolean(keyEnabled(target), false)

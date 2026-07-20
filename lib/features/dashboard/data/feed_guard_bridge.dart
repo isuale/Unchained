@@ -34,6 +34,22 @@ class FeedGuardBridge {
   static Future<bool> openAccessibilitySettings() =>
       _invokeBool('openAccessibilitySettings');
 
+  /// Pushes the Social section's mode to native: 'reelsAndShorts' (default —
+  /// Instagram/YouTube tracked only while the Reels/Shorts player itself is on
+  /// screen) or 'allSocial' (the whole app counts against the budget, same as
+  /// TikTok/Snapchat already behave). Call on app start, and again whenever it
+  /// changes.
+  static Future<bool> setSocialMode(String mode) async {
+    try {
+      final r = await _channel
+          .invokeMethod<bool>('setSocialMode', {'mode': mode});
+      return r ?? false;
+    } catch (e, st) {
+      debugPrint('FeedGuardBridge.setSocialMode failed: $e\n$st');
+      return false;
+    }
+  }
+
   /// Pushes one target's enabled/limit config to native. Call for all four
   /// targets on app start, and again whenever one changes.
   static Future<bool> setTargetConfig(

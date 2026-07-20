@@ -18,6 +18,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Always recap (summary + teaching mode):** End every response that involved doing work with a **two-part recap**: (1) a short, plain-language **Summary** of what was done (what changed, why, status/commit hash, what to check next), and (2) a separate **🎓 Teaching mode** section that explains *how* it was done step by step and **defines every technical term used**, tied to the actual files. The user is learning, so the teaching breakdown is part of the deliverable — never skip it, even for small changes. See the `task-recap` skill for the full format and project glossary.
 
+> **Always improve on the user's idea:** The user is a non-engineer describing features in plain, sometimes rough terms — the literal request is a starting point, not the ceiling. Before implementing, actively look for the gap between what they described and what would actually make the feature good: inconsistent behavior it would create (e.g. a mode change that silently doesn't do what its label implies), a related toggle/screen left half-wired, a missing confirmation before a surprising behavior change, a rough edge a real user would hit immediately. When you find one, fix it as part of the same change and say what you improved and why in the recap — don't just note it as a suggestion for later. This does **not** override the "don't build things beyond what's needed" instinct for unrelated speculative work — it's specifically about closing gaps *within* the feature just requested. If an improvement is genuinely a bigger, separate decision (new cost, new permission, a real tradeoff), surface it and ask instead of silently expanding scope.
+
 ## Commands
 
 ```bash

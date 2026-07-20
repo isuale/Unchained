@@ -145,6 +145,56 @@ class _DashboardBody extends ConsumerWidget {
     }
   }
 
+  /// Switching to "All social media" changes what the Reels/Shorts daily
+  /// budget actually blocks: Instagram/YouTube stop being tracked just for
+  /// their Reels/Shorts player and become whole-app timers instead — exactly
+  /// like TikTok/Snapchat (and App Time Limits) already work. That's a real
+  /// behavior change the user might not expect from a pill labeled "All
+  /// social media", so it's confirmed with a warning first, mirroring the
+  /// commitment warning shown the first time protection is turned on.
+  Future<void> _selectAllSocialMode(BuildContext context, WidgetRef ref) async {
+    if (settings.socialMode == 'allSocial') return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF0A0E18),
+        title: Text(
+          l.social_mode_all_warning_title,
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          l.social_mode_all_warning_body,
+          style: const TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              l.common_cancel,
+              style: const TextStyle(color: Color(0xFF888888)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              l.social_mode_all_warning_confirm,
+              style: const TextStyle(
+                color: Color(0xFF1E5FFF),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref
+          .read(blockingSettingsActionsProvider.notifier)
+          .setSocialMode('allSocial');
+    }
+  }
+
   /// Combines the plan-tier lock (`isFeatureLocked`) with the feed guard's
   /// own 24h exhaustion lock into a single [ToggleRow], since both use the
   /// same locked-look/tooltip/tap affordance but need different messaging.
@@ -609,9 +659,7 @@ class _DashboardBody extends ConsumerWidget {
                   onSelectLeft: () => ref
                       .read(blockingSettingsActionsProvider.notifier)
                       .setSocialMode('reelsAndShorts'),
-                  onSelectRight: () => ref
-                      .read(blockingSettingsActionsProvider.notifier)
-                      .setSocialMode('allSocial'),
+                  onSelectRight: () => _selectAllSocialMode(context, ref),
                 ),
               ),
               const Padding(
