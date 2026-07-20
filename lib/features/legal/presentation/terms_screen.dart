@@ -330,52 +330,87 @@ const List<_TermsSection> _terms = [
   _TermsSection(
     '2. Purpose and intended use',
     'The app is intended to support healthy digital habits by filtering '
-        'content at the network level on your own device. It is a self-help '
+        'content at the network level on your own device, and by helping you '
+        'manage and limit time spent in distracting apps. It is a self-help '
         'aid only and is not a substitute for professional, medical, or '
         'psychological advice or treatment.',
   ),
   _TermsSection(
-    '3. No guarantee of effectiveness',
+    '3. Social media & app time limits',
+    'Beyond blocking adult content, the app can enforce a daily time limit on '
+        'Instagram Reels, YouTube Shorts, TikTok, Snapchat Stories, or any '
+        'other app you choose ("App Time Limits"). This works by detecting '
+        'the app on your screen using Android\'s Accessibility Service — the '
+        'app does not monitor your activity elsewhere or send it off your '
+        'device. If you turn on "All social media" mode, once your daily '
+        'limit for Instagram or YouTube runs out the entire app is blocked '
+        'for the rest of the day, not just Reels or Shorts. Once any daily '
+        'limit runs out, that app or feed is locked for a full 24 hours as an '
+        'anti-circumvention measure, and the limit cannot be changed or '
+        'removed during that time.',
+  ),
+  _TermsSection(
+    '4. Prayer-based app lock (optional, faith-based feature)',
+    'The app includes an optional feature that locks apps you choose (or '
+        'every app) behind a short Christian prayer — a Thanksgiving prayer '
+        'or the Rosary — which must be completed before the app becomes '
+        'accessible again for a set number of hours. This feature is opt-in, '
+        'its content is religious in nature, and it is offered purely as a '
+        'personal accountability tool, not as religious instruction or '
+        'counsel. You can disable it, and choose which apps (if any) it '
+        'applies to, at any time from within the app.',
+  ),
+  _TermsSection(
+    '5. No guarantee of effectiveness',
     'Content blocking is based on DNS-level domain filtering. No filter is '
         'perfect: some unwanted content may still get through, and some '
         'legitimate content may occasionally be blocked. The app cannot '
-        'guarantee that every harmful site or app will be blocked at all times.',
+        'guarantee that every harmful site or app will be blocked at all '
+        'times. Features that rely on Android\'s Accessibility Service — App '
+        'Time Limits, "All social media" mode, and the prayer-based app lock '
+        '— depend on that service staying enabled; disabling it in your '
+        'device settings will stop those features from working.',
   ),
   _TermsSection(
-    '4. Use at your own responsibility',
+    '6. Use at your own responsibility',
     'You use the app at your own responsibility and risk. Reading these terms '
         'is your responsibility. If you choose to continue without reading '
         'them, you accept them in full and assume all responsibility for your '
         'use of the app and any outcome that results from it.',
   ),
   _TermsSection(
-    '5. Your data and privacy',
+    '7. Your data and privacy',
     'The app stores your settings and assessment results locally on your '
-        'device. It does not sell your personal data. Network requests are '
-        'processed on-device to decide what to block; the app does not require '
-        'an account to function.',
+        'device. This includes any apps you choose for App Time Limits or the '
+        'prayer-based app lock, and the local history of completed prayers '
+        'used to show your streak. It does not sell your personal data. '
+        'Network requests are processed on-device to decide what to block; '
+        'the app does not require an account to function.',
   ),
   _TermsSection(
-    '6. Device permissions',
-    'To work, the app may use a local VPN service for DNS filtering and, if you '
-        'enable it, accessibility and device-administration features for '
-        'uninstall protection. You can review or revoke these permissions in '
-        'your device settings at any time, which may reduce protection.',
+    '8. Device permissions',
+    'To work, the app may use a local VPN service for DNS filtering and, if '
+        'you enable them, Android\'s Accessibility Service and '
+        'device-administration features. The Accessibility Service is used '
+        'for uninstall protection, for enforcing Social media / App Time '
+        'Limits, and for the prayer-based app lock. You can review or revoke '
+        'these permissions in your device settings at any time, which may '
+        'reduce or disable the corresponding protection.',
   ),
   _TermsSection(
-    '7. Limitation of liability',
+    '9. Limitation of liability',
     'To the maximum extent permitted by law, the owner and developer of the '
         'app shall not be liable for any direct, indirect, or incidental '
         'damages arising from the use of, or inability to use, the app, '
         'including any content that is or is not blocked.',
   ),
   _TermsSection(
-    '8. Changes to these Terms',
+    '10. Changes to these Terms',
     'These Terms may be updated as the app evolves. Continued use of the app '
         'after an update means you accept the revised Terms.',
   ),
   _TermsSection(
-    '9. Contact & support',
+    '11. Contact & support',
     'For questions, bug reports, or support, contact the owner and developer '
         '${AppCredits.ownerName} at ${AppCredits.supportEmail}.',
   ),
