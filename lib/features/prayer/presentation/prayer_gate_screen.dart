@@ -25,12 +25,15 @@ enum PrayerGateMode {
 class PrayerGateArgs {
   const PrayerGateArgs({
     this.mode = PrayerGateMode.voluntary,
-    this.prayerType = 'rosary',
+    this.prayerType,
     this.triggerPackage,
   });
 
   final PrayerGateMode mode;
-  final String prayerType;
+
+  /// 'rosary' | 'thanksgiving', or null to let the user choose on the gate
+  /// itself (used when a locked app raises the gate with no prior choice).
+  final String? prayerType;
   final String? triggerPackage;
 }
 
@@ -56,11 +59,16 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   static const _border = Color(0xFF1B2435);
   static const _dim = Color(0xFF8A94A6);
 
-  late final String _type;
-  late final Duration _duration;
-  late final int _minSeconds;
+  late String _type;
+  late Duration _duration;
+  late int _minSeconds;
   // The Rosary's mysteries, defaulted to today's set; null for thanksgiving.
   MysterySet? _set;
+
+  // True until the user picks which prayer to pray. Only happens when a
+  // locked app raised the gate without a prior choice (args.prayerType is
+  // null); the voluntary "Rezar ahora" flow already asks before pushing here.
+  late bool _needsChoice;
 
   Timer? _timer;
   late int _secondsLeft;
@@ -73,17 +81,30 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   @override
   void initState() {
     super.initState();
-    _type = widget.args.prayerType;
-    _duration = Duration(minutes: fullMinutesFor(_type));
-    _minSeconds = minMinutesFor(_type) * 60;
-    _secondsLeft = _duration.inSeconds;
-    _set = _type == 'rosary'
-        ? mysterySetForWeekday(DateTime.now().weekday)
-        : null;
+    _needsChoice = widget.args.prayerType == null;
+    _setType(widget.args.prayerType ?? 'rosary');
 
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scriptureLockActive.value = true;
+    });
+    if (!_needsChoice) _startTimer();
+  }
+
+  void _setType(String type) {
+    _type = type;
+    _duration = Duration(minutes: fullMinutesFor(type));
+    _minSeconds = minMinutesFor(type) * 60;
+    _secondsLeft = _duration.inSeconds;
+    _set = type == 'rosary'
+        ? mysterySetForWeekday(DateTime.now().weekday)
+        : null;
+  }
+
+  void _choosePrayerType(String type) {
+    setState(() {
+      _setType(type);
+      _needsChoice = false;
     });
     _startTimer();
   }
@@ -101,7 +122,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_done && !_completed) _startTimer();
+      if (!_needsChoice && !_done && !_completed) _startTimer();
     } else {
       _timer?.cancel();
     }
@@ -165,32 +186,127 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   @override
   Widget build(BuildContext context) {
     final lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
-    final guide = buildGuide(_type, lang, set: _set);
-    final fraction = 1 - (_secondsLeft / _duration.inSeconds);
 
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _header(guide.title, lang),
-                if (_set != null) ...[
-                  const SizedBox(height: 10),
-                  _mysteryBar(lang),
+      child: _needsChoice ? _chooserScaffold(lang) : _prayerScaffold(lang),
+    );
+  }
+
+  /// Shown when a locked app raised the gate with no prayer chosen yet: the
+  /// same two options offered by "Rezar ahora", but undismissable — the timer
+  /// hasn't started, so choosing costs no time.
+  Widget _chooserScaffold(Lang lang) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.volunteer_activism, color: _gold, size: 24),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(PS.whatToPray(lang),
+                        style: GoogleFonts.dmSerifDisplay(
+                            color: Colors.white, fontSize: 22)),
+                  ),
+                  _languageButton(lang),
                 ],
-                const SizedBox(height: 14),
-                Expanded(child: _prayerBody(guide)),
-                const SizedBox(height: 12),
-                _progress(lang, fraction),
-                const SizedBox(height: 12),
-                _amenButton(lang),
-              ],
+              ),
+              const SizedBox(height: 28),
+              _chooserCard(
+                icon: Icons.brightness_7,
+                iconColor: _gold,
+                title: PS.rosaryTitle(lang),
+                subtitle: PS.rosarySub(lang),
+                onTap: () => _choosePrayerType('rosary'),
+              ),
+              const SizedBox(height: 14),
+              _chooserCard(
+                icon: Icons.favorite,
+                iconColor: _accent,
+                title: PS.thanksChoice(lang),
+                subtitle: PS.thanksSub(lang),
+                onTap: () => _choosePrayerType('thanksgiving'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _chooserCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor, size: 30),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text(subtitle,
+                      style: GoogleFonts.inter(color: _dim, fontSize: 13)),
+                ],
+              ),
             ),
+            const Icon(Icons.chevron_right, color: _dim),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _prayerScaffold(Lang lang) {
+    final guide = buildGuide(_type, lang, set: _set);
+    final fraction = 1 - (_secondsLeft / _duration.inSeconds);
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _header(guide.title, lang),
+              if (_set != null) ...[
+                const SizedBox(height: 10),
+                _mysteryBar(lang),
+              ],
+              const SizedBox(height: 14),
+              Expanded(child: _prayerBody(guide)),
+              const SizedBox(height: 12),
+              _progress(lang, fraction),
+              const SizedBox(height: 12),
+              _amenButton(lang),
+            ],
           ),
         ),
       ),

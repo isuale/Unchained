@@ -165,6 +165,63 @@ const _hailHolyQueen = {
       'advogada nossa, esses vossos olhos misericordiosos a nós volvei. Amém.',
 };
 
+// Three Hail Marys to the Most Holy Trinity, traditionally prayed at the end
+// of the Rosary (before the Salve), each addressed to Mary through one Person
+// of the Trinity, otherwise following the standard Hail Mary text.
+const _trinityHailMary = [
+  {
+    Lang.es: 'Dios te salve, María, hija de Dios Padre, llena eres de gracia, '
+        'el Señor es contigo. Bendita tú eres entre todas las mujeres, y '
+        'bendito es el fruto de tu vientre, Jesús. Santa María, Madre de '
+        'Dios, ruega por nosotros, pecadores, ahora y en la hora de nuestra '
+        'muerte. Amén.',
+    Lang.en: 'Hail Mary, daughter of God the Father, full of grace, the Lord '
+        'is with thee. Blessed art thou among women, and blessed is the '
+        'fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us '
+        'sinners, now and at the hour of our death. Amen.',
+    Lang.pt: 'Ave Maria, filha de Deus Pai, cheia de graça, o Senhor é '
+        'convosco. Bendita sois vós entre as mulheres, e bendito é o fruto '
+        'do vosso ventre, Jesus. Santa Maria, Mãe de Deus, rogai por nós '
+        'pecadores, agora e na hora da nossa morte. Amém.',
+  },
+  {
+    Lang.es: 'Dios te salve, María, madre de Dios Hijo, llena eres de '
+        'gracia, el Señor es contigo. Bendita tú eres entre todas las '
+        'mujeres, y bendito es el fruto de tu vientre, Jesús. Santa María, '
+        'Madre de Dios, ruega por nosotros, pecadores, ahora y en la hora de '
+        'nuestra muerte. Amén.',
+    Lang.en: 'Hail Mary, mother of God the Son, full of grace, the Lord is '
+        'with thee. Blessed art thou among women, and blessed is the fruit '
+        'of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, '
+        'now and at the hour of our death. Amen.',
+    Lang.pt: 'Ave Maria, mãe de Deus Filho, cheia de graça, o Senhor é '
+        'convosco. Bendita sois vós entre as mulheres, e bendito é o fruto '
+        'do vosso ventre, Jesus. Santa Maria, Mãe de Deus, rogai por nós '
+        'pecadores, agora e na hora da nossa morte. Amém.',
+  },
+  {
+    Lang.es: 'Dios te salve, María, esposa de Dios Espíritu Santo, llena '
+        'eres de gracia, el Señor es contigo. Bendita tú eres entre todas '
+        'las mujeres, y bendito es el fruto de tu vientre, Jesús. Santa '
+        'María, Madre de Dios, ruega por nosotros, pecadores, ahora y en la '
+        'hora de nuestra muerte. Amén.',
+    Lang.en: 'Hail Mary, spouse of God the Holy Spirit, full of grace, the '
+        'Lord is with thee. Blessed art thou among women, and blessed is '
+        'the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us '
+        'sinners, now and at the hour of our death. Amen.',
+    Lang.pt: 'Ave Maria, esposa de Deus Espírito Santo, cheia de graça, o '
+        'Senhor é convosco. Bendita sois vós entre as mulheres, e bendito é '
+        'o fruto do vosso ventre, Jesus. Santa Maria, Mãe de Deus, rogai por '
+        'nós pecadores, agora e na hora da nossa morte. Amém.',
+  },
+];
+
+const _hTrinityHail = {
+  Lang.es: 'Avemaría a la Santísima Trinidad',
+  Lang.en: 'Hail Mary to the Most Holy Trinity',
+  Lang.pt: 'Ave-Maria à Santíssima Trindade',
+};
+
 // --- Section headings -----------------------------------------------------
 
 const _hSign = {Lang.es: 'Señal de la Cruz', Lang.en: 'Sign of the Cross', Lang.pt: 'Sinal da Cruz'};
@@ -299,6 +356,12 @@ PrayerGuide buildRosary(Lang lang, MysterySet set) {
     steps.add(PrayerStep(
       tr(_hGloryFatima, lang),
       '${tr(_gloryBe, lang)}\n\n${tr(_oMaria, lang)}\n\n${tr(_fatima, lang)}',
+    ));
+  }
+  for (var i = 0; i < 3; i++) {
+    steps.add(PrayerStep(
+      '${tr(_hTrinityHail, lang)} (${i + 1}/3)',
+      tr(_trinityHailMary[i], lang),
     ));
   }
   steps.add(PrayerStep(tr(_hSalve, lang), tr(_hailHolyQueen, lang)));
