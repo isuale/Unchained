@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/core/dev_flags.dart';
+import 'package:unchained/features/app_limits/application/app_limits_provider.dart';
 import 'package:unchained/features/dashboard/data/feed_guard_bridge.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/domain/streak_progress.dart';
@@ -178,6 +179,64 @@ class _DashboardBody extends ConsumerWidget {
       // Compiled out entirely in normal builds (kDevTools == false).
       onLongPress:
           kDevTools ? () => _confirmResetFeedGuard(context, ref, field, label) : null,
+    );
+  }
+
+  /// Entry point into the App Time Limits picker (any app, its own daily
+  /// budget) — a plain navigable row rather than a [ToggleRow] switch, since
+  /// managing the actual set of limited apps needs its own screen.
+  Widget _appLimitsManageRow(
+      BuildContext context, WidgetRef ref, bool protectionOn) {
+    final configured = ref.watch(appLimitsProvider).asData?.value ?? const [];
+    final count = configured.length;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: protectionOn ? () => context.push('/app-limits') : null,
+        child: Opacity(
+          opacity: protectionOn ? 1.0 : 0.4,
+          child: SizedBox(
+            height: 56,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Icon(Icons.apps,
+                      size: 24, color: Colors.white.withValues(alpha: 0.7)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.app_limits_manage_row_label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            count == 0
+                                ? l.app_limits_manage_row_sublabel_none
+                                : l.app_limits_manage_row_sublabel_count(count),
+                            style: const TextStyle(
+                                color: Color(0xFF888888), fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Color(0xFF666666)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -616,10 +675,7 @@ class _DashboardBody extends ConsumerWidget {
 
           // App control
           _SectionWrapper(
-            title: SectionTitle(
-              title: l.dashboard_section_app,
-              comingSoonLabel: l.dashboard_coming_soon,
-            ),
+            title: SectionTitle(title: l.dashboard_section_app),
             children: [
               ToggleRow(
                 label: l.dashboard_app_time_limits,
@@ -632,6 +688,11 @@ class _DashboardBody extends ConsumerWidget {
                 parentEnabled: protectionOn,
                 leadingIcon: Icons.timer_outlined,
               ),
+              if (settings.appTimeLimitsEnabled &&
+                  !isFeatureLocked('appTimeLimitsEnabled', activePlan)) ...[
+                const _RowSeparator(),
+                _appLimitsManageRow(context, ref, protectionOn),
+              ],
               const _RowSeparator(),
               ToggleRow(
                 label: l.dashboard_custom_apps_blocklist,

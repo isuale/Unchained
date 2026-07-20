@@ -119,6 +119,32 @@
   "dashboard_accountability_partner": "Compañero de responsabilidad",
   "dashboard_custom_block_screen": "Pantalla de bloqueo personalizada",
   "dashboard_custom_websites_blocklist": "Lista personalizada de webs",
+  "app_limits_screen_title": "Límites de tiempo en apps",
+  "app_limits_manage_row_label": "Gestionar apps limitadas",
+  "app_limits_manage_row_sublabel_none": "Toca para elegir apps",
+  "app_limits_manage_row_sublabel_count": "{count} apps limitadas",
+  "@app_limits_manage_row_sublabel_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "app_limits_search_hint": "Buscar apps…",
+  "app_limits_section_limited": "Limitadas",
+  "app_limits_section_all": "Todas las apps",
+  "app_limits_empty_search": "No se encontraron apps.",
+  "app_limits_permission_banner": "Activa el acceso de Accesibilidad para aplicar estos límites diarios.",
+  "app_limits_permission_enable": "Activar",
+  "app_limits_remove_title": "¿Quitar el límite?",
+  "app_limits_remove_body": "{app} ya no tendrá un límite de tiempo diario.",
+  "@app_limits_remove_body": {
+    "placeholders": {
+      "app": { "type": "String" }
+    }
+  },
+  "app_limits_remove_confirm": "Quitar",
+  "app_limits_minutes_title": "Minutos al día",
+  "app_limits_minutes_body": "Permitido hoy antes de bloquearse por el resto del día.",
+  "app_limits_add": "Añadir",
   "nav_blocking": "Bloqueo",
   "nav_blocklist": "Lista",
   "nav_progress": "Progreso",

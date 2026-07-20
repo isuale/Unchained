@@ -3367,6 +3367,423 @@ class PrayerLogCompanion extends UpdateCompanion<PrayerEntry> {
   }
 }
 
+class $AppTimeLimitsTable extends AppTimeLimits
+    with TableInfo<$AppTimeLimitsTable, AppTimeLimit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AppTimeLimitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _packageNameMeta = const VerificationMeta(
+    'packageName',
+  );
+  @override
+  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
+    'package_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _appLabelMeta = const VerificationMeta(
+    'appLabel',
+  );
+  @override
+  late final GeneratedColumn<String> appLabel = GeneratedColumn<String>(
+    'app_label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _dailyLimitMinutesMeta = const VerificationMeta(
+    'dailyLimitMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> dailyLimitMinutes = GeneratedColumn<int>(
+    'daily_limit_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    packageName,
+    appLabel,
+    enabled,
+    dailyLimitMinutes,
+    addedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'app_time_limits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AppTimeLimit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('package_name')) {
+      context.handle(
+        _packageNameMeta,
+        packageName.isAcceptableOrUnknown(
+          data['package_name']!,
+          _packageNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_packageNameMeta);
+    }
+    if (data.containsKey('app_label')) {
+      context.handle(
+        _appLabelMeta,
+        appLabel.isAcceptableOrUnknown(data['app_label']!, _appLabelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_appLabelMeta);
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    }
+    if (data.containsKey('daily_limit_minutes')) {
+      context.handle(
+        _dailyLimitMinutesMeta,
+        dailyLimitMinutes.isAcceptableOrUnknown(
+          data['daily_limit_minutes']!,
+          _dailyLimitMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {packageName},
+  ];
+  @override
+  AppTimeLimit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AppTimeLimit(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      packageName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}package_name'],
+      )!,
+      appLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_label'],
+      )!,
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      dailyLimitMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}daily_limit_minutes'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AppTimeLimitsTable createAlias(String alias) {
+    return $AppTimeLimitsTable(attachedDatabase, alias);
+  }
+}
+
+class AppTimeLimit extends DataClass implements Insertable<AppTimeLimit> {
+  final int id;
+  final String packageName;
+  final String appLabel;
+  final bool enabled;
+  final int dailyLimitMinutes;
+  final DateTime addedAt;
+  const AppTimeLimit({
+    required this.id,
+    required this.packageName,
+    required this.appLabel,
+    required this.enabled,
+    required this.dailyLimitMinutes,
+    required this.addedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['package_name'] = Variable<String>(packageName);
+    map['app_label'] = Variable<String>(appLabel);
+    map['enabled'] = Variable<bool>(enabled);
+    map['daily_limit_minutes'] = Variable<int>(dailyLimitMinutes);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    return map;
+  }
+
+  AppTimeLimitsCompanion toCompanion(bool nullToAbsent) {
+    return AppTimeLimitsCompanion(
+      id: Value(id),
+      packageName: Value(packageName),
+      appLabel: Value(appLabel),
+      enabled: Value(enabled),
+      dailyLimitMinutes: Value(dailyLimitMinutes),
+      addedAt: Value(addedAt),
+    );
+  }
+
+  factory AppTimeLimit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AppTimeLimit(
+      id: serializer.fromJson<int>(json['id']),
+      packageName: serializer.fromJson<String>(json['packageName']),
+      appLabel: serializer.fromJson<String>(json['appLabel']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      dailyLimitMinutes: serializer.fromJson<int>(json['dailyLimitMinutes']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'packageName': serializer.toJson<String>(packageName),
+      'appLabel': serializer.toJson<String>(appLabel),
+      'enabled': serializer.toJson<bool>(enabled),
+      'dailyLimitMinutes': serializer.toJson<int>(dailyLimitMinutes),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+    };
+  }
+
+  AppTimeLimit copyWith({
+    int? id,
+    String? packageName,
+    String? appLabel,
+    bool? enabled,
+    int? dailyLimitMinutes,
+    DateTime? addedAt,
+  }) => AppTimeLimit(
+    id: id ?? this.id,
+    packageName: packageName ?? this.packageName,
+    appLabel: appLabel ?? this.appLabel,
+    enabled: enabled ?? this.enabled,
+    dailyLimitMinutes: dailyLimitMinutes ?? this.dailyLimitMinutes,
+    addedAt: addedAt ?? this.addedAt,
+  );
+  AppTimeLimit copyWithCompanion(AppTimeLimitsCompanion data) {
+    return AppTimeLimit(
+      id: data.id.present ? data.id.value : this.id,
+      packageName: data.packageName.present
+          ? data.packageName.value
+          : this.packageName,
+      appLabel: data.appLabel.present ? data.appLabel.value : this.appLabel,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      dailyLimitMinutes: data.dailyLimitMinutes.present
+          ? data.dailyLimitMinutes.value
+          : this.dailyLimitMinutes,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppTimeLimit(')
+          ..write('id: $id, ')
+          ..write('packageName: $packageName, ')
+          ..write('appLabel: $appLabel, ')
+          ..write('enabled: $enabled, ')
+          ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    packageName,
+    appLabel,
+    enabled,
+    dailyLimitMinutes,
+    addedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AppTimeLimit &&
+          other.id == this.id &&
+          other.packageName == this.packageName &&
+          other.appLabel == this.appLabel &&
+          other.enabled == this.enabled &&
+          other.dailyLimitMinutes == this.dailyLimitMinutes &&
+          other.addedAt == this.addedAt);
+}
+
+class AppTimeLimitsCompanion extends UpdateCompanion<AppTimeLimit> {
+  final Value<int> id;
+  final Value<String> packageName;
+  final Value<String> appLabel;
+  final Value<bool> enabled;
+  final Value<int> dailyLimitMinutes;
+  final Value<DateTime> addedAt;
+  const AppTimeLimitsCompanion({
+    this.id = const Value.absent(),
+    this.packageName = const Value.absent(),
+    this.appLabel = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.dailyLimitMinutes = const Value.absent(),
+    this.addedAt = const Value.absent(),
+  });
+  AppTimeLimitsCompanion.insert({
+    this.id = const Value.absent(),
+    required String packageName,
+    required String appLabel,
+    this.enabled = const Value.absent(),
+    this.dailyLimitMinutes = const Value.absent(),
+    this.addedAt = const Value.absent(),
+  }) : packageName = Value(packageName),
+       appLabel = Value(appLabel);
+  static Insertable<AppTimeLimit> custom({
+    Expression<int>? id,
+    Expression<String>? packageName,
+    Expression<String>? appLabel,
+    Expression<bool>? enabled,
+    Expression<int>? dailyLimitMinutes,
+    Expression<DateTime>? addedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (packageName != null) 'package_name': packageName,
+      if (appLabel != null) 'app_label': appLabel,
+      if (enabled != null) 'enabled': enabled,
+      if (dailyLimitMinutes != null) 'daily_limit_minutes': dailyLimitMinutes,
+      if (addedAt != null) 'added_at': addedAt,
+    });
+  }
+
+  AppTimeLimitsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? packageName,
+    Value<String>? appLabel,
+    Value<bool>? enabled,
+    Value<int>? dailyLimitMinutes,
+    Value<DateTime>? addedAt,
+  }) {
+    return AppTimeLimitsCompanion(
+      id: id ?? this.id,
+      packageName: packageName ?? this.packageName,
+      appLabel: appLabel ?? this.appLabel,
+      enabled: enabled ?? this.enabled,
+      dailyLimitMinutes: dailyLimitMinutes ?? this.dailyLimitMinutes,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (packageName.present) {
+      map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (appLabel.present) {
+      map['app_label'] = Variable<String>(appLabel.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (dailyLimitMinutes.present) {
+      map['daily_limit_minutes'] = Variable<int>(dailyLimitMinutes.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppTimeLimitsCompanion(')
+          ..write('id: $id, ')
+          ..write('packageName: $packageName, ')
+          ..write('appLabel: $appLabel, ')
+          ..write('enabled: $enabled, ')
+          ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3378,6 +3795,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $LockedAppsTable lockedApps = $LockedAppsTable(this);
   late final $PrayerLogTable prayerLog = $PrayerLogTable(this);
+  late final $AppTimeLimitsTable appTimeLimits = $AppTimeLimitsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3387,6 +3805,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     blockingSettings,
     lockedApps,
     prayerLog,
+    appTimeLimits,
   ];
 }
 
@@ -4913,6 +5332,223 @@ typedef $$PrayerLogTableProcessedTableManager =
       PrayerEntry,
       PrefetchHooks Function()
     >;
+typedef $$AppTimeLimitsTableCreateCompanionBuilder =
+    AppTimeLimitsCompanion Function({
+      Value<int> id,
+      required String packageName,
+      required String appLabel,
+      Value<bool> enabled,
+      Value<int> dailyLimitMinutes,
+      Value<DateTime> addedAt,
+    });
+typedef $$AppTimeLimitsTableUpdateCompanionBuilder =
+    AppTimeLimitsCompanion Function({
+      Value<int> id,
+      Value<String> packageName,
+      Value<String> appLabel,
+      Value<bool> enabled,
+      Value<int> dailyLimitMinutes,
+      Value<DateTime> addedAt,
+    });
+
+class $$AppTimeLimitsTableFilterComposer
+    extends Composer<_$AppDatabase, $AppTimeLimitsTable> {
+  $$AppTimeLimitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appLabel => $composableBuilder(
+    column: $table.appLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dailyLimitMinutes => $composableBuilder(
+    column: $table.dailyLimitMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AppTimeLimitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AppTimeLimitsTable> {
+  $$AppTimeLimitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get appLabel => $composableBuilder(
+    column: $table.appLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dailyLimitMinutes => $composableBuilder(
+    column: $table.dailyLimitMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AppTimeLimitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AppTimeLimitsTable> {
+  $$AppTimeLimitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get appLabel =>
+      $composableBuilder(column: $table.appLabel, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<int> get dailyLimitMinutes => $composableBuilder(
+    column: $table.dailyLimitMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+}
+
+class $$AppTimeLimitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AppTimeLimitsTable,
+          AppTimeLimit,
+          $$AppTimeLimitsTableFilterComposer,
+          $$AppTimeLimitsTableOrderingComposer,
+          $$AppTimeLimitsTableAnnotationComposer,
+          $$AppTimeLimitsTableCreateCompanionBuilder,
+          $$AppTimeLimitsTableUpdateCompanionBuilder,
+          (
+            AppTimeLimit,
+            BaseReferences<_$AppDatabase, $AppTimeLimitsTable, AppTimeLimit>,
+          ),
+          AppTimeLimit,
+          PrefetchHooks Function()
+        > {
+  $$AppTimeLimitsTableTableManager(_$AppDatabase db, $AppTimeLimitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AppTimeLimitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AppTimeLimitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AppTimeLimitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> packageName = const Value.absent(),
+                Value<String> appLabel = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<int> dailyLimitMinutes = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => AppTimeLimitsCompanion(
+                id: id,
+                packageName: packageName,
+                appLabel: appLabel,
+                enabled: enabled,
+                dailyLimitMinutes: dailyLimitMinutes,
+                addedAt: addedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String packageName,
+                required String appLabel,
+                Value<bool> enabled = const Value.absent(),
+                Value<int> dailyLimitMinutes = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => AppTimeLimitsCompanion.insert(
+                id: id,
+                packageName: packageName,
+                appLabel: appLabel,
+                enabled: enabled,
+                dailyLimitMinutes: dailyLimitMinutes,
+                addedAt: addedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AppTimeLimitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AppTimeLimitsTable,
+      AppTimeLimit,
+      $$AppTimeLimitsTableFilterComposer,
+      $$AppTimeLimitsTableOrderingComposer,
+      $$AppTimeLimitsTableAnnotationComposer,
+      $$AppTimeLimitsTableCreateCompanionBuilder,
+      $$AppTimeLimitsTableUpdateCompanionBuilder,
+      (
+        AppTimeLimit,
+        BaseReferences<_$AppDatabase, $AppTimeLimitsTable, AppTimeLimit>,
+      ),
+      AppTimeLimit,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4925,4 +5561,6 @@ class $AppDatabaseManager {
       $$LockedAppsTableTableManager(_db, _db.lockedApps);
   $$PrayerLogTableTableManager get prayerLog =>
       $$PrayerLogTableTableManager(_db, _db.prayerLog);
+  $$AppTimeLimitsTableTableManager get appTimeLimits =>
+      $$AppTimeLimitsTableTableManager(_db, _db.appTimeLimits);
 }

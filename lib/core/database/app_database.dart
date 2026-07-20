@@ -158,6 +158,29 @@ class LockedApps extends Table {
       ];
 }
 
+/// Apps the user has picked for the "App Time Limits" feature, each with its
+/// own daily minute budget. Matched by [packageName] against the foreground
+/// app in the native FeedGuardService watchdog (the same one that enforces
+/// Reels/Shorts/TikTok/Snapchat), which treats every one of these as a
+/// whole-app timer — see android/.../FeedGuardService.kt and FeedGuardState.kt.
+@DataClassName('AppTimeLimit')
+class AppTimeLimits extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get packageName => text()();
+  TextColumn get appLabel => text()();
+  BoolColumn get enabled => boolean().withDefault(const Constant(true))();
+  IntColumn get dailyLimitMinutes =>
+      integer().withDefault(const Constant(30))();
+  DateTimeColumn get addedAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+
+  // One row per package: re-adding an app updates the existing row.
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {packageName},
+      ];
+}
+
 /// Append-only history of completed prayer sessions, one row per finished
 /// prayer. Powers the "days giving thanks" streak on the prayer home.
 @DataClassName('PrayerEntry')
@@ -177,14 +200,19 @@ class PrayerLog extends Table {
   DateTimeColumn get completedAt => dateTime()();
 }
 
-@DriftDatabase(
-    tables: [UserAssessments, BlockingSettings, LockedApps, PrayerLog])
+@DriftDatabase(tables: [
+  UserAssessments,
+  BlockingSettings,
+  LockedApps,
+  PrayerLog,
+  AppTimeLimits
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -262,6 +290,11 @@ class AppDatabase extends _$AppDatabase {
           if (from < 11) {
             await m.addColumn(
                 blockingSettings, blockingSettings.prayerLanguage);
+          }
+          // v12: App Time Limits — the apps the user picked, each with its own
+          // daily minute budget.
+          if (from < 12) {
+            await m.createTable(appTimeLimits);
           }
         },
         beforeOpen: (details) async {

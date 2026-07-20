@@ -10,8 +10,13 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 
 /**
- * Daily time-budget watchdog for short-video/story feeds: Instagram Reels,
- * YouTube Shorts, TikTok and Snapchat Stories.
+ * Daily time-budget watchdog for short-video/story feeds (Instagram Reels,
+ * YouTube Shorts, TikTok, Snapchat Stories) AND, more generally, for the
+ * "App Time Limits" feature — any other app the user picks, each with its
+ * own daily minute budget. The four feeds above are baked in with their own
+ * detection quirks (see below); a user-picked app is always tracked as a
+ * whole-app timer, keyed by its own package name (see [FeedGuardState] for
+ * how that dynamic package set is tracked) rather than a fixed target key.
  *
  * Android's DNS-based VPN blocking (see [BlockingService]) can only block or
  * allow a whole domain, so it can't tell "Instagram" apart from "Instagram
@@ -78,10 +83,10 @@ class FeedGuardService : AccessibilityService() {
             return
         }
 
-        val matched = if (target in WHOLE_APP_TARGETS) {
-            true
-        } else {
+        val matched = if (needsSubScreenMatch(target)) {
             activeScreenMatches(event, needlesFor(target))
+        } else {
+            true
         }
 
         if (!matched) {
@@ -106,9 +111,7 @@ class FeedGuardService : AccessibilityService() {
     /** One-second heartbeat: keep counting only while the tracked target is still on screen. */
     private fun tick() {
         val target = activeTarget ?: return
-        val stillThere = if (target in WHOLE_APP_TARGETS) {
-            lastForegroundPackage?.let { targetForPackage(it) == target } == true
-        } else {
+        val stillThere = if (needsSubScreenMatch(target)) {
             rootInActiveWindow?.let { root ->
                 try {
                     nodeTreeMatches(root, needlesFor(target))
@@ -116,6 +119,8 @@ class FeedGuardService : AccessibilityService() {
                     root.recycle()
                 }
             } ?: false
+        } else {
+            lastForegroundPackage?.let { targetForPackage(it) == target } == true
         }
         if (!stillThere) {
             Log.d(TAG, "tick: $target no longer on screen, stop tracking")
@@ -250,8 +255,17 @@ class FeedGuardService : AccessibilityService() {
         Log.d(TAG, message())
     }
 
+    /** Fixed feeds first; falls back to a user-picked App Time Limits package,
+     * whose target key is simply the package name itself. */
     private fun targetForPackage(pkg: String): String? =
         TARGET_PACKAGES.entries.firstOrNull { pkg in it.value }?.key
+            ?: pkg.takeIf { FeedGuardState.appLimitPackages(this).contains(it) }
+
+    /** Only Reels/Shorts need a sub-screen match; every other target (the two
+     * whole-app feeds plus every user-picked App Time Limits package) is
+     * satisfied by foreground presence alone. */
+    private fun needsSubScreenMatch(target: String): Boolean =
+        target == "blockReels" || target == "blockShorts"
 
     private fun needlesFor(target: String): List<String> = when (target) {
         "blockReels" -> REELS_NEEDLES
@@ -264,7 +278,7 @@ class FeedGuardService : AccessibilityService() {
         "blockShorts" -> "YouTube Shorts"
         "blockTikTok" -> "TikTok"
         "blockSnapchatStories" -> "Snapchat Stories"
-        else -> target
+        else -> FeedGuardState.label(this, target) ?: target
     }
 
     companion object {
@@ -301,8 +315,6 @@ class FeedGuardService : AccessibilityService() {
             "See more videos using this sound",
             "Remix this Short",
         )
-
-        private val WHOLE_APP_TARGETS = setOf("blockTikTok", "blockSnapchatStories")
 
         private val TARGET_PACKAGES: Map<String, Set<String>> = mapOf(
             "blockReels" to setOf("com.instagram.android"),

@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:unchained/features/app_limits/presentation/app_time_limits_screen.dart';
 import 'package:unchained/features/dashboard/dashboard_screen.dart';
 import 'package:unchained/features/guard/presentation/scripture_lock_screen.dart';
 import 'package:unchained/features/dashboard/stubs/accountability_stub.dart';
@@ -78,6 +79,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/apps',
       builder: (context, state) => const AppPickerScreen(),
+    ),
+    GoRoute(
+      path: '/app-limits',
+      builder: (context, state) => const AppTimeLimitsScreen(),
     ),
     GoRoute(
       path: '/pray',

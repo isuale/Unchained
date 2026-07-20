@@ -10,9 +10,14 @@ import android.content.Context
  * budget) — both run in the same process, so plain SharedPreferences is
  * enough.
  *
- * Each target key is one of the `block*` BlockingSettings field names
+ * Each target key is either one of the `block*` BlockingSettings field names
  * (`blockReels`/`blockShorts`/`blockTikTok`/`blockSnapchatStories`), reused
- * as-is so the Dart side doesn't need a second naming scheme.
+ * as-is so the Dart side doesn't need a second naming scheme, OR — for the
+ * generalized "App Time Limits" feature (any user-picked app, not just the
+ * four built-in feeds) — the app's own package name. Package names always
+ * contain a dot, so they can never collide with the four fixed keys above.
+ * [appLimitPackages] tracks which package-keyed targets currently have
+ * config, since (unlike the fixed four) that set is dynamic.
  *
  * Anti-circumvention lock: once a target's budget is used up, [rolloverIfNeeded]
  * would normally hand back a fresh budget at the next local midnight — trivial
@@ -33,6 +38,7 @@ object FeedGuardState {
     private const val PREFS = "unchained_feed_guard"
     private const val MAX_HISTORY_DAYS = 14
     private const val LOCK_DURATION_MS = 24L * 60 * 60 * 1000
+    private const val KEY_APP_LIMIT_PACKAGES = "app_limit_packages"
 
     fun isEnabled(context: Context, target: String): Boolean =
         prefs(context).getBoolean(keyEnabled(target), false)
@@ -51,6 +57,50 @@ object FeedGuardState {
             .putInt(keyLimit(target), limitMinutes)
             .apply()
         return true
+    }
+
+    /** Package names currently configured for the App Time Limits feature (whether
+     * enabled or not) — the dynamic counterpart to the fixed [TARGETS] list. */
+    fun appLimitPackages(context: Context): Set<String> =
+        prefs(context).getStringSet(KEY_APP_LIMIT_PACKAGES, emptySet()) ?: emptySet()
+
+    fun label(context: Context, target: String): String? =
+        prefs(context).getString(keyLabel(target), null)
+
+    /** Same contract as [setConfig] (refused while locked), plus it stores [label]
+     * and registers [pkg] in [appLimitPackages] so the watchdog knows to watch it. */
+    fun setAppLimitConfig(
+        context: Context,
+        pkg: String,
+        label: String,
+        enabled: Boolean,
+        limitMinutes: Int,
+    ): Boolean {
+        if (isLocked(context, pkg)) return false
+        val packages = appLimitPackages(context) + pkg
+        prefs(context).edit()
+            .putBoolean(keyEnabled(pkg), enabled)
+            .putInt(keyLimit(pkg), limitMinutes)
+            .putString(keyLabel(pkg), label)
+            .putStringSet(KEY_APP_LIMIT_PACKAGES, packages)
+            .apply()
+        return true
+    }
+
+    /** Drops [pkg] from the App Time Limits feature entirely, clearing its usage,
+     * history and any exhaustion lock along with it. */
+    fun removeAppLimit(context: Context, pkg: String) {
+        val packages = appLimitPackages(context) - pkg
+        prefs(context).edit()
+            .putStringSet(KEY_APP_LIMIT_PACKAGES, packages)
+            .remove(keyEnabled(pkg))
+            .remove(keyLimit(pkg))
+            .remove(keyLabel(pkg))
+            .remove(keyUsed(pkg))
+            .remove(keyResetDay(pkg))
+            .remove(keyHistory(pkg))
+            .remove(keyExhaustedAt(pkg))
+            .apply()
     }
 
     /** Seconds used in the current period, resetting to 0 first if the period rolled over. */
@@ -171,6 +221,7 @@ object FeedGuardState {
     private fun keyResetDay(target: String) = "${target}_reset_day"
     private fun keyHistory(target: String) = "${target}_history"
     private fun keyExhaustedAt(target: String) = "${target}_exhausted_at"
+    private fun keyLabel(target: String) = "${target}_label"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)

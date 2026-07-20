@@ -119,6 +119,32 @@
   "dashboard_accountability_partner": "Accountability partner",
   "dashboard_custom_block_screen": "Custom block screen",
   "dashboard_custom_websites_blocklist": "Custom websites blocklist",
+  "app_limits_screen_title": "App time limits",
+  "app_limits_manage_row_label": "Manage limited apps",
+  "app_limits_manage_row_sublabel_none": "Tap to choose which apps",
+  "app_limits_manage_row_sublabel_count": "{count} apps limited",
+  "@app_limits_manage_row_sublabel_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "app_limits_search_hint": "Search apps…",
+  "app_limits_section_limited": "Limited",
+  "app_limits_section_all": "All apps",
+  "app_limits_empty_search": "No apps found.",
+  "app_limits_permission_banner": "Enable Accessibility access to enforce these daily limits.",
+  "app_limits_permission_enable": "Enable",
+  "app_limits_remove_title": "Remove limit?",
+  "app_limits_remove_body": "{app} will no longer have a daily time limit.",
+  "@app_limits_remove_body": {
+    "placeholders": {
+      "app": { "type": "String" }
+    }
+  },
+  "app_limits_remove_confirm": "Remove",
+  "app_limits_minutes_title": "Minutes per day",
+  "app_limits_minutes_body": "Allowed today before it gets blocked for the rest of the day.",
+  "app_limits_add": "Add",
   "nav_blocking": "Blocking",
   "nav_blocklist": "Blocklist",
   "nav_progress": "Progress",

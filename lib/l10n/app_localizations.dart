@@ -722,6 +722,102 @@ abstract class AppLocalizations {
   /// **'Lista personalizada de webs'**
   String get dashboard_custom_websites_blocklist;
 
+  /// No description provided for @app_limits_screen_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Límites de tiempo en apps'**
+  String get app_limits_screen_title;
+
+  /// No description provided for @app_limits_manage_row_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar apps limitadas'**
+  String get app_limits_manage_row_label;
+
+  /// No description provided for @app_limits_manage_row_sublabel_none.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para elegir apps'**
+  String get app_limits_manage_row_sublabel_none;
+
+  /// No description provided for @app_limits_manage_row_sublabel_count.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} apps limitadas'**
+  String app_limits_manage_row_sublabel_count(int count);
+
+  /// No description provided for @app_limits_search_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar apps…'**
+  String get app_limits_search_hint;
+
+  /// No description provided for @app_limits_section_limited.
+  ///
+  /// In es, this message translates to:
+  /// **'Limitadas'**
+  String get app_limits_section_limited;
+
+  /// No description provided for @app_limits_section_all.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas las apps'**
+  String get app_limits_section_all;
+
+  /// No description provided for @app_limits_empty_search.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron apps.'**
+  String get app_limits_empty_search;
+
+  /// No description provided for @app_limits_permission_banner.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa el acceso de Accesibilidad para aplicar estos límites diarios.'**
+  String get app_limits_permission_banner;
+
+  /// No description provided for @app_limits_permission_enable.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar'**
+  String get app_limits_permission_enable;
+
+  /// No description provided for @app_limits_remove_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar el límite?'**
+  String get app_limits_remove_title;
+
+  /// No description provided for @app_limits_remove_body.
+  ///
+  /// In es, this message translates to:
+  /// **'{app} ya no tendrá un límite de tiempo diario.'**
+  String app_limits_remove_body(String app);
+
+  /// No description provided for @app_limits_remove_confirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
+  String get app_limits_remove_confirm;
+
+  /// No description provided for @app_limits_minutes_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Minutos al día'**
+  String get app_limits_minutes_title;
+
+  /// No description provided for @app_limits_minutes_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Permitido hoy antes de bloquearse por el resto del día.'**
+  String get app_limits_minutes_body;
+
+  /// No description provided for @app_limits_add.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir'**
+  String get app_limits_add;
+
   /// No description provided for @nav_blocking.
   ///
   /// In es, this message translates to:

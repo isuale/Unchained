@@ -22,6 +22,7 @@ class MainActivity : FlutterActivity() {
     private val channelName = "unchained/blocking"
     private val guardChannelName = "unchained/guard"
     private val feedGuardChannelName = "unchained/feed_guard"
+    private val appLimitsChannelName = "unchained/app_limits"
     private val appsChannelName = "unchained/apps"
     private val appLockChannelName = "unchained/applock"
     private var pendingPrepareResult: MethodChannel.Result? = null
@@ -248,6 +249,78 @@ class MainActivity : FlutterActivity() {
                     "getHistory" -> {
                         val history = FeedGuardState.TARGETS.associateWith { target ->
                             FeedGuardState.history(this, target).map { (day, usedSeconds) ->
+                                mapOf("day" to day, "usedSeconds" to usedSeconds)
+                            }
+                        }
+                        result.success(history)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        // "App Time Limits": any user-picked app, each with its own daily minute
+        // budget. Reuses FeedGuardState/FeedGuardService (the same watchdog that
+        // powers Reels/Shorts/TikTok/Snapchat) keyed by package name instead of a
+        // fixed target key — see FeedGuardState's class doc.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, appLimitsChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isAccessibilityEnabled" ->
+                        result.success(isAccessibilityServiceEnabled(FeedGuardService::class.java))
+                    "openAccessibilitySettings" -> {
+                        startActivity(
+                            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                        result.success(true)
+                    }
+                    "setAppLimitConfig" -> {
+                        val pkg = call.argument<String>("package")
+                        val label = call.argument<String>("label")
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        val limitMinutes = call.argument<Int>("limitMinutes") ?: 30
+                        if (pkg == null || label == null) {
+                            result.success(false)
+                        } else {
+                            result.success(
+                                FeedGuardState.setAppLimitConfig(this, pkg, label, enabled, limitMinutes)
+                            )
+                        }
+                    }
+                    "removeAppLimit" -> {
+                        val pkg = call.argument<String>("package")
+                        if (pkg == null) {
+                            result.success(false)
+                        } else {
+                            FeedGuardState.removeAppLimit(this, pkg)
+                            result.success(true)
+                        }
+                    }
+                    "resetAppLimit" -> {
+                        // DEV_TOOLS-gated on the Dart side, mirrors feed_guard's resetTarget.
+                        val pkg = call.argument<String>("package")
+                        if (pkg == null) {
+                            result.success(false)
+                        } else {
+                            FeedGuardState.resetTarget(this, pkg)
+                            result.success(true)
+                        }
+                    }
+                    "getStatuses" -> {
+                        val packages = FeedGuardState.appLimitPackages(this)
+                        val statuses = packages.associateWith { pkg ->
+                            mapOf(
+                                "usedSeconds" to FeedGuardState.usedSeconds(this, pkg),
+                                "remainingSeconds" to FeedGuardState.remainingSeconds(this, pkg),
+                                "lockedUntilMillis" to FeedGuardState.lockedUntilMillis(this, pkg),
+                            )
+                        }
+                        result.success(statuses)
+                    }
+                    "getHistory" -> {
+                        val packages = FeedGuardState.appLimitPackages(this)
+                        val history = packages.associateWith { pkg ->
+                            FeedGuardState.history(this, pkg).map { (day, usedSeconds) ->
                                 mapOf("day" to day, "usedSeconds" to usedSeconds)
                             }
                         }

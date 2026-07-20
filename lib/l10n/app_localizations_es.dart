@@ -337,6 +337,60 @@ class AppLocalizationsEs extends AppLocalizations {
       'Lista personalizada de webs';
 
   @override
+  String get app_limits_screen_title => 'Límites de tiempo en apps';
+
+  @override
+  String get app_limits_manage_row_label => 'Gestionar apps limitadas';
+
+  @override
+  String get app_limits_manage_row_sublabel_none => 'Toca para elegir apps';
+
+  @override
+  String app_limits_manage_row_sublabel_count(int count) {
+    return '$count apps limitadas';
+  }
+
+  @override
+  String get app_limits_search_hint => 'Buscar apps…';
+
+  @override
+  String get app_limits_section_limited => 'Limitadas';
+
+  @override
+  String get app_limits_section_all => 'Todas las apps';
+
+  @override
+  String get app_limits_empty_search => 'No se encontraron apps.';
+
+  @override
+  String get app_limits_permission_banner =>
+      'Activa el acceso de Accesibilidad para aplicar estos límites diarios.';
+
+  @override
+  String get app_limits_permission_enable => 'Activar';
+
+  @override
+  String get app_limits_remove_title => '¿Quitar el límite?';
+
+  @override
+  String app_limits_remove_body(String app) {
+    return '$app ya no tendrá un límite de tiempo diario.';
+  }
+
+  @override
+  String get app_limits_remove_confirm => 'Quitar';
+
+  @override
+  String get app_limits_minutes_title => 'Minutos al día';
+
+  @override
+  String get app_limits_minutes_body =>
+      'Permitido hoy antes de bloquearse por el resto del día.';
+
+  @override
+  String get app_limits_add => 'Añadir';
+
+  @override
   String get nav_blocking => 'Bloqueo';
 
   @override
