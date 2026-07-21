@@ -440,6 +440,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'These sites are blocked. Add any porn or distracting site that slips through.';
 
   @override
+  String get blocklist_block_permanent_note =>
+      'Sites you add here can\'t be removed. Double-check the address before adding it.';
+
+  @override
   String get blocklist_allow_header => 'Allowed websites';
 
   @override

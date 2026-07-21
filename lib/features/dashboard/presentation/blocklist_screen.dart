@@ -65,9 +65,10 @@ class _DomainListView extends StatefulWidget {
     required this.inputHint,
     required this.emptyText,
     this.headerCard,
+    this.permanentNote,
     required this.custom,
     required this.onAdd,
-    required this.onRemove,
+    this.onRemove,
     required this.accent,
     required this.icon,
   });
@@ -80,11 +81,18 @@ class _DomainListView extends StatefulWidget {
   /// Optional summary card shown above the input (e.g. "1,000+ sites blocked").
   /// Null on the whitelist tab, which deliberately starts clear.
   final Widget? headerCard;
+
+  /// Optional warning shown above the input, explaining that entries can't be
+  /// removed. Null on the whitelist tab, which stays freely editable.
+  final String? permanentNote;
   final List<String> custom;
 
   /// Returns the result so we can show the right snackbar. Receives raw input.
   final Future<DomainListResult> Function(String raw) onAdd;
-  final Future<void> Function(String domain) onRemove;
+
+  /// Null on the blocklist tab: entries there can never be removed (a
+  /// deliberate commitment device), so no remove button is shown at all.
+  final Future<void> Function(String domain)? onRemove;
   final Color accent;
   final IconData icon;
 
@@ -152,6 +160,10 @@ class _DomainListViewState extends State<_DomainListView> {
         if (widget.headerCard != null) ...[
           const SizedBox(height: 16),
           widget.headerCard!,
+        ],
+        if (widget.permanentNote != null) ...[
+          const SizedBox(height: 12),
+          _PermanentNote(text: widget.permanentNote!),
         ],
         const SizedBox(height: 16),
         // Input row
@@ -225,7 +237,9 @@ class _DomainListViewState extends State<_DomainListView> {
             domain: domain,
             icon: widget.icon,
             accent: widget.accent,
-            onRemove: () => widget.onRemove(domain),
+            onRemove: widget.onRemove == null
+                ? null
+                : () => widget.onRemove!(domain),
           ),
       ],
     );
@@ -294,11 +308,11 @@ class _BlocklistTab extends ConsumerWidget {
       headerCard: count > 0
           ? _BuiltinSummaryCard(text: l.blocklist_builtin_summary(count))
           : null,
+      permanentNote: l.blocklist_block_permanent_note,
       custom: custom,
       accent: const Color(0xFFE5484D),
       icon: Icons.block,
       onAdd: actions.addToBlocklist,
-      onRemove: actions.removeFromBlocklist,
     );
   }
 }
@@ -326,6 +340,37 @@ class _BuiltinSummaryCard extends StatelessWidget {
             child: Text(
               text,
               style: const TextStyle(color: Colors.white, height: 1.3),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Sites you add here can't be removed" — warns before the user commits a
+/// domain to the blocklist, since there is no way to undo it afterward.
+class _PermanentNote extends StatelessWidget {
+  const _PermanentNote({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1408),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF3A2F1F)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lock_outline, color: Color(0xFFE5A93D), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Color(0xFFE5A93D), height: 1.3),
             ),
           ),
         ],

@@ -162,6 +162,7 @@
   "blocklist_tab_allow": "Lista blanca",
   "blocklist_block_header": "Webs bloqueadas",
   "blocklist_block_sub": "Estos sitios están bloqueados. Añade cualquier web porno o que te distraiga que se escape.",
+  "blocklist_block_permanent_note": "Los sitios que añades aquí no se pueden eliminar. Revisa bien la dirección antes de añadirla.",
   "blocklist_allow_header": "Webs permitidas",
   "blocklist_allow_sub": "Los sitios que añadas aquí nunca se bloquean. Las webs populares y seguras ya están permitidas automáticamente.",
   "blocklist_builtin": "Predefinido",

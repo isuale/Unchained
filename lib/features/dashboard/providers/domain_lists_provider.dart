@@ -29,6 +29,12 @@ enum DomainListResult { ok, invalid, duplicate }
 
 /// Add/remove domains on the custom lists. Every change is persisted to the DB
 /// and immediately pushed to the native VPN engine so it takes effect live.
+///
+/// The blocklist is intentionally add-only: once a domain is on it, there is
+/// no removal path anywhere in this class (the native side enforces the same
+/// rule independently — see [BlockingService.setUserLists]). This is a
+/// deliberate commitment device, so a moment of temptation can't undo a block
+/// the user set for themself. The allowlist has no such restriction.
 class DomainListsActions {
   DomainListsActions(this._ref);
   final Ref _ref;
@@ -74,13 +80,6 @@ class DomainListsActions {
     await _repo.setCustomBlocklist([...current, domain]);
     await _syncNative();
     return DomainListResult.ok;
-  }
-
-  Future<void> removeFromBlocklist(String domain) async {
-    final settings = await _repo.getSettings();
-    final current = parseDomainList(settings?.customBlocklist);
-    await _repo.setCustomBlocklist(current.where((d) => d != domain).toList());
-    await _syncNative();
   }
 
   Future<DomainListResult> addToAllowlist(String raw) async {

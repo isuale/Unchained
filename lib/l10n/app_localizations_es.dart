@@ -444,6 +444,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Estos sitios están bloqueados. Añade cualquier web porno o que te distraiga que se escape.';
 
   @override
+  String get blocklist_block_permanent_note =>
+      'Los sitios que añades aquí no se pueden eliminar. Revisa bien la dirección antes de añadirla.';
+
+  @override
   String get blocklist_allow_header => 'Webs permitidas';
 
   @override

@@ -920,6 +920,12 @@ abstract class AppLocalizations {
   /// **'Estos sitios están bloqueados. Añade cualquier web porno o que te distraiga que se escape.'**
   String get blocklist_block_sub;
 
+  /// No description provided for @blocklist_block_permanent_note.
+  ///
+  /// In es, this message translates to:
+  /// **'Los sitios que añades aquí no se pueden eliminar. Revisa bien la dirección antes de añadirla.'**
+  String get blocklist_block_permanent_note;
+
   /// No description provided for @blocklist_allow_header.
   ///
   /// In es, this message translates to:

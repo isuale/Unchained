@@ -19,11 +19,20 @@ List<String> parseDomainList(String? stored) {
   return out;
 }
 
+final _label = RegExp(r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?$');
+final _alpha = RegExp(r'^[a-z]+$');
+
 /// Normalizes free-typed input into a bare host, e.g.
 /// `https://www.PornHub.com/foo` -> `pornhub.com`. Returns null when the
 /// input has no usable host (so the UI can reject it). Keeps the exact host
 /// (minus scheme/path/`www.`); use [registrableDomain] on top of this to
 /// reduce to the whole site.
+///
+/// Validation is deliberately strict (rejects leading/trailing/double dots,
+/// hyphen-led/trailing labels, and a non-alphabetic or single-letter TLD) so a
+/// mistyped address is caught here as [DomainListResult.invalid] rather than
+/// slipping through — once accepted onto the blocklist it can never be
+/// removed, so this is the only chance to catch a "bad written" domain.
 String? normalizeDomain(String input) {
   var s = input.trim().toLowerCase();
   if (s.isEmpty) return null;
@@ -36,10 +45,14 @@ String? normalizeDomain(String input) {
   if (s.startsWith('www.')) s = s.substring(4);
   s = s.trim();
   if (s.isEmpty) return null;
-  // Must look like a domain: at least one dot, only valid host characters.
-  if (!s.contains('.')) return null;
-  final valid = RegExp(r'^[a-z0-9.-]+$');
-  if (!valid.hasMatch(s)) return null;
+  if (s.startsWith('.') || s.endsWith('.') || s.contains('..')) return null;
+  final labels = s.split('.');
+  if (labels.length < 2) return null;
+  for (final label in labels) {
+    if (!_label.hasMatch(label)) return null;
+  }
+  final tld = labels.last;
+  if (tld.length < 2 || !_alpha.hasMatch(tld)) return null;
   return s;
 }
 

@@ -162,6 +162,7 @@
   "blocklist_tab_allow": "Whitelist",
   "blocklist_block_header": "Blocked websites",
   "blocklist_block_sub": "These sites are blocked. Add any porn or distracting site that slips through.",
+  "blocklist_block_permanent_note": "Sites you add here can't be removed. Double-check the address before adding it.",
   "blocklist_allow_header": "Allowed websites",
   "blocklist_allow_sub": "Sites you add here are never blocked. Popular safe sites are already allowed automatically.",
   "blocklist_builtin": "Built-in",

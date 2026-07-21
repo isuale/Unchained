@@ -262,12 +262,25 @@ class BlockingService : VpnService() {
         /// Replaces the in-memory user lists and persists them to prefs so the
         /// running tunnel and any later restart both see the change. Domains are
         /// stored lowercased; empties are dropped. Safe to call from any thread.
+        ///
+        /// The blocklist is a one-way ratchet: [block] is UNIONED with whatever is
+        /// already persisted rather than replacing it, so a domain the user has
+        /// blocked can never disappear from the running tunnel even if a future
+        /// Dart-side bug (or anything else on this channel) ever sent a shrunk
+        /// list. This is the enforcement backstop for the "once blocked, can't be
+        /// unblocked" commitment — the Dart UI has no remove control for the
+        /// blocklist at all, but the guarantee lives here, at the actual DNS
+        /// engine, not just in the UI. The allowlist has no such commitment and is
+        /// always fully replaced.
         fun setUserLists(context: android.content.Context, block: List<String>, allow: List<String>) {
-            val b = block.map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toHashSet()
+            val prefs = context.getSharedPreferences(LISTS_PREFS, Context.MODE_PRIVATE)
+            val existingBlock = prefs.getStringSet(KEY_USER_BLOCKLIST, emptySet()) ?: emptySet()
+            val b = (block.asSequence() + existingBlock.asSequence())
+                .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toHashSet()
             val a = allow.map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toHashSet()
             USER_BLOCKLIST = b
             USER_ALLOWLIST = a
-            context.getSharedPreferences(LISTS_PREFS, Context.MODE_PRIVATE).edit()
+            prefs.edit()
                 .putStringSet(KEY_USER_BLOCKLIST, b)
                 .putStringSet(KEY_USER_ALLOWLIST, a)
                 .apply()
