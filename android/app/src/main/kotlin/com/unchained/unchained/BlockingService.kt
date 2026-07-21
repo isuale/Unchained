@@ -477,6 +477,17 @@ class BlockingService : VpnService() {
                 Log.e(TAG, "Skipping bad DoH route $ip", e)
             }
         }
+        // Once a VpnService is established, Android makes it the default network for
+        // every app not explicitly excluded — even though our routes only capture DNS
+        // (port 53) and the DoH/DoT IPs above, WhatsApp still gets pinned to this VPN's
+        // network object for its call-media (ICE/STUN/UDP) sockets. WhatsApp calls are
+        // well known to break under an active VPN network regardless of what it actually
+        // filters (NAT-traversal/ICE candidate gathering fails against a VPN-flagged
+        // network), which is what produced the "Connecting..." hang that never resolves.
+        // We don't need or want to filter WhatsApp's own traffic (it was never a target
+        // of the porn blocklist), so excluding it lets it use the real network directly.
+        excludeAppFromVpn(builder, "com.whatsapp")
+        excludeAppFromVpn(builder, "com.whatsapp.w4b")  // WhatsApp Business, if installed
         vpnInterface = builder.establish()
         Log.d(TAG, "VPN interface established: ${vpnInterface != null}")
 
@@ -493,6 +504,19 @@ class BlockingService : VpnService() {
         tunnelThread = Thread { runTunnelLoop() }.apply {
             name = "UnchainedTunnel"
             start()
+        }
+    }
+
+    /**
+     * Excludes [packageName] from this VPN's network scope, so its traffic (DNS included)
+     * goes straight out the real network as if protection weren't running. No-ops quietly
+     * if the package isn't installed — most devices won't have every excluded app.
+     */
+    private fun excludeAppFromVpn(builder: Builder, packageName: String) {
+        try {
+            builder.addDisallowedApplication(packageName)
+        } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+            // Not installed on this device — nothing to exclude.
         }
     }
 
