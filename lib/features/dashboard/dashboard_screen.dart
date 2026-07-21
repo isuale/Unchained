@@ -5,20 +5,17 @@ import 'package:unchained/features/dashboard/presentation/progress_screen.dart';
 import 'package:unchained/features/dashboard/presentation/settings_screen.dart';
 import 'package:unchained/features/dashboard/protection_dashboard_screen.dart';
 import 'package:unchained/features/prayer/data/app_lock_service.dart';
-import 'package:unchained/features/prayer/data/prayer_repository.dart';
 import 'package:unchained/features/prayer/presentation/prayer_home_screen.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
-/// The tabs of the home shell. Identity rather than a bare index, because the
-/// prayer tab is hidden when the user switches the (Christian) prayer locker
-/// off in Settings — with a raw index, hiding it would shift every later tab
-/// and quietly show the wrong screen for a nav item.
+/// The tabs of the home shell, keyed by identity rather than a bare index so
+/// the set can change without silently shifting which screen a nav item shows.
 enum _Tab { protection, prayer, blocklist, progress, settings }
 
 /// The app's home. Tab 0 is the control panel ("Blocking"/Protección) — the
-/// default landing after payment; tab 1 is the prayer home ("Oración"), shown
-/// only while the prayer locker is enabled; the rest are Block list, Progress
-/// (the addiction graphic) and Settings. Finishing a prayer lands on tab 0.
+/// default landing after payment; tab 1 is the prayer home ("Oración"); tabs
+/// 2–4 are Block list, Progress (the addiction graphic) and Settings.
+/// Finishing a prayer lands on tab 0.
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key, this.initialTab = 0});
 
@@ -83,22 +80,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final l = AppLocalizations.of(context)!;
 
     // Keep the native watchdog's app-lock config in sync with the DB. This
-    // lives here, not on the prayer tab, so switching the locker off still
-    // reaches native at the moment the prayer tab unmounts.
+    // lives here, not on the prayer tab, so a change still reaches native
+    // whichever tab happens to be on screen.
     ref.watch(appLockSyncProvider);
 
-    // Default to true while the setting loads: showing the tab for a frame is
-    // far less jarring than hiding one the user still uses.
-    final prayerEnabled =
-        ref.watch(prayerLockEnabledProvider).asData?.value ?? true;
-
-    final tabs = [
-      for (final t in _Tab.values)
-        if (t != _Tab.prayer || prayerEnabled) t,
-    ];
-
-    // The prayer tab can vanish underneath us while it is the selected one.
-    final selected = tabs.contains(_current) ? _current : _Tab.protection;
+    // Every tab is always present. The prayer tab stays even when the locker is
+    // switched off — it holds the only switch to turn it back on — but the
+    // screen itself then renders a neutral "off" state with no religious
+    // content. See PrayerHomeScreen.
+    const tabs = _Tab.values;
+    final selected = _current;
 
     return Scaffold(
       backgroundColor: Colors.black,

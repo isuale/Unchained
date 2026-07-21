@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
 import 'package:unchained/features/prayer/domain/prayer_strings.dart';
 import 'package:unchained/features/prayer/domain/prayers.dart';
@@ -26,9 +27,13 @@ class PrayerHomeScreen extends ConsumerWidget {
     final prayers = ref.watch(prayerLogProvider).asData?.value ?? const [];
     final lockAll = ref.watch(lockAllAppsProvider).asData?.value ?? false;
     final lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
-    // The native watchdog's config is synced from DashboardScreen, not here —
-    // this screen unmounts when the locker is switched off, which is precisely
-    // when the "off" state needs to reach native.
+    final enabled = ref.watch(prayerLockEnabledProvider).asData?.value ?? true;
+    // The native watchdog's config is synced from DashboardScreen, not here, so
+    // it keeps working regardless of which tab is on screen.
+
+    // Switched off: show nothing religious at all — just why it's off and the
+    // way back. The tab itself stays so the switch is always reachable.
+    if (!enabled) return _disabledView(context, ref, lang);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -91,10 +96,129 @@ class PrayerHomeScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
             ),
+
+            const SizedBox(height: 28),
+            _masterSwitchCard(context, ref, lang, true),
           ],
         ),
       ),
     );
+  }
+
+  /// The master on/off switch for the whole prayer locker, shown at the foot of
+  /// the prayer home (and as the only control once it's off). Kept on this
+  /// screen rather than in Settings so it sits with the feature it governs.
+  Widget _masterSwitchCard(
+      BuildContext context, WidgetRef ref, Lang lang, bool enabled) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _border),
+      ),
+      child: SwitchListTile(
+        value: enabled,
+        activeThumbColor: _accent,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        title: Text(
+          PS.lockToggleTitle(lang),
+          style: GoogleFonts.inter(
+              color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            PS.lockToggleSub(lang),
+            style: GoogleFonts.inter(color: _dim, fontSize: 12, height: 1.4),
+          ),
+        ),
+        onChanged: (v) => _setEnabled(context, ref, lang, v),
+      ),
+    );
+  }
+
+  /// What the tab shows once the locker is switched off: no prayers, no verse,
+  /// no streak — only what changed and the switch to bring it back.
+  Widget _disabledView(BuildContext context, WidgetRef ref, Lang lang) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 48, 20, 28),
+          children: [
+            const Icon(Icons.lock_open, color: _dim, size: 44),
+            const SizedBox(height: 18),
+            Text(
+              PS.lockOffTitle(lang),
+              style:
+                  GoogleFonts.dmSerifDisplay(color: Colors.white, fontSize: 28),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              PS.lockOffBody(lang),
+              style: GoogleFonts.inter(color: _dim, fontSize: 13, height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            _masterSwitchCard(context, ref, lang, false),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                PS.turnBackOn(lang),
+                style: GoogleFonts.inter(color: _dim, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Flips the master switch. Turning it *off* is confirmed first: a user of
+  /// another faith is entitled to opt out, but it still unlocks every app they
+  /// had gated, which shouldn't happen from one stray tap.
+  Future<void> _setEnabled(
+      BuildContext context, WidgetRef ref, Lang lang, bool enabled) async {
+    if (!enabled) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: _card,
+          title: Text(
+            PS.lockOffConfirmTitle(lang),
+            style: GoogleFonts.inter(
+                color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          content: Text(
+            PS.lockOffConfirmBody(lang),
+            style: GoogleFonts.inter(color: _dim, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(PS.keepItOn(lang),
+                  style: GoogleFonts.inter(color: _dim)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                PS.turnOff(lang),
+                style: GoogleFonts.inter(
+                    color: const Color(0xFFFF4D4F),
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
+
+    await ref
+        .read(blockingSettingsRepositoryProvider)
+        .toggleField('prayerLockEnabled', enabled);
   }
 
   Widget _languageButton(BuildContext context, WidgetRef ref, Lang lang) {

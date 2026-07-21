@@ -38,6 +38,33 @@ class PS {
   static String allBlocked(Lang l) => _p(l, 'All apps are locked behind prayer.', 'Todas las apps están bloqueadas tras la oración.', 'Todas as apps estão bloqueadas após a oração.');
   static String someBlocked(Lang l, int n) => _p(l, '$n app(s) locked behind prayer.', '$n app(s) bloqueada(s) tras la oración.', '$n app(s) bloqueada(s) após a oração.');
 
+  // Master switch. The prayer content is Christian, so a user of another faith
+  // (or none) can switch the whole locker off from this screen.
+  static String lockToggleTitle(Lang l) => _p(l, 'Prayer app lock', 'Bloqueo con oración', 'Bloqueio com oração');
+  static String lockToggleSub(Lang l) => _p(
+        l,
+        'These prayers are Christian. If that is not your faith, switch this off — your content blocking stays on.',
+        'Estas oraciones son cristianas. Si no es tu fe, desactívalo — tu bloqueo de contenido sigue activo.',
+        'Estas orações são cristãs. Se não é a tua fé, desativa — o teu bloqueio de conteúdo continua ativo.',
+      );
+  static String lockOffTitle(Lang l) => _p(l, 'Prayer lock is off', 'El bloqueo con oración está desactivado', 'O bloqueio com oração está desativado');
+  static String lockOffBody(Lang l) => _p(
+        l,
+        'Apps are no longer locked behind prayer. Your content blocking and every other protection are unaffected.',
+        'Las apps ya no están bloqueadas tras la oración. Tu bloqueo de contenido y las demás protecciones no cambian.',
+        'As apps já não estão bloqueadas após a oração. O teu bloqueio de conteúdo e as outras proteções não mudam.',
+      );
+  static String lockOffConfirmTitle(Lang l) => _p(l, 'Turn off the prayer lock?', '¿Desactivar el bloqueo con oración?', 'Desativar o bloqueio com oração?');
+  static String lockOffConfirmBody(Lang l) => _p(
+        l,
+        'The apps you locked behind prayer will open normally again. Your content blocking stays on, and you can turn this back on here at any time.',
+        'Las apps que bloqueaste tras la oración volverán a abrirse con normalidad. Tu bloqueo de contenido sigue activo y puedes volver a activarlo aquí cuando quieras.',
+        'As apps que bloqueaste após a oração voltarão a abrir normalmente. O teu bloqueio de conteúdo continua ativo e podes voltar a ativar aqui quando quiseres.',
+      );
+  static String keepItOn(Lang l) => _p(l, 'Keep it on', 'Mantenerlo', 'Manter');
+  static String turnOff(Lang l) => _p(l, 'Turn off', 'Desactivar', 'Desativar');
+  static String turnBackOn(Lang l) => _p(l, 'Turn the prayer lock back on', 'Volver a activar el bloqueo con oración', 'Voltar a ativar o bloqueio com oração');
+
   // Chooser
   static String whatToPray(Lang l) => _p(l, 'What do you want to pray?', '¿Qué quieres rezar?', 'O que queres rezar?');
   static String rosaryTitle(Lang l) => _p(l, 'Holy Rosary', 'Santo Rosario', 'Santo Rosário');

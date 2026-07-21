@@ -358,11 +358,12 @@ const List<_TermsSection> _terms = [
         'its content is religious in nature, and it is offered purely as a '
         'personal accountability tool, not as religious instruction or '
         'counsel. Because its content is specifically Christian, you may '
-        'switch the entire feature off at any time under Settings › Faith › '
-        '"Prayer app lock" — whatever your faith or lack of one. Turning it '
-        'off hides the prayer section and stops all prayer-based app locking; '
-        'it does not affect content blocking or any other protection. You can '
-        'also leave it on and choose exactly which apps (if any) it applies to.',
+        'switch the entire feature off at any time — whatever your faith or '
+        'lack of one — using the "Prayer app lock" switch at the bottom of the '
+        'prayer tab. Turning it off stops all prayer-based app locking and '
+        'removes the religious content from that tab; it does not affect '
+        'content blocking or any other protection. You can also leave it on '
+        'and choose exactly which apps (if any) it applies to.',
   ),
   _TermsSection(
     '5. No guarantee of effectiveness',
