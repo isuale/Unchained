@@ -51,6 +51,7 @@ class BlockingSettingsRepository {
       'customBlockScreen' => BlockingSettingsCompanion(customBlockScreen: v),
       'customWebsitesBlocklistEnabled' =>
         BlockingSettingsCompanion(customWebsitesBlocklistEnabled: v),
+      'prayerLockEnabled' => BlockingSettingsCompanion(prayerLockEnabled: v),
       _ => throw ArgumentError('Unknown boolean field: $field'),
     };
     if (field == 'protectionEnabled' && value) {

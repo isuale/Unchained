@@ -865,6 +865,21 @@ class $BlockingSettingsTable extends BlockingSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _prayerLockEnabledMeta = const VerificationMeta(
+    'prayerLockEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> prayerLockEnabled = GeneratedColumn<bool>(
+    'prayer_lock_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("prayer_lock_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _prayerLockAllAppsMeta = const VerificationMeta(
     'prayerLockAllApps',
   );
@@ -952,6 +967,7 @@ class $BlockingSettingsTable extends BlockingSettings
     termsAccepted,
     customBlocklist,
     customAllowlist,
+    prayerLockEnabled,
     prayerLockAllApps,
     prayerUnlockHours,
     prayerLanguage,
@@ -1260,6 +1276,15 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
       );
     }
+    if (data.containsKey('prayer_lock_enabled')) {
+      context.handle(
+        _prayerLockEnabledMeta,
+        prayerLockEnabled.isAcceptableOrUnknown(
+          data['prayer_lock_enabled']!,
+          _prayerLockEnabledMeta,
+        ),
+      );
+    }
     if (data.containsKey('prayer_lock_all_apps')) {
       context.handle(
         _prayerLockAllAppsMeta,
@@ -1438,6 +1463,10 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.string,
         data['${effectivePrefix}custom_allowlist'],
       ),
+      prayerLockEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}prayer_lock_enabled'],
+      )!,
       prayerLockAllApps: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}prayer_lock_all_apps'],
@@ -1498,6 +1527,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final bool termsAccepted;
   final String? customBlocklist;
   final String? customAllowlist;
+  final bool prayerLockEnabled;
   final bool prayerLockAllApps;
   final int prayerUnlockHours;
   final String prayerLanguage;
@@ -1537,6 +1567,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     required this.termsAccepted,
     this.customBlocklist,
     this.customAllowlist,
+    required this.prayerLockEnabled,
     required this.prayerLockAllApps,
     required this.prayerUnlockHours,
     required this.prayerLanguage,
@@ -1599,6 +1630,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     if (!nullToAbsent || customAllowlist != null) {
       map['custom_allowlist'] = Variable<String>(customAllowlist);
     }
+    map['prayer_lock_enabled'] = Variable<bool>(prayerLockEnabled);
     map['prayer_lock_all_apps'] = Variable<bool>(prayerLockAllApps);
     map['prayer_unlock_hours'] = Variable<int>(prayerUnlockHours);
     map['prayer_language'] = Variable<String>(prayerLanguage);
@@ -1656,6 +1688,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       customAllowlist: customAllowlist == null && nullToAbsent
           ? const Value.absent()
           : Value(customAllowlist),
+      prayerLockEnabled: Value(prayerLockEnabled),
       prayerLockAllApps: Value(prayerLockAllApps),
       prayerUnlockHours: Value(prayerUnlockHours),
       prayerLanguage: Value(prayerLanguage),
@@ -1729,6 +1762,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       termsAccepted: serializer.fromJson<bool>(json['termsAccepted']),
       customBlocklist: serializer.fromJson<String?>(json['customBlocklist']),
       customAllowlist: serializer.fromJson<String?>(json['customAllowlist']),
+      prayerLockEnabled: serializer.fromJson<bool>(json['prayerLockEnabled']),
       prayerLockAllApps: serializer.fromJson<bool>(json['prayerLockAllApps']),
       prayerUnlockHours: serializer.fromJson<int>(json['prayerUnlockHours']),
       prayerLanguage: serializer.fromJson<String>(json['prayerLanguage']),
@@ -1779,6 +1813,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'termsAccepted': serializer.toJson<bool>(termsAccepted),
       'customBlocklist': serializer.toJson<String?>(customBlocklist),
       'customAllowlist': serializer.toJson<String?>(customAllowlist),
+      'prayerLockEnabled': serializer.toJson<bool>(prayerLockEnabled),
       'prayerLockAllApps': serializer.toJson<bool>(prayerLockAllApps),
       'prayerUnlockHours': serializer.toJson<int>(prayerUnlockHours),
       'prayerLanguage': serializer.toJson<String>(prayerLanguage),
@@ -1821,6 +1856,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     bool? termsAccepted,
     Value<String?> customBlocklist = const Value.absent(),
     Value<String?> customAllowlist = const Value.absent(),
+    bool? prayerLockEnabled,
     bool? prayerLockAllApps,
     int? prayerUnlockHours,
     String? prayerLanguage,
@@ -1876,6 +1912,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     customAllowlist: customAllowlist.present
         ? customAllowlist.value
         : this.customAllowlist,
+    prayerLockEnabled: prayerLockEnabled ?? this.prayerLockEnabled,
     prayerLockAllApps: prayerLockAllApps ?? this.prayerLockAllApps,
     prayerUnlockHours: prayerUnlockHours ?? this.prayerUnlockHours,
     prayerLanguage: prayerLanguage ?? this.prayerLanguage,
@@ -1984,6 +2021,9 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       customAllowlist: data.customAllowlist.present
           ? data.customAllowlist.value
           : this.customAllowlist,
+      prayerLockEnabled: data.prayerLockEnabled.present
+          ? data.prayerLockEnabled.value
+          : this.prayerLockEnabled,
       prayerLockAllApps: data.prayerLockAllApps.present
           ? data.prayerLockAllApps.value
           : this.prayerLockAllApps,
@@ -2038,6 +2078,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write('termsAccepted: $termsAccepted, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
+          ..write('prayerLockEnabled: $prayerLockEnabled, ')
           ..write('prayerLockAllApps: $prayerLockAllApps, ')
           ..write('prayerUnlockHours: $prayerUnlockHours, ')
           ..write('prayerLanguage: $prayerLanguage, ')
@@ -2082,6 +2123,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     termsAccepted,
     customBlocklist,
     customAllowlist,
+    prayerLockEnabled,
     prayerLockAllApps,
     prayerUnlockHours,
     prayerLanguage,
@@ -2127,6 +2169,7 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.termsAccepted == this.termsAccepted &&
           other.customBlocklist == this.customBlocklist &&
           other.customAllowlist == this.customAllowlist &&
+          other.prayerLockEnabled == this.prayerLockEnabled &&
           other.prayerLockAllApps == this.prayerLockAllApps &&
           other.prayerUnlockHours == this.prayerUnlockHours &&
           other.prayerLanguage == this.prayerLanguage &&
@@ -2168,6 +2211,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<bool> termsAccepted;
   final Value<String?> customBlocklist;
   final Value<String?> customAllowlist;
+  final Value<bool> prayerLockEnabled;
   final Value<bool> prayerLockAllApps;
   final Value<int> prayerUnlockHours;
   final Value<String> prayerLanguage;
@@ -2207,6 +2251,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.termsAccepted = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
+    this.prayerLockEnabled = const Value.absent(),
     this.prayerLockAllApps = const Value.absent(),
     this.prayerUnlockHours = const Value.absent(),
     this.prayerLanguage = const Value.absent(),
@@ -2247,6 +2292,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.termsAccepted = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
+    this.prayerLockEnabled = const Value.absent(),
     this.prayerLockAllApps = const Value.absent(),
     this.prayerUnlockHours = const Value.absent(),
     this.prayerLanguage = const Value.absent(),
@@ -2287,6 +2333,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<bool>? termsAccepted,
     Expression<String>? customBlocklist,
     Expression<String>? customAllowlist,
+    Expression<bool>? prayerLockEnabled,
     Expression<bool>? prayerLockAllApps,
     Expression<int>? prayerUnlockHours,
     Expression<String>? prayerLanguage,
@@ -2343,6 +2390,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       if (termsAccepted != null) 'terms_accepted': termsAccepted,
       if (customBlocklist != null) 'custom_blocklist': customBlocklist,
       if (customAllowlist != null) 'custom_allowlist': customAllowlist,
+      if (prayerLockEnabled != null) 'prayer_lock_enabled': prayerLockEnabled,
       if (prayerLockAllApps != null) 'prayer_lock_all_apps': prayerLockAllApps,
       if (prayerUnlockHours != null) 'prayer_unlock_hours': prayerUnlockHours,
       if (prayerLanguage != null) 'prayer_language': prayerLanguage,
@@ -2385,6 +2433,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<bool>? termsAccepted,
     Value<String?>? customBlocklist,
     Value<String?>? customAllowlist,
+    Value<bool>? prayerLockEnabled,
     Value<bool>? prayerLockAllApps,
     Value<int>? prayerUnlockHours,
     Value<String>? prayerLanguage,
@@ -2430,6 +2479,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       termsAccepted: termsAccepted ?? this.termsAccepted,
       customBlocklist: customBlocklist ?? this.customBlocklist,
       customAllowlist: customAllowlist ?? this.customAllowlist,
+      prayerLockEnabled: prayerLockEnabled ?? this.prayerLockEnabled,
       prayerLockAllApps: prayerLockAllApps ?? this.prayerLockAllApps,
       prayerUnlockHours: prayerUnlockHours ?? this.prayerUnlockHours,
       prayerLanguage: prayerLanguage ?? this.prayerLanguage,
@@ -2562,6 +2612,9 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     if (customAllowlist.present) {
       map['custom_allowlist'] = Variable<String>(customAllowlist.value);
     }
+    if (prayerLockEnabled.present) {
+      map['prayer_lock_enabled'] = Variable<bool>(prayerLockEnabled.value);
+    }
     if (prayerLockAllApps.present) {
       map['prayer_lock_all_apps'] = Variable<bool>(prayerLockAllApps.value);
     }
@@ -2618,6 +2671,7 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write('termsAccepted: $termsAccepted, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
+          ..write('prayerLockEnabled: $prayerLockEnabled, ')
           ..write('prayerLockAllApps: $prayerLockAllApps, ')
           ..write('prayerUnlockHours: $prayerUnlockHours, ')
           ..write('prayerLanguage: $prayerLanguage, ')
@@ -4070,6 +4124,7 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<bool> termsAccepted,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
+      Value<bool> prayerLockEnabled,
       Value<bool> prayerLockAllApps,
       Value<int> prayerUnlockHours,
       Value<String> prayerLanguage,
@@ -4111,6 +4166,7 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<bool> termsAccepted,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
+      Value<bool> prayerLockEnabled,
       Value<bool> prayerLockAllApps,
       Value<int> prayerUnlockHours,
       Value<String> prayerLanguage,
@@ -4293,6 +4349,11 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<String> get customAllowlist => $composableBuilder(
     column: $table.customAllowlist,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get prayerLockEnabled => $composableBuilder(
+    column: $table.prayerLockEnabled,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4497,6 +4558,11 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get prayerLockEnabled => $composableBuilder(
+    column: $table.prayerLockEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get prayerLockAllApps => $composableBuilder(
     column: $table.prayerLockAllApps,
     builder: (column) => ColumnOrderings(column),
@@ -4696,6 +4762,11 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get prayerLockEnabled => $composableBuilder(
+    column: $table.prayerLockEnabled,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get prayerLockAllApps => $composableBuilder(
     column: $table.prayerLockAllApps,
     builder: (column) => column,
@@ -4787,6 +4858,7 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> termsAccepted = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
+                Value<bool> prayerLockEnabled = const Value.absent(),
                 Value<bool> prayerLockAllApps = const Value.absent(),
                 Value<int> prayerUnlockHours = const Value.absent(),
                 Value<String> prayerLanguage = const Value.absent(),
@@ -4826,6 +4898,7 @@ class $$BlockingSettingsTableTableManager
                 termsAccepted: termsAccepted,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,
+                prayerLockEnabled: prayerLockEnabled,
                 prayerLockAllApps: prayerLockAllApps,
                 prayerUnlockHours: prayerUnlockHours,
                 prayerLanguage: prayerLanguage,
@@ -4868,6 +4941,7 @@ class $$BlockingSettingsTableTableManager
                 Value<bool> termsAccepted = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
+                Value<bool> prayerLockEnabled = const Value.absent(),
                 Value<bool> prayerLockAllApps = const Value.absent(),
                 Value<int> prayerUnlockHours = const Value.absent(),
                 Value<String> prayerLanguage = const Value.absent(),
@@ -4907,6 +4981,7 @@ class $$BlockingSettingsTableTableManager
                 termsAccepted: termsAccepted,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,
+                prayerLockEnabled: prayerLockEnabled,
                 prayerLockAllApps: prayerLockAllApps,
                 prayerUnlockHours: prayerUnlockHours,
                 prayerLanguage: prayerLanguage,

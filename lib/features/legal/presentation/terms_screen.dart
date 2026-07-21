@@ -357,8 +357,12 @@ const List<_TermsSection> _terms = [
         'accessible again for a set number of hours. This feature is opt-in, '
         'its content is religious in nature, and it is offered purely as a '
         'personal accountability tool, not as religious instruction or '
-        'counsel. You can disable it, and choose which apps (if any) it '
-        'applies to, at any time from within the app.',
+        'counsel. Because its content is specifically Christian, you may '
+        'switch the entire feature off at any time under Settings › Faith › '
+        '"Prayer app lock" — whatever your faith or lack of one. Turning it '
+        'off hides the prayer section and stops all prayer-based app locking; '
+        'it does not affect content blocking or any other protection. You can '
+        'also leave it on and choose exactly which apps (if any) it applies to.',
   ),
   _TermsSection(
     '5. No guarantee of effectiveness',

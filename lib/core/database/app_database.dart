@@ -119,6 +119,13 @@ class BlockingSettings extends Table {
   TextColumn get customBlocklist => text().nullable()();
   TextColumn get customAllowlist => text().nullable()();
 
+  // Master on/off switch for the prayer app-locker. The prayer content is
+  // explicitly Christian, so a user of another faith (or none) can switch the
+  // whole feature off: the "Oración" tab disappears and the native watchdog
+  // stops gating apps, regardless of what is in LockedApps. Defaults to true so
+  // existing users keep the behaviour they already had.
+  BoolColumn get prayerLockEnabled =>
+      boolean().withDefault(const Constant(true))();
   // Prayer app-locker. When [prayerLockAllApps] is true, every launchable app
   // is locked behind prayer and the per-app LockedApps selection is ignored;
   // when false, only the apps in LockedApps are locked. [prayerUnlockHours] is
@@ -212,7 +219,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -295,6 +302,13 @@ class AppDatabase extends _$AppDatabase {
           // daily minute budget.
           if (from < 12) {
             await m.createTable(appTimeLimits);
+          }
+          // v13: master on/off switch for the (Christian) prayer app-locker, so
+          // users of another faith can turn the whole feature off. Defaults to
+          // true, so upgrading users keep their current behaviour.
+          if (from < 13) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.prayerLockEnabled);
           }
         },
         beforeOpen: (details) async {

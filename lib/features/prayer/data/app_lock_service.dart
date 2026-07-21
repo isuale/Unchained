@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
 
 /// Dart side of the prayer app-locker's native enforcement (`unchained/applock`).
@@ -14,14 +13,18 @@ class AppLockService {
 
   static const _channel = MethodChannel('unchained/applock');
 
-  /// Push the current locked-app config to native. [lockAll] guards every app;
-  /// otherwise only [packages] are guarded.
+  /// Push the current locked-app config to native. [enabled] is the master
+  /// switch — when false the watchdog gates nothing at all, whatever [lockAll]
+  /// and [packages] say. [lockAll] guards every app; otherwise only [packages]
+  /// are guarded.
   static Future<bool> setConfig({
+    required bool enabled,
     required bool lockAll,
     required List<String> packages,
   }) async {
     try {
       final r = await _channel.invokeMethod<bool>('setConfig', {
+        'enabled': enabled,
         'lockAll': lockAll,
         'packages': packages,
       });
@@ -69,14 +72,25 @@ class AppLockService {
   }
 }
 
-/// Keeps native in sync with the locked-app config. Watch this provider from a
-/// long-lived widget (the prayer home) so any change to the lock mode or the
-/// chosen apps is pushed to the native watchdog immediately.
+/// Keeps native in sync with the locked-app config. Watched from the dashboard
+/// (not the prayer tab) so the master switch still reaches native after the
+/// prayer tab is hidden — turning the feature off is exactly the moment the
+/// prayer home unmounts, and a sync that lived there would never fire.
+///
+/// Nothing is pushed until all three sources have loaded: emitting the
+/// defaults mid-load would briefly hand native an `enabled: true` config and
+/// could raise a gate the user has already switched off.
 final appLockSyncProvider = Provider<void>((ref) {
-  final lockAll = ref.watch(lockAllAppsProvider).asData?.value ?? false;
-  final locked =
-      ref.watch(lockedAppsProvider).asData?.value ?? const <LockedApp>[];
+  final enabled = ref.watch(prayerLockEnabledProvider).asData?.value;
+  final lockAll = ref.watch(lockAllAppsProvider).asData?.value;
+  final locked = ref.watch(lockedAppsProvider).asData?.value;
+  if (enabled == null || lockAll == null || locked == null) return;
+
   final packages =
       locked.where((a) => a.enabled).map((a) => a.packageName).toList();
-  AppLockService.setConfig(lockAll: lockAll, packages: packages);
+  AppLockService.setConfig(
+    enabled: enabled,
+    lockAll: lockAll,
+    packages: packages,
+  );
 });

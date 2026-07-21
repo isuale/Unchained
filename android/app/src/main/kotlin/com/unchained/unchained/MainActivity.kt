@@ -363,9 +363,14 @@ class MainActivity : FlutterActivity() {
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
                     "setConfig" -> {
+                        // Absent "enabled" means an older Dart side that predates the
+                        // master switch — treat it as on, matching AppLockState's default.
+                        val enabled = call.argument<Boolean>("enabled") ?: true
                         val lockAll = call.argument<Boolean>("lockAll") ?: false
                         val pkgs = call.argument<List<String>>("packages") ?: emptyList()
-                        AppLockState.setConfig(applicationContext, lockAll, pkgs.toSet())
+                        AppLockState.setConfig(
+                            applicationContext, enabled, lockAll, pkgs.toSet()
+                        )
                         result.success(true)
                     }
                     "openUnlockWindow" -> {

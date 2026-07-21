@@ -12,6 +12,7 @@ import android.content.Context
  */
 object AppLockState {
     private const val PREFS = "applock_state"
+    private const val KEY_ENABLED = "lock_enabled"
     private const val KEY_LOCK_ALL = "lock_all"
     private const val KEY_PKGS = "locked_pkgs"
     private const val KEY_UNLOCKED_UNTIL = "unlocked_until"
@@ -19,8 +20,9 @@ object AppLockState {
     private fun prefs(ctx: Context) =
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    fun setConfig(ctx: Context, lockAll: Boolean, pkgs: Set<String>) {
+    fun setConfig(ctx: Context, enabled: Boolean, lockAll: Boolean, pkgs: Set<String>) {
         prefs(ctx).edit()
+            .putBoolean(KEY_ENABLED, enabled)
             .putBoolean(KEY_LOCK_ALL, lockAll)
             // Copy into a fresh set — SharedPreferences must not be handed a set
             // it will keep a reference to.
@@ -28,13 +30,24 @@ object AppLockState {
             .apply()
     }
 
+    /**
+     * The master switch. The prayer content is Christian, so a user of another
+     * faith can switch the whole locker off in Settings; when off we gate
+     * nothing, whatever the lock mode and package set still say.
+     *
+     * Defaults to true so an install that has never synced from Dart keeps the
+     * historical behaviour rather than silently unlocking every app.
+     */
+    fun isEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_ENABLED, true)
+
     fun isLockAll(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_LOCK_ALL, false)
 
     fun lockedPkgs(ctx: Context): Set<String> =
         prefs(ctx).getStringSet(KEY_PKGS, emptySet()) ?: emptySet()
 
     /** Whether the locker guards anything at all. */
-    fun isActive(ctx: Context): Boolean = isLockAll(ctx) || lockedPkgs(ctx).isNotEmpty()
+    fun isActive(ctx: Context): Boolean =
+        isEnabled(ctx) && (isLockAll(ctx) || lockedPkgs(ctx).isNotEmpty())
 
     /** Open the "apps unlocked" window for [hours] from now. */
     fun openUnlockWindow(ctx: Context, hours: Int) {
@@ -51,6 +64,7 @@ object AppLockState {
      * exempt (system / launcher / our own) package.
      */
     fun shouldLock(ctx: Context, pkg: String, exempt: Set<String>): Boolean {
+        if (!isEnabled(ctx)) return false
         if (pkg in exempt) return false
         if (isUnlocked(ctx)) return false
         if (isLockAll(ctx)) return true

@@ -27,6 +27,12 @@ final lockAllAppsProvider = StreamProvider<bool>((ref) {
   return ref.watch(prayerRepositoryProvider).watchLockAllApps();
 });
 
+/// Live master on/off switch for the prayer app-locker. False = the user opted
+/// out of the (Christian) prayer feature entirely: no prayer tab, no app gating.
+final prayerLockEnabledProvider = StreamProvider<bool>((ref) {
+  return ref.watch(prayerRepositoryProvider).watchPrayerLockEnabled();
+});
+
 /// Live prayer-content language (en/es/pt).
 final prayerLanguageProvider = StreamProvider<Lang>((ref) {
   return ref.watch(prayerRepositoryProvider).watchLanguage();
@@ -43,6 +49,16 @@ class PrayerRepository {
   PrayerRepository(this._db);
 
   final AppDatabase _db;
+
+  // --- Master switch ---
+
+  /// Whether the prayer app-locker is switched on at all. Defaults to true so a
+  /// missing row never silently disables a lock the user is relying on.
+  Stream<bool> watchPrayerLockEnabled() {
+    return (_db.select(_db.blockingSettings)..where((t) => t.id.equals(1)))
+        .watchSingleOrNull()
+        .map((row) => row?.prayerLockEnabled ?? true);
+  }
 
   // --- Lock mode (all apps vs. selected apps) ---
 
