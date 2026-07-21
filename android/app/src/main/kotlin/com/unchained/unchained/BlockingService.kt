@@ -480,6 +480,22 @@ class BlockingService : VpnService() {
             .setSession("Unchained")
             .setBlocking(true)
             .setMtu(1500)
+        // Claim the entire IPv6 address space into the tunnel too, even though we don't
+        // otherwise touch IPv6 (handlePacket drops it — see "skip IPv6 for now" below).
+        // Without this, IPv6 never enters the tun at all: it goes straight out the real
+        // network, so a site reachable over IPv6 (e.g. a cached AAAA record from a search
+        // result) sails past every DNS-based block untouched, since neither the query nor
+        // the connection was ever ours to inspect. Claiming + dropping IPv6 forces every
+        // app back onto IPv4, where our blocking already applies. Trade-off: on the rare
+        // IPv6-only network (no native IPv4, e.g. some carrier/corporate Wi-Fi using
+        // NAT64), this blackholes all internet while protection is on — recoverable by
+        // just turning protection off.
+        try {
+            builder.addAddress("fd00:1:fd00:1:fd00:1:fd00:1", 128)
+            builder.addRoute("::", 0)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to claim IPv6 routes; IPv6 may bypass blocking", e)
+        }
         // Pull each known encrypted-DNS resolver into the tunnel (host route /32) so
         // handlePacket() can drop its DoH/DoT traffic. Without these routes that traffic
         // would skip the tun entirely and bypass the block. Bad literals are skipped.
@@ -650,7 +666,10 @@ class BlockingService : VpnService() {
         if (length < 28) return  // min: IPv4 (20) + UDP (8)
 
         val ipVersion = (buf[0].toInt() shr 4) and 0xF
-        if (ipVersion != 4) return  // skip IPv6 for now
+        // IPv6 has no forwarding path here — it's routed into the tun in startVpn() purely
+        // to be blackholed (dropped, never relayed) so it can't bypass the IPv4-only
+        // blocking below. Nothing forwards it, so returning here is the actual block.
+        if (ipVersion != 4) return
 
         val ihl = (buf[0].toInt() and 0xF) * 4
         val protocol = buf[9].toInt() and 0xFF
