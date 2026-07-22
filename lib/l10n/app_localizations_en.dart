@@ -157,20 +157,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forever_price => '€15.99 / month';
 
   @override
-  String get forever_feature_1 => 'Everything in Monthly';
+  String get forever_feature_1 => 'Everything in the Monthly plan';
 
   @override
-  String get forever_feature_2 => 'Permanent block mode';
+  String get forever_feature_2 =>
+      'Permanent block mode — protection stays locked on';
 
   @override
-  String get forever_feature_3 => 'Custom apps & websites block';
+  String get forever_feature_3 => 'Custom website blocklist & allowlist';
 
   @override
   String get forever_feature_4 =>
-      'Block: Shopping, Reels, Shorts, Snapchat Stories, Gambling, Image & Video Search';
+      'Block distracting feeds: Reels, Shorts, TikTok & Snapchat Stories';
 
   @override
-  String get forever_feature_5 => 'Custom block screen';
+  String get forever_feature_5 =>
+      'Uninstall protection — the app can\'t be removed while locked';
+
+  @override
+  String get forever_tagline =>
+      'Our strongest plan — protection that stays on for good.';
 
   @override
   String get forever_cta => 'Get Forever';

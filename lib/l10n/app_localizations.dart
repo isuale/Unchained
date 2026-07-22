@@ -389,32 +389,38 @@ abstract class AppLocalizations {
   /// No description provided for @forever_feature_1.
   ///
   /// In es, this message translates to:
-  /// **'Todo lo del plan mensual'**
+  /// **'Todo lo del plan Mensual'**
   String get forever_feature_1;
 
   /// No description provided for @forever_feature_2.
   ///
   /// In es, this message translates to:
-  /// **'Modo de bloqueo permanente'**
+  /// **'Modo de bloqueo permanente: la protección queda siempre activada'**
   String get forever_feature_2;
 
   /// No description provided for @forever_feature_3.
   ///
   /// In es, this message translates to:
-  /// **'Bloqueo de apps y webs personalizadas'**
+  /// **'Lista personalizada de webs bloqueadas y permitidas'**
   String get forever_feature_3;
 
   /// No description provided for @forever_feature_4.
   ///
   /// In es, this message translates to:
-  /// **'Bloquea: Shopping, Reels, Shorts, Historias de Snapchat, Apuestas, Búsqueda de imágenes y vídeos'**
+  /// **'Bloquea feeds que distraen: Reels, Shorts, TikTok e Historias de Snapchat'**
   String get forever_feature_4;
 
   /// No description provided for @forever_feature_5.
   ///
   /// In es, this message translates to:
-  /// **'Pantalla de bloqueo personalizada'**
+  /// **'Protección contra desinstalación: no se puede eliminar la app mientras está bloqueada'**
   String get forever_feature_5;
+
+  /// No description provided for @forever_tagline.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuestro plan más fuerte: una protección que no se desactiva.'**
+  String get forever_tagline;
 
   /// No description provided for @forever_cta.
   ///

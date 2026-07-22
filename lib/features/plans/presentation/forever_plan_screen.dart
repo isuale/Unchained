@@ -80,9 +80,20 @@ class ForeverPlanScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 12),
               _animate(
                 3,
+                Text(
+                  l.forever_tagline,
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: const Color(0xFF9AA3B2),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+              _animate(
+                4,
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -110,7 +121,7 @@ class ForeverPlanScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 40),
               _animate(
-                4,
+                5,
                 SizedBox(
                   width: double.infinity,
                   height: 56,
