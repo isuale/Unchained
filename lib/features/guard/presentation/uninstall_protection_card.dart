@@ -121,7 +121,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
           ),
           const SizedBox(height: 8),
           const Text(
-            'When you head toward Force stop or Uninstall, Unchained covers the '
+            'When you head toward Force stop or Uninstall, Be Unchained covers the '
             'screen and asks you to copy 800 letters of Scripture within four '
             'minutes first. With device administrator on, the system also refuses '
             'to uninstall until you deactivate it here — which is gated by the same '

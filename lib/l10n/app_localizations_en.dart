@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get app_title => 'Unchained';
+  String get app_title => 'Be Unchained';
 
   @override
   String get welcome_tagline => 'Break Free. Live Free.';

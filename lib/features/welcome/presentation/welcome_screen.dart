@@ -36,7 +36,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Unchained',
+                    'Be Unchained',
                     style:
                         Theme.of(context).textTheme.displayMedium?.copyWith(
                               fontWeight: FontWeight.bold,

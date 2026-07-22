@@ -9,10 +9,10 @@ class AppCredits {
 
   static const String ownerName = 'Alessandro Lozada Alvarez';
   static const String supportEmail = 'imblueale@gmail.com';
-  static const String bugReportSubject = 'Unchained — Bug report';
+  static const String bugReportSubject = 'Be Unchained — Bug report';
 
   /// Attribution for the app that inspired this one. Deliberately worded as
-  /// "inspired by" rather than a bare name: Unchained is not affiliated with,
+  /// "inspired by" rather than a bare name: Be Unchained is not affiliated with,
   /// endorsed by, or a product of BlockerX, and the footer must not suggest it is.
   static const String inspirationCredit = 'Inspired by BlockerX';
 

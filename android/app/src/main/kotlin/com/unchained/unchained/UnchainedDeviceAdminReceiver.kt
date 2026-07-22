@@ -26,7 +26,7 @@ import android.content.Intent
 class UnchainedDeviceAdminReceiver : DeviceAdminReceiver() {
 
     override fun onDisableRequested(context: Context, intent: Intent): CharSequence =
-        "Deactivating this removes Unchained's uninstall protection. Stay the course."
+        "Deactivating this removes Be Unchained's uninstall protection. Stay the course."
 
     companion object {
         /** The admin component, resolved against the runtime package (`com.unchained.app`). */

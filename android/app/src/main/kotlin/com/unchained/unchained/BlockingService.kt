@@ -409,7 +409,7 @@ class BlockingService : VpnService() {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(applicationInfo.icon)
-            .setContentTitle("Unchained Protection Active")
+            .setContentTitle("Be Unchained Protection Active")
             .setContentText("Tap to open")
             .setContentIntent(pi)
             .setOngoing(true)
@@ -477,7 +477,7 @@ class BlockingService : VpnService() {
             .addAddress("10.0.0.2", 30)
             .addRoute("10.0.0.0", 30)
             .addDnsServer("10.0.0.1")
-            .setSession("Unchained")
+            .setSession("Be Unchained")
             .setBlocking(true)
             .setMtu(1500)
         // Claim the entire IPv6 address space into the tunnel too, even though we don't

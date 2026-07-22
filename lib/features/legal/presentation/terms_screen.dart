@@ -322,7 +322,7 @@ class _TermsSection {
 const List<_TermsSection> _terms = [
   _TermsSection(
     '1. Acceptance of these Terms',
-    'Unchained ("the app") is a personal tool that helps you block adult and '
+    'Be Unchained ("the app") is a personal tool that helps you block adult and '
         'distracting content. By using the app you agree to these Terms & '
         'Conditions. If you do not agree with any part of them, you should not '
         'use the app.',

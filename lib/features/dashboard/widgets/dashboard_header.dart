@@ -27,7 +27,7 @@ class DashboardHeader extends StatelessWidget {
               Image.asset('assets/images/logo.png', width: 28, height: 28),
               const SizedBox(width: 10),
               Text(
-                'Unchained',
+                'Be Unchained',
                 style: textTheme.displaySmall?.copyWith(
                   color: Colors.white,
                   fontSize: 22,

@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @app_title.
   ///
   /// In es, this message translates to:
-  /// **'Unchained'**
+  /// **'Be Unchained'**
   String get app_title;
 
   /// No description provided for @welcome_tagline.
