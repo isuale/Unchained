@@ -747,10 +747,7 @@ class _DashboardBody extends ConsumerWidget {
                 value: settings.customAppsBlocklistEnabled,
                 onChanged: (v) =>
                     _toggle(ref, 'customAppsBlocklistEnabled', v),
-                isLocked: isFeatureLocked(
-                    'customAppsBlocklistEnabled', activePlan),
-                lockedTooltip: l.lock_forever_only,
-                onLockedTap: () => _navLockedToForever(context),
+                badge: l.common_working_on_it,
                 parentEnabled: protectionOn,
                 leadingIcon: Icons.apps,
               ),
@@ -780,7 +777,7 @@ class _DashboardBody extends ConsumerWidget {
                 value: settings.accountabilityPartnerEnabled,
                 onChanged: (v) =>
                     _toggle(ref, 'accountabilityPartnerEnabled', v),
-                isLocked: false,
+                badge: l.common_working_on_it,
                 parentEnabled: protectionOn,
                 leadingIcon: Icons.people_outline,
               ),

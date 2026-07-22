@@ -191,6 +191,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_coming_soon => 'Coming soon';
 
   @override
+  String get common_working_on_it => 'Working on it';
+
+  @override
   String get protection_activate => 'Activate Protection';
 
   @override

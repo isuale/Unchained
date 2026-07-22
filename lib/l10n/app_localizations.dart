@@ -452,6 +452,12 @@ abstract class AppLocalizations {
   /// **'Próximamente'**
   String get common_coming_soon;
 
+  /// No description provided for @common_working_on_it.
+  ///
+  /// In es, this message translates to:
+  /// **'En desarrollo'**
+  String get common_working_on_it;
+
   /// No description provided for @protection_activate.
   ///
   /// In es, this message translates to:

@@ -13,6 +13,7 @@ class ToggleRow extends StatelessWidget {
     this.parentEnabled = true,
     this.onLockedTap,
     this.onLongPress,
+    this.badge,
   });
 
   final String label;
@@ -25,6 +26,12 @@ class ToggleRow extends StatelessWidget {
   final bool parentEnabled;
   final VoidCallback? onLockedTap;
 
+  /// When set, the row shows this text as a small pill instead of a switch and
+  /// becomes inert. Used to mark a feature that exists in the UI but isn't
+  /// wired up yet (e.g. "Working on it"), so a user can't flip on something
+  /// that does nothing.
+  final String? badge;
+
   /// Optional long-press handler. Used by the dev-only "reset daily budget"
   /// affordance on the social-feed rows; null (and inert) in normal builds.
   final VoidCallback? onLongPress;
@@ -36,7 +43,7 @@ class ToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveOpacity = parentEnabled ? 1.0 : 0.4;
-    final tappable = isLocked && onLockedTap != null;
+    final tappable = badge == null && isLocked && onLockedTap != null;
 
     final content = SizedBox(
       height: 56,
@@ -77,7 +84,25 @@ class ToggleRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            if (isLocked)
+            if (badge != null)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: _accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: _accent.withValues(alpha: 0.5)),
+                ),
+                child: Text(
+                  badge!,
+                  style: const TextStyle(
+                    color: _accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
+            else if (isLocked)
               Row(
                 children: [
                   if (lockedTooltip != null)
