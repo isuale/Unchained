@@ -1,13 +1,16 @@
 ---
 name: auto-commit
-description: Make a git commit every time a feature is added or a meaningful change is finished in the unchained app, so the user can always roll back if a function breaks. Use after completing any working change — new feature, bug fix, refactor, or config edit.
+description: Make a git commit and push it to origin every time a feature is added or a meaningful change is finished in the unchained app, so the user can always roll back if a function breaks and the work is backed up on GitHub. Use after completing any working change — new feature, bug fix, refactor, or config edit.
 ---
 
-# Auto-commit after every working change
+# Auto-commit (and push) after every working change
 
 Git is the safety net for this project: if a function breaks, the user wants to be
-able to go back to the last working version. So **commit early and often** — every
-time a feature or change is complete and the app still works, snapshot it.
+able to go back to the last working version — and that safety net only counts if it
+also lives on GitHub, not just on one disk. So **commit early and often, and push every
+time** — every time a feature or change is complete and the app still works, snapshot
+it and push it. (Local commits piled up unpushed for 12 days once — origin/main sat 50
+commits behind — before this rule was tightened on 2026-07-23. Don't let that recur.)
 
 ## When to commit
 
@@ -37,15 +40,16 @@ committing a green state.
 
 5. Commit to the **current branch** (this is a solo learning repo on `main` — that's
    fine; do not open PRs or branch unless the user asks).
-6. **Do NOT push** unless the user explicitly asks. Committing locally is enough to
-   protect their work; pushing is a separate, outward-facing action.
+6. **Push immediately** with `git push` (or `git push -u origin main` if no upstream is
+   set yet). Do this by default, without waiting to be asked — a commit that never
+   reaches GitHub isn't actually backed up.
 
 ## After committing
 
 **Always** tell the user — proactively, without waiting to be asked — in one line what was
-committed and the short commit hash, so they know the rollback point exists, e.g.:
-`Committed "Add onboarding skip button" (a1b2c3d) — you can roll back to here anytime.`
-Also state whether it was pushed (default: committed locally only, not pushed).
+committed, pushed, and the short commit hash, so they know the rollback point exists, e.g.:
+`Committed and pushed "Add onboarding skip button" (a1b2c3d) — you can roll back to here anytime.`
+If the push failed (e.g. no network), say so explicitly rather than staying silent about it.
 
 ## Teaching note
 
