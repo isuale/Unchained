@@ -28,7 +28,7 @@ PRICE_FOREVER = "price_1TwOqfBivTKGIw4obpv4vTGj"
 # then paste the returned id below.
 [[kv_namespaces]]
 binding = "ENTITLEMENTS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "9f89af808af94608bb1766dc8b28a98d"
 
 # NOTE: two SECRET values are NOT in this file. Set them once with:
 #   npx wrangler secret put STRIPE_SECRET_KEY       (paste sk_test_... / sk_live_...)

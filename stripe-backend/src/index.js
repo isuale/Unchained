@@ -48,23 +48,27 @@ export default {
     // Browsers send a preflight OPTIONS before a cross-site POST; answer it.
     if (request.method === 'OPTIONS') return json({}, 204);
 
-    const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      httpClient: Stripe.createFetchHttpClient(),
-      apiVersion: '2025-08-27.basil',
-    });
-
     try {
-      if (pathname === '/v1/subscribe' && request.method === 'POST') {
-        return await handleSubscribe(request, env, stripe);
-      }
-      if (pathname === '/v1/webhook' && request.method === 'POST') {
-        return await handleWebhook(request, env, stripe);
-      }
+      // /health and /v1/entitlement don't talk to Stripe, so they must not
+      // require STRIPE_SECRET_KEY — building the client is deferred until a
+      // route that actually needs it.
       if (pathname === '/v1/entitlement' && request.method === 'GET') {
         return await handleEntitlement(url, env);
       }
       if (pathname === '/' || pathname === '/health') {
         return json({ ok: true, service: 'unchained-stripe-backend' });
+      }
+
+      const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+        httpClient: Stripe.createFetchHttpClient(),
+        apiVersion: '2025-08-27.basil',
+      });
+
+      if (pathname === '/v1/subscribe' && request.method === 'POST') {
+        return await handleSubscribe(request, env, stripe);
+      }
+      if (pathname === '/v1/webhook' && request.method === 'POST') {
+        return await handleWebhook(request, env, stripe);
       }
       return json({ error: 'not_found' }, 404);
     } catch (err) {
