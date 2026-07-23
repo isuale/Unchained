@@ -6,6 +6,7 @@ import 'package:unchained/core/database/user_assessment_repository.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/features/dashboard/widgets/plan_activation_overlay.dart';
 import 'package:unchained/features/onboarding/domain/plan_recommendation.dart';
+import 'package:unchained/features/plans/domain/stripe_checkout.dart';
 import 'package:unchained/features/plans/presentation/widgets/schedule_summary.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
@@ -236,12 +237,16 @@ class AiPlanScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(28),
                       ),
                     ),
-                    onPressed: () => PlanActivationOverlay.show(
-                      context: context,
-                      ref: ref,
-                      plan: ActivePlan.aiPlan,
-                      schedule: schedule,
-                    ),
+                    onPressed: () async {
+                      await StripeCheckout.open('ai_plan');
+                      if (!context.mounted) return;
+                      await PlanActivationOverlay.show(
+                        context: context,
+                        ref: ref,
+                        plan: ActivePlan.aiPlan,
+                        schedule: schedule,
+                      );
+                    },
                     child: Text(
                       l.ai_plan_cta,
                       style: const TextStyle(
