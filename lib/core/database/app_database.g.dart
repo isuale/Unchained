@@ -843,6 +843,28 @@ class $BlockingSettingsTable extends BlockingSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _customerEmailMeta = const VerificationMeta(
+    'customerEmail',
+  );
+  @override
+  late final GeneratedColumn<String> customerEmail = GeneratedColumn<String>(
+    'customer_email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pendingActivationJsonMeta =
+      const VerificationMeta('pendingActivationJson');
+  @override
+  late final GeneratedColumn<String> pendingActivationJson =
+      GeneratedColumn<String>(
+        'pending_activation_json',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _customBlocklistMeta = const VerificationMeta(
     'customBlocklist',
   );
@@ -965,6 +987,8 @@ class $BlockingSettingsTable extends BlockingSettings
     protectionStartedAt,
     activePlan,
     termsAccepted,
+    customerEmail,
+    pendingActivationJson,
     customBlocklist,
     customAllowlist,
     prayerLockEnabled,
@@ -1258,6 +1282,24 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
       );
     }
+    if (data.containsKey('customer_email')) {
+      context.handle(
+        _customerEmailMeta,
+        customerEmail.isAcceptableOrUnknown(
+          data['customer_email']!,
+          _customerEmailMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pending_activation_json')) {
+      context.handle(
+        _pendingActivationJsonMeta,
+        pendingActivationJson.isAcceptableOrUnknown(
+          data['pending_activation_json']!,
+          _pendingActivationJsonMeta,
+        ),
+      );
+    }
     if (data.containsKey('custom_blocklist')) {
       context.handle(
         _customBlocklistMeta,
@@ -1455,6 +1497,14 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.bool,
         data['${effectivePrefix}terms_accepted'],
       )!,
+      customerEmail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_email'],
+      ),
+      pendingActivationJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pending_activation_json'],
+      ),
       customBlocklist: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}custom_blocklist'],
@@ -1525,6 +1575,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final DateTime? protectionStartedAt;
   final String? activePlan;
   final bool termsAccepted;
+  final String? customerEmail;
+  final String? pendingActivationJson;
   final String? customBlocklist;
   final String? customAllowlist;
   final bool prayerLockEnabled;
@@ -1565,6 +1617,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     this.protectionStartedAt,
     this.activePlan,
     required this.termsAccepted,
+    this.customerEmail,
+    this.pendingActivationJson,
     this.customBlocklist,
     this.customAllowlist,
     required this.prayerLockEnabled,
@@ -1624,6 +1678,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       map['active_plan'] = Variable<String>(activePlan);
     }
     map['terms_accepted'] = Variable<bool>(termsAccepted);
+    if (!nullToAbsent || customerEmail != null) {
+      map['customer_email'] = Variable<String>(customerEmail);
+    }
+    if (!nullToAbsent || pendingActivationJson != null) {
+      map['pending_activation_json'] = Variable<String>(pendingActivationJson);
+    }
     if (!nullToAbsent || customBlocklist != null) {
       map['custom_blocklist'] = Variable<String>(customBlocklist);
     }
@@ -1682,6 +1742,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ? const Value.absent()
           : Value(activePlan),
       termsAccepted: Value(termsAccepted),
+      customerEmail: customerEmail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerEmail),
+      pendingActivationJson: pendingActivationJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pendingActivationJson),
       customBlocklist: customBlocklist == null && nullToAbsent
           ? const Value.absent()
           : Value(customBlocklist),
@@ -1760,6 +1826,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       ),
       activePlan: serializer.fromJson<String?>(json['activePlan']),
       termsAccepted: serializer.fromJson<bool>(json['termsAccepted']),
+      customerEmail: serializer.fromJson<String?>(json['customerEmail']),
+      pendingActivationJson: serializer.fromJson<String?>(
+        json['pendingActivationJson'],
+      ),
       customBlocklist: serializer.fromJson<String?>(json['customBlocklist']),
       customAllowlist: serializer.fromJson<String?>(json['customAllowlist']),
       prayerLockEnabled: serializer.fromJson<bool>(json['prayerLockEnabled']),
@@ -1811,6 +1881,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'protectionStartedAt': serializer.toJson<DateTime?>(protectionStartedAt),
       'activePlan': serializer.toJson<String?>(activePlan),
       'termsAccepted': serializer.toJson<bool>(termsAccepted),
+      'customerEmail': serializer.toJson<String?>(customerEmail),
+      'pendingActivationJson': serializer.toJson<String?>(
+        pendingActivationJson,
+      ),
       'customBlocklist': serializer.toJson<String?>(customBlocklist),
       'customAllowlist': serializer.toJson<String?>(customAllowlist),
       'prayerLockEnabled': serializer.toJson<bool>(prayerLockEnabled),
@@ -1854,6 +1928,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     Value<DateTime?> protectionStartedAt = const Value.absent(),
     Value<String?> activePlan = const Value.absent(),
     bool? termsAccepted,
+    Value<String?> customerEmail = const Value.absent(),
+    Value<String?> pendingActivationJson = const Value.absent(),
     Value<String?> customBlocklist = const Value.absent(),
     Value<String?> customAllowlist = const Value.absent(),
     bool? prayerLockEnabled,
@@ -1906,6 +1982,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
         : this.protectionStartedAt,
     activePlan: activePlan.present ? activePlan.value : this.activePlan,
     termsAccepted: termsAccepted ?? this.termsAccepted,
+    customerEmail: customerEmail.present
+        ? customerEmail.value
+        : this.customerEmail,
+    pendingActivationJson: pendingActivationJson.present
+        ? pendingActivationJson.value
+        : this.pendingActivationJson,
     customBlocklist: customBlocklist.present
         ? customBlocklist.value
         : this.customBlocklist,
@@ -2015,6 +2097,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       termsAccepted: data.termsAccepted.present
           ? data.termsAccepted.value
           : this.termsAccepted,
+      customerEmail: data.customerEmail.present
+          ? data.customerEmail.value
+          : this.customerEmail,
+      pendingActivationJson: data.pendingActivationJson.present
+          ? data.pendingActivationJson.value
+          : this.pendingActivationJson,
       customBlocklist: data.customBlocklist.present
           ? data.customBlocklist.value
           : this.customBlocklist,
@@ -2076,6 +2164,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write('protectionStartedAt: $protectionStartedAt, ')
           ..write('activePlan: $activePlan, ')
           ..write('termsAccepted: $termsAccepted, ')
+          ..write('customerEmail: $customerEmail, ')
+          ..write('pendingActivationJson: $pendingActivationJson, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
           ..write('prayerLockEnabled: $prayerLockEnabled, ')
@@ -2121,6 +2211,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     protectionStartedAt,
     activePlan,
     termsAccepted,
+    customerEmail,
+    pendingActivationJson,
     customBlocklist,
     customAllowlist,
     prayerLockEnabled,
@@ -2167,6 +2259,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.protectionStartedAt == this.protectionStartedAt &&
           other.activePlan == this.activePlan &&
           other.termsAccepted == this.termsAccepted &&
+          other.customerEmail == this.customerEmail &&
+          other.pendingActivationJson == this.pendingActivationJson &&
           other.customBlocklist == this.customBlocklist &&
           other.customAllowlist == this.customAllowlist &&
           other.prayerLockEnabled == this.prayerLockEnabled &&
@@ -2209,6 +2303,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<DateTime?> protectionStartedAt;
   final Value<String?> activePlan;
   final Value<bool> termsAccepted;
+  final Value<String?> customerEmail;
+  final Value<String?> pendingActivationJson;
   final Value<String?> customBlocklist;
   final Value<String?> customAllowlist;
   final Value<bool> prayerLockEnabled;
@@ -2249,6 +2345,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.protectionStartedAt = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.termsAccepted = const Value.absent(),
+    this.customerEmail = const Value.absent(),
+    this.pendingActivationJson = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
     this.prayerLockEnabled = const Value.absent(),
@@ -2290,6 +2388,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.protectionStartedAt = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.termsAccepted = const Value.absent(),
+    this.customerEmail = const Value.absent(),
+    this.pendingActivationJson = const Value.absent(),
     this.customBlocklist = const Value.absent(),
     this.customAllowlist = const Value.absent(),
     this.prayerLockEnabled = const Value.absent(),
@@ -2331,6 +2431,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<DateTime>? protectionStartedAt,
     Expression<String>? activePlan,
     Expression<bool>? termsAccepted,
+    Expression<String>? customerEmail,
+    Expression<String>? pendingActivationJson,
     Expression<String>? customBlocklist,
     Expression<String>? customAllowlist,
     Expression<bool>? prayerLockEnabled,
@@ -2388,6 +2490,9 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
         'protection_started_at': protectionStartedAt,
       if (activePlan != null) 'active_plan': activePlan,
       if (termsAccepted != null) 'terms_accepted': termsAccepted,
+      if (customerEmail != null) 'customer_email': customerEmail,
+      if (pendingActivationJson != null)
+        'pending_activation_json': pendingActivationJson,
       if (customBlocklist != null) 'custom_blocklist': customBlocklist,
       if (customAllowlist != null) 'custom_allowlist': customAllowlist,
       if (prayerLockEnabled != null) 'prayer_lock_enabled': prayerLockEnabled,
@@ -2431,6 +2536,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<DateTime?>? protectionStartedAt,
     Value<String?>? activePlan,
     Value<bool>? termsAccepted,
+    Value<String?>? customerEmail,
+    Value<String?>? pendingActivationJson,
     Value<String?>? customBlocklist,
     Value<String?>? customAllowlist,
     Value<bool>? prayerLockEnabled,
@@ -2477,6 +2584,9 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       protectionStartedAt: protectionStartedAt ?? this.protectionStartedAt,
       activePlan: activePlan ?? this.activePlan,
       termsAccepted: termsAccepted ?? this.termsAccepted,
+      customerEmail: customerEmail ?? this.customerEmail,
+      pendingActivationJson:
+          pendingActivationJson ?? this.pendingActivationJson,
       customBlocklist: customBlocklist ?? this.customBlocklist,
       customAllowlist: customAllowlist ?? this.customAllowlist,
       prayerLockEnabled: prayerLockEnabled ?? this.prayerLockEnabled,
@@ -2606,6 +2716,14 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     if (termsAccepted.present) {
       map['terms_accepted'] = Variable<bool>(termsAccepted.value);
     }
+    if (customerEmail.present) {
+      map['customer_email'] = Variable<String>(customerEmail.value);
+    }
+    if (pendingActivationJson.present) {
+      map['pending_activation_json'] = Variable<String>(
+        pendingActivationJson.value,
+      );
+    }
     if (customBlocklist.present) {
       map['custom_blocklist'] = Variable<String>(customBlocklist.value);
     }
@@ -2669,6 +2787,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write('protectionStartedAt: $protectionStartedAt, ')
           ..write('activePlan: $activePlan, ')
           ..write('termsAccepted: $termsAccepted, ')
+          ..write('customerEmail: $customerEmail, ')
+          ..write('pendingActivationJson: $pendingActivationJson, ')
           ..write('customBlocklist: $customBlocklist, ')
           ..write('customAllowlist: $customAllowlist, ')
           ..write('prayerLockEnabled: $prayerLockEnabled, ')
@@ -4122,6 +4242,8 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<DateTime?> protectionStartedAt,
       Value<String?> activePlan,
       Value<bool> termsAccepted,
+      Value<String?> customerEmail,
+      Value<String?> pendingActivationJson,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
       Value<bool> prayerLockEnabled,
@@ -4164,6 +4286,8 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<DateTime?> protectionStartedAt,
       Value<String?> activePlan,
       Value<bool> termsAccepted,
+      Value<String?> customerEmail,
+      Value<String?> pendingActivationJson,
       Value<String?> customBlocklist,
       Value<String?> customAllowlist,
       Value<bool> prayerLockEnabled,
@@ -4339,6 +4463,16 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<bool> get termsAccepted => $composableBuilder(
     column: $table.termsAccepted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerEmail => $composableBuilder(
+    column: $table.customerEmail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pendingActivationJson => $composableBuilder(
+    column: $table.pendingActivationJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4548,6 +4682,16 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get customerEmail => $composableBuilder(
+    column: $table.customerEmail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pendingActivationJson => $composableBuilder(
+    column: $table.pendingActivationJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get customBlocklist => $composableBuilder(
     column: $table.customBlocklist,
     builder: (column) => ColumnOrderings(column),
@@ -4752,6 +4896,16 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get customerEmail => $composableBuilder(
+    column: $table.customerEmail,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pendingActivationJson => $composableBuilder(
+    column: $table.pendingActivationJson,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get customBlocklist => $composableBuilder(
     column: $table.customBlocklist,
     builder: (column) => column,
@@ -4856,6 +5010,8 @@ class $$BlockingSettingsTableTableManager
                 Value<DateTime?> protectionStartedAt = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<bool> termsAccepted = const Value.absent(),
+                Value<String?> customerEmail = const Value.absent(),
+                Value<String?> pendingActivationJson = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
                 Value<bool> prayerLockEnabled = const Value.absent(),
@@ -4896,6 +5052,8 @@ class $$BlockingSettingsTableTableManager
                 protectionStartedAt: protectionStartedAt,
                 activePlan: activePlan,
                 termsAccepted: termsAccepted,
+                customerEmail: customerEmail,
+                pendingActivationJson: pendingActivationJson,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,
                 prayerLockEnabled: prayerLockEnabled,
@@ -4939,6 +5097,8 @@ class $$BlockingSettingsTableTableManager
                 Value<DateTime?> protectionStartedAt = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<bool> termsAccepted = const Value.absent(),
+                Value<String?> customerEmail = const Value.absent(),
+                Value<String?> pendingActivationJson = const Value.absent(),
                 Value<String?> customBlocklist = const Value.absent(),
                 Value<String?> customAllowlist = const Value.absent(),
                 Value<bool> prayerLockEnabled = const Value.absent(),
@@ -4979,6 +5139,8 @@ class $$BlockingSettingsTableTableManager
                 protectionStartedAt: protectionStartedAt,
                 activePlan: activePlan,
                 termsAccepted: termsAccepted,
+                customerEmail: customerEmail,
+                pendingActivationJson: pendingActivationJson,
                 customBlocklist: customBlocklist,
                 customAllowlist: customAllowlist,
                 prayerLockEnabled: prayerLockEnabled,

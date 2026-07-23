@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +12,23 @@ import 'package:unchained/shared/app_credits.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Stripe checkout returns here via the unchained://paid deep link (see
+  // AndroidManifest.xml's intent-filter on MainActivity). Both the live
+  // stream (app already running/backgrounded) and the initial link (Android
+  // killed the app while the browser was open, so this is a cold start) route
+  // to the same confirmation screen, which polls the backend for payment
+  // confirmation before unlocking anything.
+  final appLinks = AppLinks();
+  appLinks.uriLinkStream.listen((uri) {
+    if (uri.scheme == 'unchained' && uri.host == 'paid') {
+      appRouter.go('/plans/confirm');
+    }
+  });
+  appLinks.getInitialLink().then((uri) {
+    if (uri != null && uri.scheme == 'unchained' && uri.host == 'paid') {
+      appRouter.go('/plans/confirm');
+    }
+  });
   // When the native watchdog catches an uninstall / force-stop attempt it asks us
   // to throw up the scripture lock over whatever route is showing. Flag it active
   // *before* navigating so the owner-credit footer is gone on the lock's very first

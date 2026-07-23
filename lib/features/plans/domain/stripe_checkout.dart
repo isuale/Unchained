@@ -11,6 +11,11 @@ import 'package:url_launcher/url_launcher.dart';
 class StripeCheckout {
   StripeCheckout._();
 
+  /// The Cloudflare Worker backend that holds the Stripe secret key and
+  /// answers "is this email a paying subscriber?" — see ../../../../stripe-backend.
+  static const String backendBaseUrl =
+      'https://unchained-stripe-backend.doli-network.workers.dev';
+
   /// planId -> Stripe Payment Link URL. Fill these in from the Stripe Dashboard.
   static const Map<String, String> _links = {
     'monthly': 'https://buy.stripe.com/test_5kQ28q2Pn9i9eZI39V5kk00', // €5.99/mo
@@ -23,20 +28,30 @@ class StripeCheckout {
   /// filled, this is never used and can be removed.
   static const String _standIn = 'https://beunchained.app';
 
-  /// True once a real Payment Link has been configured for [planId].
+  /// True once a real Payment Link has been configured for [planId]. Only
+  /// plans with a real link go through payment gating (email prompt + waiting
+  /// for Stripe confirmation) — plans still on the stand-in have no real
+  /// checkout to confirm against, so they keep activating immediately.
   static bool hasRealLink(String planId) => (_links[planId] ?? '').isNotEmpty;
 
-  /// The URL to open for [planId] — the real Payment Link if set, otherwise the
-  /// stand-in so the redirect is still demonstrable.
-  static String urlFor(String planId) {
+  /// The URL to open for [planId] — the real Payment Link (with the buyer's
+  /// email pre-filled so the app can look them up after payment) if
+  /// configured, otherwise the stand-in so the redirect is still demonstrable.
+  static String urlFor(String planId, {String? email}) {
     final configured = _links[planId] ?? '';
-    return configured.isNotEmpty ? configured : _standIn;
+    if (configured.isEmpty) return _standIn;
+    if (email == null || email.isEmpty) return configured;
+    final uri = Uri.parse(configured);
+    return uri.replace(queryParameters: {
+      ...uri.queryParameters,
+      'prefilled_email': email,
+    }).toString();
   }
 
   /// Opens the plan's checkout page in an external browser.
   /// Returns true if the page was launched.
-  static Future<bool> open(String planId) async {
-    final uri = Uri.parse(urlFor(planId));
+  static Future<bool> open(String planId, {String? email}) async {
+    final uri = Uri.parse(urlFor(planId, email: email));
     return launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

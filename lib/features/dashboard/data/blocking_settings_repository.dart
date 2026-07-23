@@ -171,6 +171,29 @@ class BlockingSettingsRepository {
     ));
   }
 
+  /// Remembers the email the user entered before Stripe checkout, so future
+  /// checkouts can be pre-filled and so a returning payment can be looked up.
+  Future<void> setCustomerEmail(String email) async {
+    await updateSettings(
+        BlockingSettingsCompanion(customerEmail: Value(email)));
+  }
+
+  /// Records the plan+schedule the user is trying to buy, right before sending
+  /// them to Stripe checkout. Read back after returning from checkout (via the
+  /// unchained://paid deep link) to know what to activate once payment is
+  /// confirmed. [json] is a [PendingActivation] JSON-encoded by the caller.
+  Future<void> setPendingActivation(String json) async {
+    await updateSettings(
+        BlockingSettingsCompanion(pendingActivationJson: Value(json)));
+  }
+
+  /// Clears the pending activation once it's been handled (confirmed or
+  /// abandoned by the user), so a stale one is never re-applied later.
+  Future<void> clearPendingActivation() async {
+    await updateSettings(
+        const BlockingSettingsCompanion(pendingActivationJson: Value(null)));
+  }
+
   /// Wipes the user's session so the app behaves like a fresh install:
   /// clears the settings row back to defaults and removes the onboarding
   /// assessment history. After this, the splash screen routes to /welcome

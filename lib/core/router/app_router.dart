@@ -12,6 +12,7 @@ import 'package:unchained/features/plans/presentation/forever_plan_screen.dart';
 import 'package:unchained/features/plans/presentation/free_trial_plan_screen.dart';
 import 'package:unchained/features/plans/presentation/monthly_plan_screen.dart';
 import 'package:unchained/features/plans/presentation/monthly_setup_screen.dart';
+import 'package:unchained/features/plans/presentation/payment_confirmation_screen.dart';
 import 'package:unchained/features/prayer/presentation/app_picker_screen.dart';
 import 'package:unchained/features/prayer/presentation/prayer_gate_screen.dart';
 import 'package:unchained/features/splash/presentation/splash_screen.dart';
@@ -59,6 +60,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/plans/all',
       builder: (context, state) => const AllPlansScreen(),
+    ),
+    GoRoute(
+      path: '/plans/confirm',
+      builder: (context, state) => const PaymentConfirmationScreen(),
     ),
     GoRoute(
       path: '/terms',

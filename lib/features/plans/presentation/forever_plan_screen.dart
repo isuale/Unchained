@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
-import 'package:unchained/features/dashboard/widgets/plan_activation_overlay.dart';
-import 'package:unchained/features/plans/domain/stripe_checkout.dart';
+import 'package:unchained/features/plans/presentation/widgets/plan_checkout_flow.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class ForeverPlanScreen extends ConsumerWidget {
@@ -134,17 +133,13 @@ class ForeverPlanScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(28),
                       ),
                     ),
-                    onPressed: () async {
-                      // Send the user to Stripe's hosted checkout page first.
-                      await StripeCheckout.open('forever');
-                      if (!context.mounted) return;
-                      await PlanActivationOverlay.show(
-                        context: context,
-                        ref: ref,
-                        plan: ActivePlan.forever,
-                        schedule: CommitmentSchedule.forever,
-                      );
-                    },
+                    onPressed: () => PlanCheckoutFlow.start(
+                      context: context,
+                      ref: ref,
+                      planId: 'forever',
+                      plan: ActivePlan.forever,
+                      schedule: CommitmentSchedule.forever,
+                    ),
                     child: Text(
                       l.forever_cta,
                       style: const TextStyle(

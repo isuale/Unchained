@@ -111,6 +111,18 @@ class BlockingSettings extends Table {
   BoolColumn get termsAccepted =>
       boolean().withDefault(const Constant(false))();
 
+  // Stripe payment gating. customerEmail is the last email the user entered
+  // before being sent to Stripe checkout — reused to pre-fill future checkouts
+  // and to query the backend's /v1/entitlement after returning from payment.
+  // pendingActivationJson holds the plan+schedule the user was trying to buy,
+  // JSON-encoded (see features/plans/domain/pending_activation.dart), written
+  // right before opening Stripe checkout and cleared once payment is confirmed
+  // (or the user gives up) — it's how the app remembers what to activate after
+  // control returns from the browser, since Android may kill the app while
+  // it's backgrounded during checkout.
+  TextColumn get customerEmail => text().nullable()();
+  TextColumn get pendingActivationJson => text().nullable()();
+
   // User-managed domain lists, stored newline-separated (one domain per line).
   // customBlocklist: extra sites the user chose to block, on top of the native
   // built-in list. customAllowlist: sites the user chose to un-block (allow),
@@ -219,7 +231,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -309,6 +321,14 @@ class AppDatabase extends _$AppDatabase {
           if (from < 13) {
             await m.addColumn(
                 blockingSettings, blockingSettings.prayerLockEnabled);
+          }
+          // v14: Stripe payment gating — remembered checkout email and the
+          // plan/schedule pending confirmation after returning from checkout.
+          if (from < 14) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.customerEmail);
+            await m.addColumn(
+                blockingSettings, blockingSettings.pendingActivationJson);
           }
         },
         beforeOpen: (details) async {
