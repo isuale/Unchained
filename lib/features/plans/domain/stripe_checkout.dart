@@ -13,7 +13,7 @@ class StripeCheckout {
 
   /// planId -> Stripe Payment Link URL. Fill these in from the Stripe Dashboard.
   static const Map<String, String> _links = {
-    'monthly': '', // paste https://buy.stripe.com/test_... for €5.99/mo
+    'monthly': 'https://buy.stripe.com/test_5kQ28q2Pn9i9eZI39V5kk00', // €5.99/mo
     'ai_plan': '', // paste https://buy.stripe.com/test_... for €9.99/mo
     'forever': '', // paste https://buy.stripe.com/test_... for €15.99/mo
   };
