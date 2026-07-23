@@ -44,6 +44,15 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Deep link so Stripe's "payment successful" page can reopen the app
+                 (unchained://paid). singleTop above brings the running app forward
+                 instead of launching a second copy. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="unchained" android:host="paid" />
+            </intent-filter>
         </activity>
 
         <service
