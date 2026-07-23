@@ -1,0 +1,17 @@
+{
+  "name": "unchained-stripe-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tiny Cloudflare Worker that talks to Stripe for the Unchained app: creates subscriptions, receives webhooks, and reports who is a paying subscriber.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "stripe": "^18.5.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.113.0"
+  }
+}
