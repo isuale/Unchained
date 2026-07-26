@@ -40,6 +40,15 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- The app already handles the unchained://paid deep link itself via
+                 the app_links package (see main.dart) — this flag stops Flutter's
+                 engine from ALSO feeding the raw intent data into go_router as an
+                 initial route, which otherwise races app_links and crashes with
+                 "no routes for location: /" on a cold start via that link. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
+              />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

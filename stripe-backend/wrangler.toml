@@ -15,7 +15,7 @@ compatibility_flags = ["nodejs_compat"]
 # Non-secret variables, readable inside the Worker as `env.<NAME>`.
 [vars]
 # Public key — safe to expose. Paste your pk_test_... here (and pk_live_... when going live).
-STRIPE_PUBLISHABLE_KEY = "pk_test_REPLACE_ME"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51Tw6FuBivTKGIw4o6tm41lpH3EHCqvvS0uQv6tR0l9J0zfXfNaFbaDb2YBsTZhIoA3dWIADfFIlV5QTPzBXSufWe00fXao79x3"
 
 # The three Stripe Price IDs you created. The Worker only allows subscriptions to
 # these, so a tampered app can't invent a cheaper price.

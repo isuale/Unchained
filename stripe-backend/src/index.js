@@ -17,6 +17,71 @@
 
 import Stripe from 'stripe';
 
+// GET /paid — the page Stripe's Payment Link redirects the browser to after a
+// successful checkout. Stripe's redirect field only accepts http(s) URLs, so
+// it can't jump straight to the unchained://paid app deep link — this page
+// bounces the browser there instead. Served from the Worker (not the
+// beunchained.app website) so it doesn't depend on the home-server's uptime,
+// since this step is payment-critical.
+const PAID_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment successful — Be Unchained</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue: #1E5FFF; --green: #00D26A; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: #000; color: #fff; font-family: 'Inter', system-ui, sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 24px; min-height: 100dvh;
+    }
+    .card { max-width: 420px; width: 100%; }
+    .check {
+      width: 96px; height: 96px; border-radius: 50%; background: var(--green);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 28px;
+    }
+    .check svg { width: 52px; height: 52px; stroke: #fff; stroke-width: 5;
+      fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: 32px;
+      font-weight: 400; margin-bottom: 14px; }
+    p { color: rgba(255,255,255,.72); font-size: 16px; line-height: 1.5; margin-bottom: 32px; }
+    .btn {
+      display: inline-block; width: 100%; padding: 17px 24px; border-radius: 28px;
+      background: var(--blue); color: #fff; font-size: 17px; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer;
+    }
+    .hint { margin-top: 18px; font-size: 13px; color: rgba(255,255,255,.45); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">
+      <svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6" /></svg>
+    </div>
+    <h1>Payment successful</h1>
+    <p>Your subscription is active. Head back to the Be Unchained app to continue.</p>
+    <a class="btn" id="openApp" href="unchained://paid">Return to the app</a>
+    <div class="hint">If the button doesn't open the app, just switch back to it manually.</div>
+  </div>
+
+  <script>
+    // Try to reopen the app automatically. Browsers may require a tap, so the
+    // button above is always the reliable path.
+    setTimeout(function () {
+      window.location.href = 'unchained://paid';
+    }, 600);
+  </script>
+</body>
+</html>
+`;
+
 // Small helper: build a JSON HTTP response with permissive CORS (handy for
 // testing from a browser; the native app doesn't care about CORS).
 function json(data, status = 200) {
@@ -57,6 +122,11 @@ export default {
       }
       if (pathname === '/' || pathname === '/health') {
         return json({ ok: true, service: 'unchained-stripe-backend' });
+      }
+      if (pathname === '/paid' && request.method === 'GET') {
+        return new Response(PAID_HTML, {
+          headers: { 'content-type': 'text/html; charset=utf-8' },
+        });
       }
 
       const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -154,12 +224,23 @@ async function handleWebhook(request, env, stripe) {
 
   const type = event.type;
   const obj = event.data.object;
+  console.log(`webhook event received: type=${type} id=${event.id} customer=${obj.customer} status=${obj.status}`);
 
   // Resolve the customer's email (some events carry it, some need a lookup).
   async function emailFor(customerId) {
     if (!customerId) return null;
-    const c = await stripe.customers.retrieve(customerId).catch(() => null);
-    return c && !c.deleted ? (c.email || '').toLowerCase() : null;
+    const c = await stripe.customers.retrieve(customerId).catch((err) => {
+      console.error(`customer lookup failed for ${customerId}: ${err && err.message || err}`);
+      return null;
+    });
+    if (!c || c.deleted) {
+      console.log(`customer ${customerId} missing or deleted`);
+      return null;
+    }
+    if (!c.email) {
+      console.log(`customer ${customerId} has no email on file`);
+    }
+    return (c.email || '').toLowerCase() || null;
   }
 
   if (type === 'customer.subscription.created' ||
