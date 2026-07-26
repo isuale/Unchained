@@ -95,7 +95,15 @@ private val DOH_BOOTSTRAP = setOf(
 // IPv4 only (the tunnel is IPv4-only); the app's own upstream uses a protect()ed
 // socket so routing these in never breaks our own lookups.
 private val DOH_RESOLVER_IP_STRINGS = listOf(
-    "1.1.1.1", "1.0.0.1", "1.1.1.2", "1.0.0.2", "1.1.1.3", "1.0.0.3",       // Cloudflare
+    "1.1.1.1", "1.0.0.1", "1.1.1.2", "1.0.0.2", "1.1.1.3", "1.0.0.3",       // Cloudflare (1.1.1.1 anycast)
+    // Firefox's actual default DoH endpoint, mozilla.cloudflare-dns.com, is NOT served off
+    // the 1.1.1.1 anycast edge above — it's a dedicated pair of Cloudflare CDN IPs (verified
+    // stable across Google/Cloudflare/Quad9 resolvers). Sinkholing the hostname alone doesn't
+    // stop Firefox: DoH is deliberately designed to survive exactly that (a censor NXDOMAINing
+    // the resolver's own hostname), so Firefox still connects to these IPs directly. This was
+    // the confirmed gap letting Firefox bypass the block while other browsers stayed filtered.
+    "162.159.61.4", "172.64.41.4",                                          // mozilla.cloudflare-dns.com
+    "104.16.248.249", "104.16.249.249",                                     // bare cloudflare-dns.com
     "8.8.8.8", "8.8.4.4",                                                    // Google
     "9.9.9.9", "149.112.112.112", "9.9.9.11", "149.112.112.11",             // Quad9
     "9.9.9.10", "149.112.112.10",                                           // Quad9 (unsecured/ECS)
