@@ -127,4 +127,6 @@ Use Stripe test card **4242 4242 4242 4242**, any future expiry, any CVC.
 | GET | `/v1/entitlement?email=` | app → us: "is this email a paying subscriber?" |
 | POST | `/v1/owner/request-code` | emails a fresh 6-digit code to `OWNER_EMAIL` |
 | POST | `/v1/owner/verify-code` | `{ code }` → `{ valid: true/false }` |
+| GET | `/assets/owner-code-logo.png` | hosted logo used inside the owner-code email |
+| GET | `/v1/owner/preview-email` | renders the owner-code email body for debugging (no send) |
 | GET | `/health` | uptime check |
