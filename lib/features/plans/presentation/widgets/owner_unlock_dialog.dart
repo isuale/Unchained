@@ -3,12 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/plans/domain/owner_access.dart';
 import 'package:unchained/features/plans/domain/owner_email_verification.dart';
 
-/// Three-step owner verification:
+/// Two-step owner verification:
 ///  1. The owner's email (checked locally — a wrong email never touches the
 ///     network, so a typo can't spam the inbox or probe the backend).
 ///  2. The one-time code the backend just emailed to that address.
-///  3. The current 6-digit Authy code (checked entirely on-device).
-/// Returns true only once all three pass.
+/// Returns true only once both pass.
 Future<bool> showOwnerUnlockDialog(BuildContext context) async {
   final result = await showDialog<bool>(
     context: context,
@@ -18,7 +17,7 @@ Future<bool> showOwnerUnlockDialog(BuildContext context) async {
   return result ?? false;
 }
 
-enum _Step { email, emailCode, totpCode }
+enum _Step { email, emailCode }
 
 class _OwnerUnlockDialog extends StatefulWidget {
   const _OwnerUnlockDialog();
@@ -34,7 +33,6 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
 
   final _emailController = TextEditingController();
   final _emailCodeController = TextEditingController();
-  final _totpController = TextEditingController();
 
   _Step _step = _Step.email;
   bool _busy = false;
@@ -44,7 +42,6 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
   void dispose() {
     _emailController.dispose();
     _emailCodeController.dispose();
-    _totpController.dispose();
     super.dispose();
   }
 
@@ -92,26 +89,15 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
     });
     final valid = await OwnerEmailVerification.verifyCode(_emailCodeController.text);
     if (!mounted) return;
+    if (valid) {
+      Navigator.of(context).pop(true);
+      return;
+    }
     setState(() {
       _busy = false;
-      if (valid) {
-        _step = _Step.totpCode;
-      } else {
-        _error = 'Wrong or expired code';
-        _emailCodeController.clear();
-      }
+      _error = 'Wrong or expired code';
+      _emailCodeController.clear();
     });
-  }
-
-  void _submitTotpCode() {
-    if (OwnerAccess.verifyCode(_totpController.text)) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() {
-        _error = 'Wrong code';
-        _totpController.clear();
-      });
-    }
   }
 
   void _submit() {
@@ -120,8 +106,6 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
         _submitEmail();
       case _Step.emailCode:
         _submitEmailCode();
-      case _Step.totpCode:
-        _submitTotpCode();
     }
   }
 
@@ -142,16 +126,6 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
           'Enter the code just emailed to you.',
           _buildTextField(
             controller: _emailCodeController,
-            keyboardType: TextInputType.number,
-            hintText: '000000',
-            digits: true,
-          ),
-        ),
-      _Step.totpCode => (
-          'Authenticator code',
-          'Enter the current code from Authy.',
-          _buildTextField(
-            controller: _totpController,
             keyboardType: TextInputType.number,
             hintText: '000000',
             digits: true,
@@ -231,7 +205,7 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
                     color: Colors.white,
                   ),
                 )
-              : Text(_step == _Step.totpCode ? 'Unlock' : 'Next'),
+              : Text(_step == _Step.emailCode ? 'Unlock' : 'Next'),
         ),
       ],
     );
