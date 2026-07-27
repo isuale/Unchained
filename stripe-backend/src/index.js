@@ -5,14 +5,26 @@
 // because Stripe's SECRET key (the one that can actually charge cards) must never
 // live inside the app. Only this Worker holds it.
 //
-// It exposes three endpoints:
-//   POST /v1/subscribe    – app asks to start a paid subscription; returns the
-//                           one-time tokens the in-app card sheet needs.
-//   POST /v1/webhook      – Stripe calls this to report payment events; we record
-//                           who is (and isn't) a paying subscriber.
-//   GET  /v1/entitlement  – app asks "is this email a paying subscriber?"
+// It exposes these endpoints:
+//   POST /v1/subscribe         – app asks to start a paid subscription; returns
+//                                the one-time tokens the in-app card sheet needs.
+//   POST /v1/webhook           – Stripe calls this to report payment events; we
+//                                record who is (and isn't) a paying subscriber.
+//   GET  /v1/entitlement       – app asks "is this email a paying subscriber?"
+//   POST /v1/owner/request-code – app asks to email a fresh owner verification
+//                                code (see "Owner verification" below).
+//   POST /v1/owner/verify-code  – app asks "is this the code you just emailed?"
 //
 // The free trial does NOT touch this Worker — that's handled locally in the app.
+//
+// ── Owner verification ───────────────────────────────────────────────────────
+// The app's owner-only unlock (see lib/features/plans/domain/owner_access.dart)
+// is a two-factor check: an emailed one-time code (handled here, via Resend)
+// plus a locally-verified Authy TOTP code (handled entirely on-device, no
+// network). request-code always emails env.OWNER_EMAIL — it ignores whatever
+// address the caller supplies, so this can never become an open mail relay.
+// The code lives in the OWNER_CODES KV store for 10 minutes and is invalidated
+// after 5 wrong guesses.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import Stripe from 'stripe';
@@ -119,6 +131,12 @@ export default {
       // route that actually needs it.
       if (pathname === '/v1/entitlement' && request.method === 'GET') {
         return await handleEntitlement(url, env);
+      }
+      if (pathname === '/v1/owner/request-code' && request.method === 'POST') {
+        return await handleOwnerRequestCode(env);
+      }
+      if (pathname === '/v1/owner/verify-code' && request.method === 'POST') {
+        return await handleOwnerVerifyCode(request, env);
       }
       if (pathname === '/' || pathname === '/health') {
         return json({ ok: true, service: 'unchained-stripe-backend' });
@@ -284,4 +302,81 @@ async function handleEntitlement(url, env) {
     status: record.status || null,
     currentPeriodEnd: record.currentPeriodEnd || null,
   });
+}
+
+// ── POST /v1/owner/request-code ──────────────────────────────────────────────
+// Generates a fresh 6-digit code, stores it in KV for 10 minutes, and emails it
+// to env.OWNER_EMAIL via Resend. Rate-limited to one send per 60s (Cloudflare
+// KV's minimum TTL) so a stuck "resend" button can't spam the inbox. Ignores
+// any email in the request body — there is exactly one recipient, fixed
+// server-side.
+const CODE_TTL_SECONDS = 600;
+const MAX_ATTEMPTS = 5;
+const RESEND_COOLDOWN_SECONDS = 60;
+
+async function handleOwnerRequestCode(env) {
+  const now = Date.now();
+  const lastSentRaw = await env.OWNER_CODES.get('lastSent');
+  if (lastSentRaw && now - Number(lastSentRaw) < RESEND_COOLDOWN_SECONDS * 1000) {
+    return json({ error: 'rate_limited' }, 429);
+  }
+
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  await env.OWNER_CODES.put(
+    'verify',
+    JSON.stringify({ code, attempts: 0 }),
+    { expirationTtl: CODE_TTL_SECONDS },
+  );
+  await env.OWNER_CODES.put('lastSent', String(now), {
+    expirationTtl: RESEND_COOLDOWN_SECONDS,
+  });
+
+  const emailResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${env.RESEND_API_KEY}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'Unchained <onboarding@resend.dev>',
+      to: [env.OWNER_EMAIL],
+      subject: 'Your Unchained owner verification code',
+      text: `Your verification code is ${code}. It expires in 10 minutes.`,
+    }),
+  });
+  if (!emailResponse.ok) {
+    const detail = await emailResponse.text().catch(() => '');
+    console.error(`Resend send failed: ${emailResponse.status} ${detail}`);
+    return json({ error: 'send_failed' }, 502);
+  }
+
+  return json({ sent: true });
+}
+
+// ── POST /v1/owner/verify-code ───────────────────────────────────────────────
+// Body: { "code": "123456" }. Consumes the code on a correct match (one-time
+// use); locks it out after 5 wrong guesses, forcing a fresh request-code.
+async function handleOwnerVerifyCode(request, env) {
+  const body = await request.json().catch(() => ({}));
+  const submitted = String(body.code || '').trim();
+
+  const raw = await env.OWNER_CODES.get('verify');
+  if (!raw) return json({ valid: false });
+
+  const record = JSON.parse(raw);
+  if (record.attempts >= MAX_ATTEMPTS) {
+    await env.OWNER_CODES.delete('verify');
+    return json({ valid: false });
+  }
+
+  if (submitted && submitted === record.code) {
+    await env.OWNER_CODES.delete('verify');
+    return json({ valid: true });
+  }
+
+  record.attempts += 1;
+  await env.OWNER_CODES.put('verify', JSON.stringify(record), {
+    expirationTtl: CODE_TTL_SECONDS,
+  });
+  return json({ valid: false });
 }

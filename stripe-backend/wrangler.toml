@@ -23,6 +23,11 @@ PRICE_MONTHLY = "price_1TxnZfBivTKGIw4oCkVWXP2K"
 PRICE_AI      = "price_1Txnb5BivTKGIw4oKYk6MTvA"
 PRICE_FOREVER = "price_1TxnbXBivTKGIw4ofUv49Do9"
 
+# The only address /v1/owner/request-code will ever send to — must be the same
+# inbox you sign up to Resend with (their sandbox mode, with no verified
+# domain, only allows sending to the account's own address).
+OWNER_EMAIL = "imblueale@gmail.com"
+
 # Key/value store that remembers who is a paying subscriber (keyed by email).
 # Create it once with:  npx wrangler kv namespace create ENTITLEMENTS
 # then paste the returned id below.
@@ -30,6 +35,15 @@ PRICE_FOREVER = "price_1TxnbXBivTKGIw4ofUv49Do9"
 binding = "ENTITLEMENTS"
 id = "9f89af808af94608bb1766dc8b28a98d"
 
-# NOTE: two SECRET values are NOT in this file. Set them once with:
+# Key/value store for the owner email-verification one-time code (see
+# /v1/owner/request-code and /v1/owner/verify-code).
+# Create it once with:  npx wrangler kv namespace create OWNER_CODES
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "OWNER_CODES"
+id = "cb01684dc3e74b7484a7d085fb1d5273"
+
+# NOTE: three SECRET values are NOT in this file. Set them once with:
 #   npx wrangler secret put STRIPE_SECRET_KEY       (paste sk_test_... / sk_live_...)
 #   npx wrangler secret put STRIPE_WEBHOOK_SECRET    (paste whsec_... from the webhook step)
+#   npx wrangler secret put RESEND_API_KEY           (paste re_... from resend.com)

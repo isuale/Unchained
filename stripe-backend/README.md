@@ -40,6 +40,39 @@ npx wrangler deploy
 #    -> copy the URL it prints, e.g. https://unchained-stripe-backend.<you>.workers.dev
 ```
 
+## Owner verification (emailed one-time code)
+
+The app's "Owner" unlock on the plan screens needs this Worker to email a
+one-time code. It uses [Resend](https://resend.com) to send the email.
+
+1. Sign up at resend.com **using the same email address** as `OWNER_EMAIL` in
+   `wrangler.toml` (currently `imblueale@gmail.com`) — without a verified
+   custom domain, Resend's sandbox mode only allows sending to the address you
+   signed up with, which is exactly what we want here.
+2. Resend dashboard → **API Keys** → create one, copy the `re_...` value.
+3. Create the KV store for the code:
+   ```bash
+   npx wrangler kv namespace create OWNER_CODES
+   #    -> copy the "id" it prints, and paste it into wrangler.toml
+   #       (replace REPLACE_WITH_OWNER_CODES_KV_NAMESPACE_ID)
+   ```
+4. Store the Resend key as a secret:
+   ```bash
+   npx wrangler secret put RESEND_API_KEY   # paste re_...
+   ```
+5. Redeploy:
+   ```bash
+   npx wrangler deploy
+   ```
+
+Test it:
+```bash
+curl -X POST https://unchained-stripe-backend.<you>.workers.dev/v1/owner/request-code
+# check the OWNER_EMAIL inbox for the code, then:
+curl -X POST https://unchained-stripe-backend.<you>.workers.dev/v1/owner/verify-code \
+  -H 'content-type: application/json' -d '{"code":"123456"}'
+```
+
 ## Connect the webhook (so Stripe can tell us about payments)
 
 1. Stripe → **Desarrolladores → Webhooks → Add endpoint**.
@@ -92,4 +125,6 @@ Use Stripe test card **4242 4242 4242 4242**, any future expiry, any CVC.
 | POST | `/v1/subscribe` | `{ email, priceId }` → tokens for the in‑app card sheet |
 | POST | `/v1/webhook` | Stripe → us: payment/subscription events |
 | GET | `/v1/entitlement?email=` | app → us: "is this email a paying subscriber?" |
+| POST | `/v1/owner/request-code` | emails a fresh 6-digit code to `OWNER_EMAIL` |
+| POST | `/v1/owner/verify-code` | `{ code }` → `{ valid: true/false }` |
 | GET | `/health` | uptime check |

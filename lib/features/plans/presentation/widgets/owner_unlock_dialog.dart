@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/plans/domain/owner_access.dart';
+import 'package:unchained/features/plans/domain/owner_email_verification.dart';
 
-/// Two-step owner verification: the owner's email, then the current 6-digit
-/// Authy code. Returns true only once both check out.
+/// Three-step owner verification:
+///  1. The owner's email (checked locally — a wrong email never touches the
+///     network, so a typo can't spam the inbox or probe the backend).
+///  2. The one-time code the backend just emailed to that address.
+///  3. The current 6-digit Authy code (checked entirely on-device).
+/// Returns true only once all three pass.
 Future<bool> showOwnerUnlockDialog(BuildContext context) async {
   final result = await showDialog<bool>(
     context: context,
@@ -12,6 +17,8 @@ Future<bool> showOwnerUnlockDialog(BuildContext context) async {
   );
   return result ?? false;
 }
+
+enum _Step { email, emailCode, totpCode }
 
 class _OwnerUnlockDialog extends StatefulWidget {
   const _OwnerUnlockDialog();
@@ -26,46 +33,131 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
   static const _bad = Color(0xFFFF4D4F);
 
   final _emailController = TextEditingController();
-  final _codeController = TextEditingController();
+  final _emailCodeController = TextEditingController();
+  final _totpController = TextEditingController();
 
-  int _step = 0; // 0 = email, 1 = TOTP code
-  bool _wrong = false;
+  _Step _step = _Step.email;
+  bool _busy = false;
+  String? _error;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _codeController.dispose();
+    _emailCodeController.dispose();
+    _totpController.dispose();
     super.dispose();
   }
 
-  void _submitEmail() {
-    if (OwnerAccess.verifyEmail(_emailController.text)) {
+  Future<void> _submitEmail() async {
+    if (!OwnerAccess.verifyEmail(_emailController.text)) {
       setState(() {
-        _wrong = false;
-        _step = 1;
+        _error = 'Wrong email';
+        _emailController.clear();
       });
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final sent = await OwnerEmailVerification.requestCode();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (sent) {
+        _step = _Step.emailCode;
+      } else {
+        _error = "Couldn't send the code — try again";
+      }
+    });
+  }
+
+  Future<void> _resendCode() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final sent = await OwnerEmailVerification.requestCode();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _error = sent ? null : "Couldn't resend the code — try again";
+    });
+  }
+
+  Future<void> _submitEmailCode() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final valid = await OwnerEmailVerification.verifyCode(_emailCodeController.text);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (valid) {
+        _step = _Step.totpCode;
+      } else {
+        _error = 'Wrong or expired code';
+        _emailCodeController.clear();
+      }
+    });
+  }
+
+  void _submitTotpCode() {
+    if (OwnerAccess.verifyCode(_totpController.text)) {
+      Navigator.of(context).pop(true);
     } else {
       setState(() {
-        _wrong = true;
-        _emailController.clear();
+        _error = 'Wrong code';
+        _totpController.clear();
       });
     }
   }
 
-  void _submitCode() {
-    if (OwnerAccess.verifyCode(_codeController.text)) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() {
-        _wrong = true;
-        _codeController.clear();
-      });
+  void _submit() {
+    switch (_step) {
+      case _Step.email:
+        _submitEmail();
+      case _Step.emailCode:
+        _submitEmailCode();
+      case _Step.totpCode:
+        _submitTotpCode();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isEmailStep = _step == 0;
+    final (title, hint, field) = switch (_step) {
+      _Step.email => (
+          'Owner',
+          "Enter the owner's email to continue.",
+          _buildTextField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            hintText: 'owner@email.com',
+          ),
+        ),
+      _Step.emailCode => (
+          'Check your email',
+          'Enter the code just emailed to you.',
+          _buildTextField(
+            controller: _emailCodeController,
+            keyboardType: TextInputType.number,
+            hintText: '000000',
+            digits: true,
+          ),
+        ),
+      _Step.totpCode => (
+          'Authenticator code',
+          'Enter the current code from Authy.',
+          _buildTextField(
+            controller: _totpController,
+            keyboardType: TextInputType.number,
+            hintText: '000000',
+            digits: true,
+          ),
+        ),
+    };
 
     return AlertDialog(
       backgroundColor: const Color(0xFF0A0E18),
@@ -79,11 +171,8 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
               color: _accent, size: 22),
           const SizedBox(width: 10),
           Text(
-            isEmailStep ? 'Owner' : 'Verification code',
-            style: GoogleFonts.dmSerifDisplay(
-              color: Colors.white,
-              fontSize: 20,
-            ),
+            title,
+            style: GoogleFonts.dmSerifDisplay(color: Colors.white, fontSize: 20),
           ),
         ],
       ),
@@ -93,98 +182,102 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              isEmailStep
-                  ? "Enter the owner's email to continue."
-                  : 'Enter the current code from Authy.',
-              style: GoogleFonts.inter(color: _dim, fontSize: 13),
-            ),
+            Text(hint, style: GoogleFonts.inter(color: _dim, fontSize: 13)),
             const SizedBox(height: 16),
-            if (isEmailStep)
-              TextField(
-                controller: _emailController,
-                autofocus: true,
-                keyboardType: TextInputType.emailAddress,
-                style: GoogleFonts.inter(color: Colors.white),
-                cursorColor: _accent,
-                onSubmitted: (_) => _submitEmail(),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFF070A12),
-                  hintText: 'owner@email.com',
-                  hintStyle: const TextStyle(color: Color(0xFF444C5C)),
-                  errorText: _wrong ? 'Wrong email' : null,
-                  errorStyle: const TextStyle(color: _bad),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF1B2435)),
+            field,
+            if (_error != null) ...[
+              const SizedBox(height: 8),
+              Text(_error!, style: GoogleFonts.inter(color: _bad, fontSize: 12)),
+            ],
+            if (_step == _Step.emailCode) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: _busy ? null : _resendCode,
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF1B2435)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _accent),
-                  ),
-                ),
-              )
-            else
-              TextField(
-                controller: _codeController,
-                autofocus: true,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  letterSpacing: 6,
-                  fontSize: 20,
-                ),
-                cursorColor: _accent,
-                onSubmitted: (_) => _submitCode(),
-                decoration: InputDecoration(
-                  counterText: '',
-                  filled: true,
-                  fillColor: const Color(0xFF070A12),
-                  hintText: '000000',
-                  hintStyle: const TextStyle(
-                      color: Color(0xFF444C5C), letterSpacing: 6),
-                  errorText: _wrong ? 'Wrong code' : null,
-                  errorStyle: const TextStyle(color: _bad),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF1B2435)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF1B2435)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _accent),
+                  child: Text(
+                    'Resend code',
+                    style: GoogleFonts.inter(color: _accent, fontSize: 12),
                   ),
                 ),
               ),
+            ],
           ],
         ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: _busy ? null : () => Navigator.of(context).pop(false),
           child: Text('Cancel', style: GoogleFonts.inter(color: _dim)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: _accent,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
-          onPressed: isEmailStep ? _submitEmail : _submitCode,
-          child: Text(isEmailStep ? 'Next' : 'Unlock'),
+          onPressed: _busy ? null : _submit,
+          child: _busy
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(_step == _Step.totpCode ? 'Unlock' : 'Next'),
         ),
       ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required TextInputType keyboardType,
+    required String hintText,
+    bool digits = false,
+  }) {
+    return TextField(
+      controller: controller,
+      autofocus: true,
+      enabled: !_busy,
+      keyboardType: keyboardType,
+      maxLength: digits ? 6 : null,
+      style: GoogleFonts.inter(
+        color: Colors.white,
+        letterSpacing: digits ? 6 : 0,
+        fontSize: digits ? 20 : 14,
+      ),
+      cursorColor: _accent,
+      onSubmitted: (_) => _submit(),
+      decoration: InputDecoration(
+        counterText: digits ? '' : null,
+        filled: true,
+        fillColor: const Color(0xFF070A12),
+        hintText: hintText,
+        hintStyle: TextStyle(
+          color: const Color(0xFF444C5C),
+          letterSpacing: digits ? 6 : 0,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1B2435)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1B2435)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _accent),
+        ),
+      ),
     );
   }
 }
