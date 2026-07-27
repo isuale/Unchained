@@ -18,9 +18,9 @@ class StripeCheckout {
 
   /// planId -> Stripe Payment Link URL. Fill these in from the Stripe Dashboard.
   static const Map<String, String> _links = {
-    'monthly': 'https://buy.stripe.com/test_5kQ28q2Pn9i9eZI39V5kk00', // €5.99/mo
-    'ai_plan': '', // paste https://buy.stripe.com/test_... for €9.99/mo
-    'forever': '', // paste https://buy.stripe.com/test_... for €15.99/mo
+    'monthly': 'https://buy.stripe.com/5kQ28q2Pn9i9eZI39V5kk00', // €5.99/mo
+    'ai_plan': 'https://buy.stripe.com/6oU7sK4Xv8e5eZIdOz5kk01', // €9.99/mo
+    'forever': 'https://buy.stripe.com/fZu4gy2PnamdcRA7qb5kk02', // €15.99/mo
   };
 
   /// Temporary stand-in so tapping a paid plan visibly opens the browser even
