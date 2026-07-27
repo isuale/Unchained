@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
+import 'package:unchained/features/plans/presentation/widgets/owner_entry_button.dart';
 import 'package:unchained/features/plans/presentation/widgets/plan_checkout_flow.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
@@ -150,7 +151,16 @@ class ForeverPlanScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+              OwnerEntryButton(
+                onUnlocked: () => PlanCheckoutFlow.startAsOwner(
+                  context: context,
+                  ref: ref,
+                  plan: ActivePlan.forever,
+                  schedule: CommitmentSchedule.forever,
+                ),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),

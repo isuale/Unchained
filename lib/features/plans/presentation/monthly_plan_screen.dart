@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unchained/features/plans/presentation/widgets/owner_entry_button.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class MonthlyPlanScreen extends ConsumerWidget {
@@ -128,7 +129,16 @@ class MonthlyPlanScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+              OwnerEntryButton(
+                // The commitment schedule (days/breaks) is chosen on the next
+                // setup screen, not here — carry the unlock through as a
+                // one-shot flag so its CTA activates for free instead of
+                // sending the owner to Stripe.
+                onUnlocked: () =>
+                    context.push('/plans/monthly/setup', extra: true),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),

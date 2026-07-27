@@ -61,4 +61,22 @@ class PlanCheckoutFlow {
     await repo.setPendingActivation(pending.toJson());
     await StripeCheckout.open(planId, email: email);
   }
+
+  /// Owner-only path: activates [plan] with [schedule] immediately, skipping
+  /// Stripe/email/entitlement entirely. Only call this after the owner has
+  /// passed [showOwnerUnlockDialog] — the commitment lock the schedule
+  /// implies still applies normally once protection is turned on.
+  static Future<void> startAsOwner({
+    required BuildContext context,
+    required WidgetRef ref,
+    required ActivePlan plan,
+    required CommitmentSchedule schedule,
+  }) {
+    return PlanActivationOverlay.show(
+      context: context,
+      ref: ref,
+      plan: plan,
+      schedule: schedule,
+    );
+  }
 }

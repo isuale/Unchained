@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unchained/core/database/user_assessment_repository.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/features/onboarding/domain/plan_recommendation.dart';
+import 'package:unchained/features/plans/presentation/widgets/owner_entry_button.dart';
 import 'package:unchained/features/plans/presentation/widgets/plan_checkout_flow.dart';
 import 'package:unchained/features/plans/presentation/widgets/schedule_summary.dart';
 import 'package:unchained/l10n/app_localizations.dart';
@@ -269,7 +270,16 @@ class AiPlanScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+              OwnerEntryButton(
+                onUnlocked: () => PlanCheckoutFlow.startAsOwner(
+                  context: context,
+                  ref: ref,
+                  plan: ActivePlan.aiPlan,
+                  schedule: schedule,
+                ),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),

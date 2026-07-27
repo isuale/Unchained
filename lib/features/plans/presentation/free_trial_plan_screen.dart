@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/providers/active_plan_provider.dart';
 import 'package:unchained/features/dashboard/widgets/plan_activation_overlay.dart';
+import 'package:unchained/features/plans/presentation/widgets/owner_entry_button.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
 class FreeTrialPlanScreen extends ConsumerWidget {
@@ -134,7 +135,15 @@ class FreeTrialPlanScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+              OwnerEntryButton(
+                onUnlocked: () => PlanActivationOverlay.show(
+                  context: context,
+                  ref: ref,
+                  plan: ActivePlan.freeTrial,
+                ),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),

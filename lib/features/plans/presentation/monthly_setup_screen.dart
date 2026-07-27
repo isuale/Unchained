@@ -44,6 +44,7 @@ class _MonthlySetupScreenState extends ConsumerState<MonthlySetupScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final ownerBypass = GoRouterState.of(context).extra == true;
 
     return Scaffold(
       body: SafeArea(
@@ -179,13 +180,20 @@ class _MonthlySetupScreenState extends ConsumerState<MonthlySetupScreen> {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  onPressed: () => PlanCheckoutFlow.start(
-                    context: context,
-                    ref: ref,
-                    planId: 'monthly',
-                    plan: ActivePlan.monthly,
-                    schedule: _schedule,
-                  ),
+                  onPressed: () => ownerBypass
+                      ? PlanCheckoutFlow.startAsOwner(
+                          context: context,
+                          ref: ref,
+                          plan: ActivePlan.monthly,
+                          schedule: _schedule,
+                        )
+                      : PlanCheckoutFlow.start(
+                          context: context,
+                          ref: ref,
+                          planId: 'monthly',
+                          plan: ActivePlan.monthly,
+                          schedule: _schedule,
+                        ),
                   child: Text(
                     l.monthly_setup_activate,
                     style: const TextStyle(
