@@ -673,7 +673,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get commitment_break_sub =>
-      'Ahora puedes desactivar la protección. Se vuelve a bloquear automáticamente, esta vez por más tiempo.';
+      'La protección se vuelve a activar sola cuando termine la pausa.';
+
+  @override
+  String commitment_break_available_banner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tienes $count pausas disponibles',
+      one: 'Tienes 1 pausa disponible',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commitment_break_available_sub =>
+      'Desactiva la protección cuando quieras usarla: dura 30 min y luego se vuelve a activar sola.';
 
   @override
   String commitment_locked_toast(int days) {

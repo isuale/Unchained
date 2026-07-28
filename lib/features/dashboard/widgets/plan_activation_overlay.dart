@@ -41,17 +41,26 @@ class PlanActivationOverlay {
     final days = settings?.commitmentTotalDays ?? 0;
     final breaks = settings?.commitmentBreakCount ?? 0;
     final now = DateTime.now();
-    final rolledStart =
-        advanceCycle(mode, days, breaks, settings?.commitmentStartedAt, now);
     final status = computeStatus(
-        mode, days, breaks, rolledStart ?? settings?.commitmentStartedAt, now);
+      mode,
+      days,
+      breaks,
+      settings?.commitmentStartedAt,
+      now,
+      breaksUsed: settings?.commitmentBreaksUsed ?? 0,
+      breakClaimedAt: settings?.commitmentBreakClaimedAt,
+    );
+    // A repeating cycle that has just finished a span is not over — it restarts —
+    // so it must survive a plan switch exactly like a mid-span commitment does.
+    final stillCommitted =
+        status.isActive || (status.isCompleted && mode == CommitmentMode.cycle);
     // Captured before setActivePlan overwrites it, so we can tell a genuine
     // plan CHANGE (was some other plan) apart from a first-time activation
     // (was null) or simply re-confirming the same plan (unchanged).
     final previousPlan = settings?.activePlan;
 
     await ref.read(activePlanActionsProvider.notifier).setActivePlan(plan);
-    if (!status.isActive) {
+    if (!stillCommitted) {
       await repo.setCommitmentSchedule(schedule ?? CommitmentSchedule.none);
     }
     // Switching to a different plan than the one already active requires

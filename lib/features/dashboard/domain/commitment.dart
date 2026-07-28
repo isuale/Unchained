@@ -5,10 +5,11 @@ import 'package:flutter/foundation.dart';
 /// The plan the user picks decides this:
 ///  - [forever]  — Forever plan: protection is locked ON permanently. No break,
 ///                 never ends.
-///  - [fixed]    — Monthly / AI plan: a single span of [CommitmentSchedule.totalDays]
-///                 days with [CommitmentSchedule.breakCount] short breaks spaced
-///                 evenly inside. When the span ends, the commitment clears
-///                 (protection stays on but becomes freely toggleable again).
+///  - [fixed]    — Monthly / AI plan: [CommitmentSchedule.totalDays] days of
+///                 protection with [CommitmentSchedule.breakCount] short breaks
+///                 earned along the way. When the days are served, the
+///                 commitment clears (protection stays on but becomes freely
+///                 toggleable again).
 ///  - [cycle]    — Monthly "Constant" / AI repeating: same as [fixed] but it
 ///                 restarts forever when the span ends — a never-ending cycle.
 ///  - [none]     — Free trial / nothing picked: no lock, protection toggles freely.
@@ -42,10 +43,12 @@ class CommitmentSchedule {
 
   final CommitmentMode mode;
 
-  /// Total locked days across the whole span (ignored for [CommitmentMode.forever]).
+  /// Total *protected* days across the whole span (ignored for
+  /// [CommitmentMode.forever]). Time spent on a break does not count toward
+  /// this, so the user always serves the full number of days they chose.
   final int totalDays;
 
-  /// How many short breaks are spaced evenly inside the span (0 = none).
+  /// How many short breaks are earned across the span (0 = none).
   final int breakCount;
 
   bool get isNone => mode == CommitmentMode.none;
@@ -69,11 +72,21 @@ enum CommitmentPhase {
   /// Inside a lock window — protection cannot be turned off.
   locked,
 
-  /// A short release window between locks — protection may be turned off.
+  /// A break has been earned but not taken yet. Protection is still on, and
+  /// turning it off *claims* the break (which starts its countdown).
+  ///
+  /// This phase waits indefinitely. That is the whole point: a break pinned to
+  /// a wall-clock instant lands at 3am as often as not, and a user asleep
+  /// through their only 30-minute window effectively has the Forever plan.
+  breakAvailable,
+
+  /// A claimed break is running — protection may be off until it expires, at
+  /// which point the caller must turn protection back on.
   breakOpen,
 
-  /// A [CommitmentMode.fixed] span has fully elapsed. The caller should clear
-  /// the commitment (protection stays on but becomes freely toggleable).
+  /// The full span has been served. The caller should clear the commitment
+  /// (protection stays on but becomes freely toggleable) or, for
+  /// [CommitmentMode.cycle], restart it.
   completed,
 }
 
@@ -88,6 +101,8 @@ class CommitmentStatus {
     this.daysLeft = 0,
     this.minutesLeft = 0,
     this.isPermanent = false,
+    this.breaksUsed = 0,
+    this.breaksTotal = 0,
   });
 
   /// TEMPORARY TEST MODE — set back to false before committing.
@@ -95,65 +110,95 @@ class CommitmentStatus {
   /// lock → break → re-lock span can be watched in a couple of minutes.
   static const bool testMode = false;
 
-  /// The short release window between locks.
+  /// How long a break lasts once the user claims it.
   static const Duration breakDuration =
       testMode ? Duration(minutes: 1) : Duration(minutes: 30);
 
   final CommitmentPhase phase;
   final CommitmentMode mode;
 
-  /// When the whole protection span ends (for display of "locked until").
-  /// Null for [CommitmentMode.forever] and when not locked.
+  /// When the whole protection span is expected to end (for display of "locked
+  /// until"), assuming every remaining break is taken. Null for
+  /// [CommitmentMode.forever] and when not locked.
   final DateTime? lockUntil;
 
-  /// When the current break expires (start of the next lock). Null unless on a break.
+  /// When the current break expires (start of the next lock). Null unless a
+  /// break is actually running.
   final DateTime? breakUntil;
 
-  /// Whole days left until the span ends (ceil), for display.
+  /// Whole protected days still to serve (ceil), for display.
   final int daysLeft;
 
-  /// Whole minutes left in the current break (ceil), for display.
+  /// Whole minutes left in the running break (ceil), for display.
   final int minutesLeft;
 
   /// True for the Forever plan — locked with no end.
   final bool isPermanent;
 
+  /// Breaks already claimed, and how many the plan grants in total.
+  final int breaksUsed;
+  final int breaksTotal;
+
+  /// Breaks still to come, including one that is available right now.
+  int get breaksLeft {
+    final left = breaksTotal - breaksUsed;
+    return left < 0 ? 0 : left;
+  }
+
   bool get isActive =>
-      phase == CommitmentPhase.locked || phase == CommitmentPhase.breakOpen;
+      phase == CommitmentPhase.locked ||
+      phase == CommitmentPhase.breakAvailable ||
+      phase == CommitmentPhase.breakOpen;
+
+  /// True only when protection genuinely may not be turned off.
   bool get isLocked => phase == CommitmentPhase.locked;
+
+  /// A break is earned and waiting to be claimed.
+  bool get isBreakAvailable => phase == CommitmentPhase.breakAvailable;
+
+  /// A claimed break is running right now.
   bool get isBreak => phase == CommitmentPhase.breakOpen;
+
+  /// Either kind of break state — protection is allowed to be off.
+  bool get canPause =>
+      phase == CommitmentPhase.breakAvailable ||
+      phase == CommitmentPhase.breakOpen;
+
   bool get isCompleted => phase == CommitmentPhase.completed;
 
   static const CommitmentStatus none_ =
       CommitmentStatus(phase: CommitmentPhase.none);
 }
 
-/// Length of a single lock segment: the total locked time split evenly across
-/// the [breakCount] + 1 segments. In [CommitmentStatus.testMode], "days" are
-/// treated as minutes.
+/// Total *protected* time the user signed up for. Breaks sit on top of this
+/// rather than eating into it, so a 30-day plan always means 30 days protected.
+Duration _totalLockDuration(int totalDays) => Duration(
+    minutes: CommitmentStatus.testMode ? totalDays : totalDays * 24 * 60);
+
+/// How much protected time must be served to earn each successive break: the
+/// total split evenly across the [breakCount] + 1 stretches between breaks.
 Duration _segmentLength(int totalDays, int breakCount) {
-  final totalMinutes =
-      CommitmentStatus.testMode ? totalDays : totalDays * 24 * 60;
-  final segments = breakCount + 1;
-  return Duration(minutes: (totalMinutes / segments).round());
+  final total = _totalLockDuration(totalDays).inMinutes;
+  return Duration(minutes: (total / (breakCount + 1)).round());
 }
 
-/// The whole span = (breakCount+1) lock segments + breakCount breaks between them.
-Duration _spanLength(Duration segLen, int breakCount) =>
-    segLen * (breakCount + 1) + CommitmentStatus.breakDuration * breakCount;
-
-/// Derives the current [CommitmentStatus] from the stored schedule + the run
-/// anchor [startedAt] (null = template stored but the user hasn't started yet).
+/// Derives the current [CommitmentStatus] from the stored schedule, the run
+/// anchor [startedAt] (null = template stored but the user hasn't started yet),
+/// and the break bookkeeping.
 ///
-/// For [CommitmentMode.cycle], call [advanceCycle] first and persist its result
-/// so a lapsed span has already been rolled forward into a fresh cycle.
+/// [breaksUsed] is how many breaks have been claimed so far; [breakClaimedAt] is
+/// when the newest one was claimed (null if no break is running). A claim whose
+/// [CommitmentStatus.breakDuration] has already elapsed reads as locked again —
+/// the caller is responsible for clearing it and re-arming protection.
 CommitmentStatus computeStatus(
   CommitmentMode mode,
   int totalDays,
   int breakCount,
   DateTime? startedAt,
-  DateTime now,
-) {
+  DateTime now, {
+  int breaksUsed = 0,
+  DateTime? breakClaimedAt,
+}) {
   if (mode == CommitmentMode.none || startedAt == null) {
     return CommitmentStatus.none_;
   }
@@ -166,74 +211,62 @@ CommitmentStatus computeStatus(
   }
 
   // fixed or cycle
-  final segLen = _segmentLength(totalDays, breakCount);
   final brk = CommitmentStatus.breakDuration;
-  final spanEnd = startedAt.add(_spanLength(segLen, breakCount));
+  final totalLock = _totalLockDuration(totalDays);
+  final segLen = _segmentLength(totalDays, breakCount);
 
-  if (!now.isBefore(spanEnd)) {
-    // Span elapsed. A cycle should have been advanced already; treat as done.
-    return CommitmentStatus(phase: CommitmentPhase.completed, mode: mode);
-  }
-
-  var cursor = startedAt;
-  for (var i = 0; i <= breakCount; i++) {
-    final lockEnd = cursor.add(segLen);
-    if (now.isBefore(lockEnd)) {
-      // Breaks add a little wall-clock time on top of the locked days; cap the
-      // displayed days-left at the days the user actually chose so a 30-day
-      // plan never reads as "31 days".
-      final days = _ceilDays(spanEnd.difference(now));
+  // A running break outranks everything else.
+  if (breakClaimedAt != null) {
+    final breakEnd = breakClaimedAt.add(brk);
+    if (now.isBefore(breakEnd)) {
+      final mins = (breakEnd.difference(now).inSeconds / 60).ceil();
       return CommitmentStatus(
-        phase: CommitmentPhase.locked,
+        phase: CommitmentPhase.breakOpen,
         mode: mode,
-        lockUntil: spanEnd,
-        daysLeft: days > totalDays ? totalDays : days,
+        breakUntil: breakEnd,
+        minutesLeft: mins < 1 ? 1 : mins,
+        breaksUsed: breaksUsed,
+        breaksTotal: breakCount,
       );
     }
-    cursor = lockEnd;
-    if (i < breakCount) {
-      final breakEnd = cursor.add(brk);
-      if (now.isBefore(breakEnd)) {
-        final mins = (breakEnd.difference(now).inSeconds / 60).ceil();
-        return CommitmentStatus(
-          phase: CommitmentPhase.breakOpen,
-          mode: mode,
-          breakUntil: breakEnd,
-          minutesLeft: mins < 1 ? 1 : mins,
-        );
-      }
-      cursor = breakEnd;
-    }
+    // Expired claim falls through: it counts as spent (it is already included
+    // in breaksUsed) and the user is locked again.
   }
-  // Unreachable given the spanEnd guard above, but stay safe.
-  return CommitmentStatus(phase: CommitmentPhase.completed, mode: mode);
-}
 
-/// For a [CommitmentMode.cycle] whose span has fully elapsed, rolls [startedAt]
-/// forward by whole spans so a fresh cycle is running. Loops in case the device
-/// was off long enough to miss several spans.
-///
-/// Returns the new [startedAt] to persist, or null if nothing changed / not
-/// applicable.
-DateTime? advanceCycle(
-  CommitmentMode mode,
-  int totalDays,
-  int breakCount,
-  DateTime? startedAt,
-  DateTime now,
-) {
-  if (mode != CommitmentMode.cycle || startedAt == null) return null;
-  final segLen = _segmentLength(totalDays, breakCount);
-  final spanLen = _spanLength(segLen, breakCount);
-  if (spanLen.inSeconds <= 0) return null;
+  // Protected time served so far = wall clock minus every break consumed.
+  var served = now.difference(startedAt) - brk * breaksUsed;
+  if (served.isNegative) served = Duration.zero;
 
-  var start = startedAt;
-  var changed = false;
-  while (!now.isBefore(start.add(spanLen))) {
-    start = start.add(spanLen);
-    changed = true;
+  if (served >= totalLock) {
+    return CommitmentStatus(
+      phase: CommitmentPhase.completed,
+      mode: mode,
+      breaksUsed: breaksUsed,
+      breaksTotal: breakCount,
+    );
   }
-  return changed ? start : null;
+
+  final remaining = totalLock - served;
+
+  // One break is earned per completed stretch. Clamped so the final stretch
+  // can't hand out a break that does not exist.
+  var earned = segLen.inSeconds <= 0
+      ? breakCount
+      : served.inSeconds ~/ segLen.inSeconds;
+  if (earned > breakCount) earned = breakCount;
+
+  return CommitmentStatus(
+    phase: earned > breaksUsed
+        ? CommitmentPhase.breakAvailable
+        : CommitmentPhase.locked,
+    mode: mode,
+    // The realistic finish date: the protected time still owed, plus the
+    // wall-clock the remaining breaks will add on top.
+    lockUntil: now.add(remaining + brk * (breakCount - breaksUsed).clamp(0, breakCount)),
+    daysLeft: _ceilDays(remaining),
+    breaksUsed: breaksUsed,
+    breaksTotal: breakCount,
+  );
 }
 
 int _ceilDays(Duration d) {

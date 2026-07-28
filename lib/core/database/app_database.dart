@@ -87,12 +87,19 @@ class BlockingSettings extends Table {
   //  - commitmentTotalDays: total locked days across the span (forever: ignored).
   //  - commitmentBreakCount: short breaks spaced evenly inside the span.
   //  - commitmentStartedAt: run anchor; null until protection is first turned on.
+  //  - commitmentBreaksUsed: how many breaks have been claimed this run.
+  //  - commitmentBreakClaimedAt: when the running break was claimed; null when
+  //    no break is running. Breaks are earned and then wait to be claimed, so
+  //    these two cannot be derived from the anchor alone.
   TextColumn get commitmentMode => text().nullable()();
   IntColumn get commitmentTotalDays =>
       integer().withDefault(const Constant(0))();
   IntColumn get commitmentBreakCount =>
       integer().withDefault(const Constant(0))();
   DateTimeColumn get commitmentStartedAt => dateTime().nullable()();
+  IntColumn get commitmentBreaksUsed =>
+      integer().withDefault(const Constant(0))();
+  DateTimeColumn get commitmentBreakClaimedAt => dateTime().nullable()();
 
   // Plan-agnostic streak anchor for the Progress tab: the first time
   // protectionEnabled ever flips true, set once and never moved by later
@@ -231,7 +238,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'unchained_db'));
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -329,6 +336,17 @@ class AppDatabase extends _$AppDatabase {
                 blockingSettings, blockingSettings.customerEmail);
             await m.addColumn(
                 blockingSettings, blockingSettings.pendingActivationJson);
+          }
+          // v15: commitment breaks are now earned and then claimed on demand
+          // rather than opening at a fixed wall-clock instant, so the run has
+          // to remember how many were taken and when the current one started.
+          // Both default to "no break taken", which is correct for an upgrading
+          // user mid-run: they simply keep every break they had left.
+          if (from < 15) {
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentBreaksUsed);
+            await m.addColumn(
+                blockingSettings, blockingSettings.commitmentBreakClaimedAt);
           }
         },
         beforeOpen: (details) async {

@@ -259,7 +259,14 @@
       "minutes": { "type": "int" }
     }
   },
-  "commitment_break_sub": "Podes desativar a proteção agora. Volta a bloquear-se automaticamente — desta vez por mais tempo.",
+  "commitment_break_sub": "A proteção volta a ligar-se sozinha quando a pausa terminar.",
+  "commitment_break_available_banner": "{count, plural, =1{Tens 1 pausa disponível} other{Tens {count} pausas disponíveis}}",
+  "@commitment_break_available_banner": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "commitment_break_available_sub": "Desativa a proteção quando quiseres usá-la — dura 30 min e depois volta a ligar-se sozinha.",
   "commitment_locked_toast": "Bloqueado durante mais {days} dias. Foi esse o teu compromisso.",
   "@commitment_locked_toast": {
     "placeholders": {

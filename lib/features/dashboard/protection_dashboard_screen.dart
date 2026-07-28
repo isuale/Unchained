@@ -859,6 +859,10 @@ class _CommitmentBanner extends StatelessWidget {
     } else if (locked) {
       title = l.commitment_locked_banner(status.daysLeft);
       subtitle = l.commitment_locked_sub(_shortDate(status.lockUntil!));
+    } else if (status.isBreakAvailable) {
+      // Earned but not taken — it waits here until the user wants it.
+      title = l.commitment_break_available_banner(status.breaksLeft);
+      subtitle = l.commitment_break_available_sub;
     } else {
       title = l.commitment_break_banner(status.minutesLeft);
       subtitle = l.commitment_break_sub;
@@ -878,7 +882,9 @@ class _CommitmentBanner extends StatelessWidget {
                   ? Icons.lock
                   : locked
                       ? Icons.lock_clock
-                      : Icons.self_improvement,
+                      : status.isBreakAvailable
+                          ? Icons.free_breakfast
+                          : Icons.self_improvement,
               color: accent,
               size: 22),
           const SizedBox(width: 12),

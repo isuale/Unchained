@@ -150,14 +150,37 @@ class BlockingSettingsRepository {
       commitmentTotalDays: Value(schedule.totalDays),
       commitmentBreakCount: Value(schedule.breakCount),
       commitmentStartedAt: const Value(null),
+      commitmentBreaksUsed: const Value(0),
+      commitmentBreakClaimedAt: const Value(null),
     ));
   }
 
   /// Anchors the commitment run at [startedAt] — called the moment the user
-  /// first turns protection on (or when a cycle rolls forward to a new span).
+  /// first turns protection on (or when a cycle restarts into a new span).
+  /// Break bookkeeping resets with it, so a new span grants a full set again.
   Future<void> startCommitmentRun(DateTime startedAt) async {
+    await updateSettings(BlockingSettingsCompanion(
+      commitmentStartedAt: Value(startedAt),
+      commitmentBreaksUsed: const Value(0),
+      commitmentBreakClaimedAt: const Value(null),
+    ));
+  }
+
+  /// Spends one earned break, starting its countdown at [now]. Called when the
+  /// user turns protection off while a break is available.
+  Future<void> claimBreak(DateTime now, int breaksUsed) async {
+    await updateSettings(BlockingSettingsCompanion(
+      commitmentBreaksUsed: Value(breaksUsed + 1),
+      commitmentBreakClaimedAt: Value(now),
+    ));
+  }
+
+  /// Ends the running break (expired, or the user re-armed protection early).
+  /// The break stays spent — [commitmentBreaksUsed] is deliberately not rolled
+  /// back, so stopping and restarting cannot farm extra break time.
+  Future<void> endBreak() async {
     await updateSettings(
-        BlockingSettingsCompanion(commitmentStartedAt: Value(startedAt)));
+        const BlockingSettingsCompanion(commitmentBreakClaimedAt: Value(null)));
   }
 
   /// Clears the commitment entirely (used when a fixed span completes). Leaves
@@ -168,6 +191,8 @@ class BlockingSettingsRepository {
       commitmentTotalDays: Value(0),
       commitmentBreakCount: Value(0),
       commitmentStartedAt: Value(null),
+      commitmentBreaksUsed: Value(0),
+      commitmentBreakClaimedAt: Value(null),
     ));
   }
 

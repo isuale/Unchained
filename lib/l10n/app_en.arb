@@ -259,7 +259,14 @@
       "minutes": { "type": "int" }
     }
   },
-  "commitment_break_sub": "You can turn protection off now. It re-locks automatically — longer this time.",
+  "commitment_break_sub": "Protection turns itself back on when the break ends.",
+  "commitment_break_available_banner": "{count, plural, =1{You have 1 break available} other{You have {count} breaks available}}",
+  "@commitment_break_available_banner": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "commitment_break_available_sub": "Turn protection off whenever you want to use it — it lasts 30 min, then comes back on by itself.",
   "commitment_locked_toast": "Locked for {days} more days. You committed to this.",
   "@commitment_locked_toast": {
     "placeholders": {

@@ -1291,8 +1291,20 @@ abstract class AppLocalizations {
   /// No description provided for @commitment_break_sub.
   ///
   /// In es, this message translates to:
-  /// **'Ahora puedes desactivar la protección. Se vuelve a bloquear automáticamente, esta vez por más tiempo.'**
+  /// **'La protección se vuelve a activar sola cuando termine la pausa.'**
   String get commitment_break_sub;
+
+  /// No description provided for @commitment_break_available_banner.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Tienes 1 pausa disponible} other{Tienes {count} pausas disponibles}}'**
+  String commitment_break_available_banner(int count);
+
+  /// No description provided for @commitment_break_available_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'Desactiva la protección cuando quieras usarla: dura 30 min y luego se vuelve a activar sola.'**
+  String get commitment_break_available_sub;
 
   /// No description provided for @commitment_locked_toast.
   ///

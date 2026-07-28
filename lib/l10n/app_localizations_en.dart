@@ -667,7 +667,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commitment_break_sub =>
-      'You can turn protection off now. It re-locks automatically — longer this time.';
+      'Protection turns itself back on when the break ends.';
+
+  @override
+  String commitment_break_available_banner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You have $count breaks available',
+      one: 'You have 1 break available',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commitment_break_available_sub =>
+      'Turn protection off whenever you want to use it — it lasts 30 min, then comes back on by itself.';
 
   @override
   String commitment_locked_toast(int days) {

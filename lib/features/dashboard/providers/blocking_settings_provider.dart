@@ -31,40 +31,84 @@ final feedGuardStatusesProvider =
 
 /// The user's current spot in the plan-driven commitment, recomputed every second.
 ///
-/// For a [CommitmentMode.cycle] this persists the roll-forward into the next
-/// span so the cycle advances live while the app is open (not only on reopen).
-/// For a [CommitmentMode.fixed] that has fully elapsed it clears the commitment,
-/// leaving protection running but freely toggleable.
+/// This provider does not merely *report* the phase, it enforces it:
+///  - a break whose 30 minutes have run out is closed and protection put back up;
+///  - being [CommitmentPhase.locked] with protection off is treated as a fault
+///    and repaired, because that combination is exactly what a user who paused
+///    during a break and never came back would otherwise sit in for weeks;
+///  - a completed [CommitmentMode.cycle] restarts into a fresh span, and a
+///    completed [CommitmentMode.fixed] clears the lock (protection stays on but
+///    becomes freely toggleable).
 final commitmentStatusProvider = Provider<CommitmentStatus>((ref) {
   ref.watch(_secondTickerProvider); // re-evaluate every second
   final settings = ref.watch(blockingSettingsProvider).asData?.value;
   if (settings == null) return CommitmentStatus.none_;
 
-  final mode = commitmentModeFromString(settings.commitmentMode);
-  final days = settings.commitmentTotalDays;
-  final breaks = settings.commitmentBreakCount;
   final now = DateTime.now();
+  final repo = ref.read(blockingSettingsRepositoryProvider);
+  final status = _statusFor(settings, now);
 
-  // A repeating cycle whose span elapsed — roll it forward and keep protection on.
-  final newStart =
-      advanceCycle(mode, days, breaks, settings.commitmentStartedAt, now);
-  if (newStart != null) {
-    final repo = ref.read(blockingSettingsRepositoryProvider);
-    repo.startCommitmentRun(newStart);
-    repo.toggleField('protectionEnabled', true);
-    BlockingService.start();
-    return computeStatus(mode, days, breaks, newStart, now);
+  // A claimed break that is no longer running has expired. Close it out so the
+  // next tick reads as a clean lock rather than a stale claim.
+  if (settings.commitmentBreakClaimedAt != null && !status.isBreak) {
+    repo.endBreak();
   }
 
-  final status =
-      computeStatus(mode, days, breaks, settings.commitmentStartedAt, now);
   if (status.isCompleted) {
-    // A fixed span finished — clear the lock, leave protection running.
-    ref.read(blockingSettingsRepositoryProvider).clearCommitment();
+    if (status.mode == CommitmentMode.cycle) {
+      // Repeating plan: straight into the next span, with a fresh set of breaks.
+      repo.startCommitmentRun(now);
+      _rearmProtection(repo);
+      return computeStatus(CommitmentMode.cycle, settings.commitmentTotalDays,
+          settings.commitmentBreakCount, now, now);
+    }
+    repo.clearCommitment();
     return CommitmentStatus.none_;
+  }
+
+  // THE ENFORCEMENT. "Locked" must mean protected. If protection is off here,
+  // the user turned it off during a break and the break has since ended — put
+  // it back up rather than leaving a lock badge over an unprotected phone.
+  if (status.isLocked && !settings.protectionEnabled) {
+    _rearmProtection(repo);
   }
   return status;
 });
+
+/// Guards against the once-a-second provider firing a second re-arm while the
+/// first is still awaiting native.
+bool _rearmInFlight = false;
+
+/// When a re-arm may next be attempted. `prepare()` puts up Android's VPN
+/// consent dialog if consent was revoked, and this provider re-evaluates every
+/// second — without a cooldown a user who dismisses that dialog would be shown
+/// it again a second later, forever.
+DateTime? _rearmBlockedUntil;
+const Duration _rearmCooldown = Duration(seconds: 30);
+
+/// Brings the tunnel back up and records it. Used wherever the commitment says
+/// protection must be on but it isn't.
+Future<void> _rearmProtection(BlockingSettingsRepository repo) async {
+  if (_rearmInFlight) return;
+  final blockedUntil = _rearmBlockedUntil;
+  if (blockedUntil != null && DateTime.now().isBefore(blockedUntil)) return;
+  _rearmInFlight = true;
+  try {
+    if (!await BlockingService.isRunning()) {
+      // Already-granted consent resolves immediately; no dialog is shown.
+      if (!await BlockingService.prepare() || !await BlockingService.start()) {
+        // Consent refused or the tunnel would not come up. Back off rather than
+        // hammering; the next attempt still happens without the user asking.
+        _rearmBlockedUntil = DateTime.now().add(_rearmCooldown);
+        return;
+      }
+    }
+    _rearmBlockedUntil = null;
+    await repo.toggleField('protectionEnabled', true);
+  } finally {
+    _rearmInFlight = false;
+  }
+}
 
 /// Pure helper: the commitment status for a freshly-read settings row.
 CommitmentStatus _statusFor(BlockingSetting? s, DateTime now) => computeStatus(
@@ -73,6 +117,8 @@ CommitmentStatus _statusFor(BlockingSetting? s, DateTime now) => computeStatus(
       s?.commitmentBreakCount ?? 0,
       s?.commitmentStartedAt,
       now,
+      breaksUsed: s?.commitmentBreaksUsed ?? 0,
+      breakClaimedAt: s?.commitmentBreakClaimedAt,
     );
 
 enum ProtectionToggleResult { ok, permissionDenied, failed, locked }
@@ -80,8 +126,9 @@ enum ProtectionToggleResult { ok, permissionDenied, failed, locked }
 class BlockingSettingsActions extends Notifier<void> {
   @override
   void build() {
-    _reconcileWithNative();
-    _reconcileCommitment();
+    // Chained, not parallel: both touch protectionEnabled, and the commitment
+    // pass must judge the row the native reconcile has already settled.
+    _reconcileWithNative().then((_) => _reconcileCommitment());
     _syncUserLists();
     _syncFeedGuardTargets();
   }
@@ -138,36 +185,39 @@ class BlockingSettingsActions extends Notifier<void> {
   }
 
   /// Reconciles the commitment after time has passed (app relaunch / before a
-  /// toggle-off). A lapsed [CommitmentMode.cycle] span rolls forward into a
-  /// fresh span and re-arms protection; a finished [CommitmentMode.fixed] span
-  /// clears the commitment (protection stays on but freely toggleable).
+  /// toggle-off). This is the cold-start twin of [commitmentStatusProvider]'s
+  /// enforcement: a break that expired while the app was closed is closed out
+  /// and protection restored, a completed [CommitmentMode.cycle] restarts, and a
+  /// completed [CommitmentMode.fixed] clears the lock.
   Future<void> _reconcileCommitment() async {
     final repo = ref.read(blockingSettingsRepositoryProvider);
-    final settings = await repo.getSettings();
+    var settings = await repo.getSettings();
     if (settings == null) return;
-    final mode = commitmentModeFromString(settings.commitmentMode);
-    final days = settings.commitmentTotalDays;
-    final breaks = settings.commitmentBreakCount;
     final now = DateTime.now();
+    var status = _statusFor(settings, now);
 
-    final newStart =
-        advanceCycle(mode, days, breaks, settings.commitmentStartedAt, now);
-    if (newStart != null) {
-      await repo.startCommitmentRun(newStart);
-      // A new span just began — make sure protection is actually running.
-      final running = await BlockingService.isRunning();
-      if (!running) {
-        final granted = await BlockingService.prepare();
-        if (granted) await BlockingService.start();
+    // A break claimed before the app was closed may have run out meanwhile.
+    if (settings.commitmentBreakClaimedAt != null && !status.isBreak) {
+      await repo.endBreak();
+      settings = await repo.getSettings();
+      if (settings == null) return;
+      status = _statusFor(settings, now);
+    }
+
+    if (status.isCompleted) {
+      if (status.mode == CommitmentMode.cycle) {
+        await repo.startCommitmentRun(now);
+        await _rearmProtection(repo);
+      } else {
+        await repo.clearCommitment();
       }
-      await repo.toggleField('protectionEnabled', true);
       return;
     }
 
-    final status =
-        computeStatus(mode, days, breaks, settings.commitmentStartedAt, now);
-    if (status.isCompleted) {
-      await repo.clearCommitment();
+    // Locked but unprotected — the state a lapsed break leaves behind. Repair it
+    // here too, so closing the app during a break cannot outlast the break.
+    if (status.isLocked && !settings.protectionEnabled) {
+      await _rearmProtection(repo);
     }
   }
 
@@ -184,14 +234,24 @@ class BlockingSettingsActions extends Notifier<void> {
       if (!granted) return ProtectionToggleResult.permissionDenied;
       final started = await BlockingService.start();
       if (!started) return ProtectionToggleResult.failed;
+      // Coming back early ends the break. It stays spent — otherwise a user
+      // could re-arm at 29 minutes and claim a fresh 30 straight after.
+      final settings = await repo.getSettings();
+      if (settings?.commitmentBreakClaimedAt != null) await repo.endBreak();
       await repo.toggleField('protectionEnabled', true);
       return ProtectionToggleResult.ok;
     } else {
-      // Roll any lapsed cycle/fixed span forward first, then refuse if still locked.
+      // Settle any expired break / finished span first, then judge the phase.
       await _reconcileCommitment();
       final settings = await repo.getSettings();
-      final status = _statusFor(settings, DateTime.now());
+      final now = DateTime.now();
+      final status = _statusFor(settings, now);
       if (status.isLocked) return ProtectionToggleResult.locked;
+      // Turning protection off is how a waiting break gets claimed; from here
+      // the 30 minutes start running and end with protection back on.
+      if (status.isBreakAvailable) {
+        await repo.claimBreak(now, settings?.commitmentBreaksUsed ?? 0);
+      }
       await BlockingService.stop();
       await repo.toggleField('protectionEnabled', false);
       return ProtectionToggleResult.ok;

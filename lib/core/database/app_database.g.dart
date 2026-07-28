@@ -806,6 +806,28 @@ class $BlockingSettingsTable extends BlockingSettings
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _commitmentBreaksUsedMeta =
+      const VerificationMeta('commitmentBreaksUsed');
+  @override
+  late final GeneratedColumn<int> commitmentBreaksUsed = GeneratedColumn<int>(
+    'commitment_breaks_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _commitmentBreakClaimedAtMeta =
+      const VerificationMeta('commitmentBreakClaimedAt');
+  @override
+  late final GeneratedColumn<DateTime> commitmentBreakClaimedAt =
+      GeneratedColumn<DateTime>(
+        'commitment_break_claimed_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _protectionStartedAtMeta =
       const VerificationMeta('protectionStartedAt');
   @override
@@ -984,6 +1006,8 @@ class $BlockingSettingsTable extends BlockingSettings
     commitmentTotalDays,
     commitmentBreakCount,
     commitmentStartedAt,
+    commitmentBreaksUsed,
+    commitmentBreakClaimedAt,
     protectionStartedAt,
     activePlan,
     termsAccepted,
@@ -1258,6 +1282,24 @@ class $BlockingSettingsTable extends BlockingSettings
         ),
       );
     }
+    if (data.containsKey('commitment_breaks_used')) {
+      context.handle(
+        _commitmentBreaksUsedMeta,
+        commitmentBreaksUsed.isAcceptableOrUnknown(
+          data['commitment_breaks_used']!,
+          _commitmentBreaksUsedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('commitment_break_claimed_at')) {
+      context.handle(
+        _commitmentBreakClaimedAtMeta,
+        commitmentBreakClaimedAt.isAcceptableOrUnknown(
+          data['commitment_break_claimed_at']!,
+          _commitmentBreakClaimedAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('protection_started_at')) {
       context.handle(
         _protectionStartedAtMeta,
@@ -1485,6 +1527,14 @@ class $BlockingSettingsTable extends BlockingSettings
         DriftSqlType.dateTime,
         data['${effectivePrefix}commitment_started_at'],
       ),
+      commitmentBreaksUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}commitment_breaks_used'],
+      )!,
+      commitmentBreakClaimedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}commitment_break_claimed_at'],
+      ),
       protectionStartedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}protection_started_at'],
@@ -1572,6 +1622,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
   final int commitmentTotalDays;
   final int commitmentBreakCount;
   final DateTime? commitmentStartedAt;
+  final int commitmentBreaksUsed;
+  final DateTime? commitmentBreakClaimedAt;
   final DateTime? protectionStartedAt;
   final String? activePlan;
   final bool termsAccepted;
@@ -1614,6 +1666,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     required this.commitmentTotalDays,
     required this.commitmentBreakCount,
     this.commitmentStartedAt,
+    required this.commitmentBreaksUsed,
+    this.commitmentBreakClaimedAt,
     this.protectionStartedAt,
     this.activePlan,
     required this.termsAccepted,
@@ -1670,6 +1724,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     map['commitment_break_count'] = Variable<int>(commitmentBreakCount);
     if (!nullToAbsent || commitmentStartedAt != null) {
       map['commitment_started_at'] = Variable<DateTime>(commitmentStartedAt);
+    }
+    map['commitment_breaks_used'] = Variable<int>(commitmentBreaksUsed);
+    if (!nullToAbsent || commitmentBreakClaimedAt != null) {
+      map['commitment_break_claimed_at'] = Variable<DateTime>(
+        commitmentBreakClaimedAt,
+      );
     }
     if (!nullToAbsent || protectionStartedAt != null) {
       map['protection_started_at'] = Variable<DateTime>(protectionStartedAt);
@@ -1735,6 +1795,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       commitmentStartedAt: commitmentStartedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(commitmentStartedAt),
+      commitmentBreaksUsed: Value(commitmentBreaksUsed),
+      commitmentBreakClaimedAt: commitmentBreakClaimedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(commitmentBreakClaimedAt),
       protectionStartedAt: protectionStartedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(protectionStartedAt),
@@ -1821,6 +1885,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       commitmentStartedAt: serializer.fromJson<DateTime?>(
         json['commitmentStartedAt'],
       ),
+      commitmentBreaksUsed: serializer.fromJson<int>(
+        json['commitmentBreaksUsed'],
+      ),
+      commitmentBreakClaimedAt: serializer.fromJson<DateTime?>(
+        json['commitmentBreakClaimedAt'],
+      ),
       protectionStartedAt: serializer.fromJson<DateTime?>(
         json['protectionStartedAt'],
       ),
@@ -1878,6 +1948,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       'commitmentTotalDays': serializer.toJson<int>(commitmentTotalDays),
       'commitmentBreakCount': serializer.toJson<int>(commitmentBreakCount),
       'commitmentStartedAt': serializer.toJson<DateTime?>(commitmentStartedAt),
+      'commitmentBreaksUsed': serializer.toJson<int>(commitmentBreaksUsed),
+      'commitmentBreakClaimedAt': serializer.toJson<DateTime?>(
+        commitmentBreakClaimedAt,
+      ),
       'protectionStartedAt': serializer.toJson<DateTime?>(protectionStartedAt),
       'activePlan': serializer.toJson<String?>(activePlan),
       'termsAccepted': serializer.toJson<bool>(termsAccepted),
@@ -1925,6 +1999,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     int? commitmentTotalDays,
     int? commitmentBreakCount,
     Value<DateTime?> commitmentStartedAt = const Value.absent(),
+    int? commitmentBreaksUsed,
+    Value<DateTime?> commitmentBreakClaimedAt = const Value.absent(),
     Value<DateTime?> protectionStartedAt = const Value.absent(),
     Value<String?> activePlan = const Value.absent(),
     bool? termsAccepted,
@@ -1977,6 +2053,10 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     commitmentStartedAt: commitmentStartedAt.present
         ? commitmentStartedAt.value
         : this.commitmentStartedAt,
+    commitmentBreaksUsed: commitmentBreaksUsed ?? this.commitmentBreaksUsed,
+    commitmentBreakClaimedAt: commitmentBreakClaimedAt.present
+        ? commitmentBreakClaimedAt.value
+        : this.commitmentBreakClaimedAt,
     protectionStartedAt: protectionStartedAt.present
         ? protectionStartedAt.value
         : this.protectionStartedAt,
@@ -2088,6 +2168,12 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
       commitmentStartedAt: data.commitmentStartedAt.present
           ? data.commitmentStartedAt.value
           : this.commitmentStartedAt,
+      commitmentBreaksUsed: data.commitmentBreaksUsed.present
+          ? data.commitmentBreaksUsed.value
+          : this.commitmentBreaksUsed,
+      commitmentBreakClaimedAt: data.commitmentBreakClaimedAt.present
+          ? data.commitmentBreakClaimedAt.value
+          : this.commitmentBreakClaimedAt,
       protectionStartedAt: data.protectionStartedAt.present
           ? data.protectionStartedAt.value
           : this.protectionStartedAt,
@@ -2161,6 +2247,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           ..write('commitmentTotalDays: $commitmentTotalDays, ')
           ..write('commitmentBreakCount: $commitmentBreakCount, ')
           ..write('commitmentStartedAt: $commitmentStartedAt, ')
+          ..write('commitmentBreaksUsed: $commitmentBreaksUsed, ')
+          ..write('commitmentBreakClaimedAt: $commitmentBreakClaimedAt, ')
           ..write('protectionStartedAt: $protectionStartedAt, ')
           ..write('activePlan: $activePlan, ')
           ..write('termsAccepted: $termsAccepted, ')
@@ -2208,6 +2296,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
     commitmentTotalDays,
     commitmentBreakCount,
     commitmentStartedAt,
+    commitmentBreaksUsed,
+    commitmentBreakClaimedAt,
     protectionStartedAt,
     activePlan,
     termsAccepted,
@@ -2256,6 +2346,8 @@ class BlockingSetting extends DataClass implements Insertable<BlockingSetting> {
           other.commitmentTotalDays == this.commitmentTotalDays &&
           other.commitmentBreakCount == this.commitmentBreakCount &&
           other.commitmentStartedAt == this.commitmentStartedAt &&
+          other.commitmentBreaksUsed == this.commitmentBreaksUsed &&
+          other.commitmentBreakClaimedAt == this.commitmentBreakClaimedAt &&
           other.protectionStartedAt == this.protectionStartedAt &&
           other.activePlan == this.activePlan &&
           other.termsAccepted == this.termsAccepted &&
@@ -2300,6 +2392,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
   final Value<int> commitmentTotalDays;
   final Value<int> commitmentBreakCount;
   final Value<DateTime?> commitmentStartedAt;
+  final Value<int> commitmentBreaksUsed;
+  final Value<DateTime?> commitmentBreakClaimedAt;
   final Value<DateTime?> protectionStartedAt;
   final Value<String?> activePlan;
   final Value<bool> termsAccepted;
@@ -2342,6 +2436,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.commitmentTotalDays = const Value.absent(),
     this.commitmentBreakCount = const Value.absent(),
     this.commitmentStartedAt = const Value.absent(),
+    this.commitmentBreaksUsed = const Value.absent(),
+    this.commitmentBreakClaimedAt = const Value.absent(),
     this.protectionStartedAt = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.termsAccepted = const Value.absent(),
@@ -2385,6 +2481,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     this.commitmentTotalDays = const Value.absent(),
     this.commitmentBreakCount = const Value.absent(),
     this.commitmentStartedAt = const Value.absent(),
+    this.commitmentBreaksUsed = const Value.absent(),
+    this.commitmentBreakClaimedAt = const Value.absent(),
     this.protectionStartedAt = const Value.absent(),
     this.activePlan = const Value.absent(),
     this.termsAccepted = const Value.absent(),
@@ -2428,6 +2526,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Expression<int>? commitmentTotalDays,
     Expression<int>? commitmentBreakCount,
     Expression<DateTime>? commitmentStartedAt,
+    Expression<int>? commitmentBreaksUsed,
+    Expression<DateTime>? commitmentBreakClaimedAt,
     Expression<DateTime>? protectionStartedAt,
     Expression<String>? activePlan,
     Expression<bool>? termsAccepted,
@@ -2486,6 +2586,10 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
         'commitment_break_count': commitmentBreakCount,
       if (commitmentStartedAt != null)
         'commitment_started_at': commitmentStartedAt,
+      if (commitmentBreaksUsed != null)
+        'commitment_breaks_used': commitmentBreaksUsed,
+      if (commitmentBreakClaimedAt != null)
+        'commitment_break_claimed_at': commitmentBreakClaimedAt,
       if (protectionStartedAt != null)
         'protection_started_at': protectionStartedAt,
       if (activePlan != null) 'active_plan': activePlan,
@@ -2533,6 +2637,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
     Value<int>? commitmentTotalDays,
     Value<int>? commitmentBreakCount,
     Value<DateTime?>? commitmentStartedAt,
+    Value<int>? commitmentBreaksUsed,
+    Value<DateTime?>? commitmentBreakClaimedAt,
     Value<DateTime?>? protectionStartedAt,
     Value<String?>? activePlan,
     Value<bool>? termsAccepted,
@@ -2581,6 +2687,9 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
       commitmentTotalDays: commitmentTotalDays ?? this.commitmentTotalDays,
       commitmentBreakCount: commitmentBreakCount ?? this.commitmentBreakCount,
       commitmentStartedAt: commitmentStartedAt ?? this.commitmentStartedAt,
+      commitmentBreaksUsed: commitmentBreaksUsed ?? this.commitmentBreaksUsed,
+      commitmentBreakClaimedAt:
+          commitmentBreakClaimedAt ?? this.commitmentBreakClaimedAt,
       protectionStartedAt: protectionStartedAt ?? this.protectionStartedAt,
       activePlan: activePlan ?? this.activePlan,
       termsAccepted: termsAccepted ?? this.termsAccepted,
@@ -2705,6 +2814,14 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
         commitmentStartedAt.value,
       );
     }
+    if (commitmentBreaksUsed.present) {
+      map['commitment_breaks_used'] = Variable<int>(commitmentBreaksUsed.value);
+    }
+    if (commitmentBreakClaimedAt.present) {
+      map['commitment_break_claimed_at'] = Variable<DateTime>(
+        commitmentBreakClaimedAt.value,
+      );
+    }
     if (protectionStartedAt.present) {
       map['protection_started_at'] = Variable<DateTime>(
         protectionStartedAt.value,
@@ -2784,6 +2901,8 @@ class BlockingSettingsCompanion extends UpdateCompanion<BlockingSetting> {
           ..write('commitmentTotalDays: $commitmentTotalDays, ')
           ..write('commitmentBreakCount: $commitmentBreakCount, ')
           ..write('commitmentStartedAt: $commitmentStartedAt, ')
+          ..write('commitmentBreaksUsed: $commitmentBreaksUsed, ')
+          ..write('commitmentBreakClaimedAt: $commitmentBreakClaimedAt, ')
           ..write('protectionStartedAt: $protectionStartedAt, ')
           ..write('activePlan: $activePlan, ')
           ..write('termsAccepted: $termsAccepted, ')
@@ -4239,6 +4358,8 @@ typedef $$BlockingSettingsTableCreateCompanionBuilder =
       Value<int> commitmentTotalDays,
       Value<int> commitmentBreakCount,
       Value<DateTime?> commitmentStartedAt,
+      Value<int> commitmentBreaksUsed,
+      Value<DateTime?> commitmentBreakClaimedAt,
       Value<DateTime?> protectionStartedAt,
       Value<String?> activePlan,
       Value<bool> termsAccepted,
@@ -4283,6 +4404,8 @@ typedef $$BlockingSettingsTableUpdateCompanionBuilder =
       Value<int> commitmentTotalDays,
       Value<int> commitmentBreakCount,
       Value<DateTime?> commitmentStartedAt,
+      Value<int> commitmentBreaksUsed,
+      Value<DateTime?> commitmentBreakClaimedAt,
       Value<DateTime?> protectionStartedAt,
       Value<String?> activePlan,
       Value<bool> termsAccepted,
@@ -4448,6 +4571,16 @@ class $$BlockingSettingsTableFilterComposer
 
   ColumnFilters<DateTime> get commitmentStartedAt => $composableBuilder(
     column: $table.commitmentStartedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get commitmentBreaksUsed => $composableBuilder(
+    column: $table.commitmentBreaksUsed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get commitmentBreakClaimedAt => $composableBuilder(
+    column: $table.commitmentBreakClaimedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4667,6 +4800,16 @@ class $$BlockingSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get commitmentBreaksUsed => $composableBuilder(
+    column: $table.commitmentBreaksUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get commitmentBreakClaimedAt => $composableBuilder(
+    column: $table.commitmentBreakClaimedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get protectionStartedAt => $composableBuilder(
     column: $table.protectionStartedAt,
     builder: (column) => ColumnOrderings(column),
@@ -4881,6 +5024,16 @@ class $$BlockingSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get commitmentBreaksUsed => $composableBuilder(
+    column: $table.commitmentBreaksUsed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get commitmentBreakClaimedAt => $composableBuilder(
+    column: $table.commitmentBreakClaimedAt,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get protectionStartedAt => $composableBuilder(
     column: $table.protectionStartedAt,
     builder: (column) => column,
@@ -5007,6 +5160,9 @@ class $$BlockingSettingsTableTableManager
                 Value<int> commitmentTotalDays = const Value.absent(),
                 Value<int> commitmentBreakCount = const Value.absent(),
                 Value<DateTime?> commitmentStartedAt = const Value.absent(),
+                Value<int> commitmentBreaksUsed = const Value.absent(),
+                Value<DateTime?> commitmentBreakClaimedAt =
+                    const Value.absent(),
                 Value<DateTime?> protectionStartedAt = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<bool> termsAccepted = const Value.absent(),
@@ -5049,6 +5205,8 @@ class $$BlockingSettingsTableTableManager
                 commitmentTotalDays: commitmentTotalDays,
                 commitmentBreakCount: commitmentBreakCount,
                 commitmentStartedAt: commitmentStartedAt,
+                commitmentBreaksUsed: commitmentBreaksUsed,
+                commitmentBreakClaimedAt: commitmentBreakClaimedAt,
                 protectionStartedAt: protectionStartedAt,
                 activePlan: activePlan,
                 termsAccepted: termsAccepted,
@@ -5094,6 +5252,9 @@ class $$BlockingSettingsTableTableManager
                 Value<int> commitmentTotalDays = const Value.absent(),
                 Value<int> commitmentBreakCount = const Value.absent(),
                 Value<DateTime?> commitmentStartedAt = const Value.absent(),
+                Value<int> commitmentBreaksUsed = const Value.absent(),
+                Value<DateTime?> commitmentBreakClaimedAt =
+                    const Value.absent(),
                 Value<DateTime?> protectionStartedAt = const Value.absent(),
                 Value<String?> activePlan = const Value.absent(),
                 Value<bool> termsAccepted = const Value.absent(),
@@ -5136,6 +5297,8 @@ class $$BlockingSettingsTableTableManager
                 commitmentTotalDays: commitmentTotalDays,
                 commitmentBreakCount: commitmentBreakCount,
                 commitmentStartedAt: commitmentStartedAt,
+                commitmentBreaksUsed: commitmentBreaksUsed,
+                commitmentBreakClaimedAt: commitmentBreakClaimedAt,
                 protectionStartedAt: protectionStartedAt,
                 activePlan: activePlan,
                 termsAccepted: termsAccepted,
