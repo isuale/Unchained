@@ -30,6 +30,16 @@ class ProtectionDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context)!;
+    // Instantiating the actions notifier is what runs its reconcile-from-native
+    // pass (BlockingSettingsActions.build → _reconcileWithNative), which pulls the
+    // VPN's real running state and the native uninstall-guard flag back into the
+    // DB the switches below render from. Every other call site is a
+    // `ref.read(...notifier)` inside a tap handler, so without this watch the
+    // notifier was only ever created once the user touched *some* toggle — and
+    // until then the dashboard showed stale DB values. That is how "Prevent
+    // uninstall" could read Off while the native watchdog was on and firing the
+    // scripture lock: nothing had reconciled them yet.
+    ref.watch(blockingSettingsActionsProvider);
     final asyncSettings = ref.watch(blockingSettingsProvider);
     final activePlan = ref.watch(activePlanProvider);
 
