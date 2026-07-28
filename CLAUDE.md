@@ -39,9 +39,25 @@ flutter gen-l10n                             # regenerate localizations from lib
 flutter pub run flutter_launcher_icons       # regenerate Android launcher icons from assets/images/logo.png
 
 flutter build apk                            # release build (applicationId: com.unchained.app)
+flutter build appbundle                      # .aab for the Play Store (signed with the upload key)
 ```
 
 `test/widget_test.dart` is the stale default Flutter counter test and does **not** match this app (no counter widget) — it will fail if run. Replace it before relying on `flutter test`.
+
+## Release signing
+
+Release builds are signed with a real **upload key**, not the debug key (wired up 2026-07-28 for the Play Store). `android/app/build.gradle.kts` reads `android/key.properties` for the credentials; both that file and the keystore are gitignored, and the keystore itself lives **outside the repo** at `~/keystores/unchained-upload-keystore.p12` (alias `upload`, PKCS12). If `key.properties` is missing — a fresh clone, CI — the build falls back to debug signing so it still compiles; such a build runs on a device but Play rejects it.
+
+**Losing the keystore means never being able to update the app on Play again.** It is not reproducible and not in git. Confirm it is backed up somewhere off this machine before relying on it.
+
+**Gotcha:** Android refuses to replace an installed app with one signed by a different key. Any device still carrying an older debug-signed build must be **uninstalled** (destroying its app data) before a release-signed build will install — no `-r` flag gets around it. `scripts/dev_guard.sh install` detects this specific failure and says so rather than suggesting a pointless retry.
+
+Verify what a built artifact is actually signed with — never assume:
+```bash
+apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk   # APK (v2/v3 signing)
+keytool -printcert -jarfile build/app/outputs/bundle/release/app-release.aab   # AAB (JAR signing)
+```
+Debug-signed output says `CN=Android Debug`; correctly signed output says `CN=Be Unchained`.
 
 ## Architecture
 

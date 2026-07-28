@@ -179,10 +179,25 @@ case "$CMD" in
     # guard down that uninstall now SUCCEEDS — wiping the DB (onboarding history,
     # active plan, terms acceptance, commitment-lock anchor) on every dev install.
     # `adb install -r` replaces the APK in place and keeps app data.
-    "$ADB" install -r -d "$APK" || {
+    INSTALL_OUT="$("$ADB" install -r -d "$APK" 2>&1)"
+    printf '%s\n' "$INSTALL_OUT"
+    if ! printf '%s' "$INSTALL_OUT" | grep -q "Success"; then
+      # Since release signing was wired up (android/key.properties), release builds
+      # carry the upload key while anything installed before that was debug-signed.
+      # Android never replaces an app across a signing-key change, so this is the one
+      # install failure that a retry can never fix — say what actually has to happen.
+      if printf '%s' "$INSTALL_OUT" | grep -qE "INSTALL_FAILED_UPDATE_INCOMPATIBLE|signatures do not match"; then
+        echo
+        echo "  ! The installed app is signed with a DIFFERENT key than this build."
+        echo "    Android refuses to replace an app across a signing-key change, so"
+        echo "    retrying cannot help. You must uninstall first, which DELETES the"
+        echo "    app's data (onboarding history, plan, terms, commitment anchor):"
+        echo "      adb uninstall $APP_PKG"
+        echo "    Protection is already down, so that uninstall will succeed."
+      fi
       echo "adb install failed — leaving protection down so you can retry."
       exit 1
-    }
+    fi
     AFTER="$(installed_stamp)"
     echo
     echo "Installed after:  $AFTER"
