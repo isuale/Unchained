@@ -270,6 +270,17 @@ class UninstallGuardService : AccessibilityService() {
         private var cachedExempt: Set<String>? = null
 
         // Our user-visible label (see android:label in the manifest). Lowercase.
+        //
+        // CAVEAT — this matches the *label*, not the package. The accessibility API
+        // shows us only the text on screen; the Settings App-info page and the
+        // installer dialog never expose which package they are about. So if a second
+        // app whose label contains "unchained" is installed (e.g. a dev build under a
+        // different applicationId), this watchdog fires when the user tries to
+        // uninstall *that* one too — while that copy's own card correctly reports its
+        // protection as off, since each package has its own GuardState. That exact
+        // pair (com.unchained.app + com.beunchained.app) was reported on 2026-07-28 as
+        // "the app says protection is off but the lock still appears"; the fix was
+        // removing the duplicate. Keep only one build of this app installed.
         private val APP_LABELS = listOf("unchained")
 
         // Uninstall captions (lowercase, EN + ES). Used for the installer dialog and
