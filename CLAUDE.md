@@ -74,6 +74,24 @@ A second Dart↔native bridge, `MethodChannel('unchained/guard')`, layered indep
 - Cold-start handling in `main.dart`: `UninstallGuardService.registerLockHandler` reacts to a live push from native; `consumePendingLock()` is polled once after first frame to catch the case where the watchdog cold-launched the app specifically to show the lock (a live push fired before the handler was registered would otherwise strand the user on the normal app).
 - No plugin is involved anywhere in this feature — device admin, the accessibility watchdog, and the challenge are all hand-rolled native Kotlin + Dart, not backed by a package.
 
+#### Developer escape hatch (`scripts/dev_guard.sh`)
+`android/.../DevGuardReceiver.kt` is a **developer-only** back door for lowering uninstall protection over adb, so a new build can be pushed to the test phone without a human completing the 800-letter scripture challenge. It exists because protection is deliberately human-only to turn off, which previously left the device stranded on stale commits.
+
+It is **not reachable from any Flutter screen** — there is no widget, route, or MethodChannel method for it. It is an exported `BroadcastReceiver` gated by two independent things: `android:permission="android.permission.DUMP"` in the manifest (a `signature|privileged` permission that only the adb shell uid and privileged apps hold — no third-party app can send the broadcast) and a secret `token` extra checked in `onReceive`. Reaching it requires a computer with authorised USB debugging.
+
+```bash
+bash scripts/dev_guard.sh status     # every layer's state, app-side and OS-side
+bash scripts/dev_guard.sh unlock     # guard off + device admin released
+bash scripts/dev_guard.sh relock     # re-arm every layer
+bash scripts/dev_guard.sh install    # unlock → install → verify it took → re-arm
+```
+
+Two behaviours worth keeping if this code is touched:
+- **`install` uses `adb install -r`, never `flutter install`.** `flutter install` uninstalls the old copy first; with the guard *up* that uninstall fails harmlessly and it falls back to in-place replacement, but with the guard *down* it succeeds and **wipes the DB** (onboarding history, active plan, terms acceptance, commitment-lock anchor).
+- **Admin removal and admin granting use opposite mechanisms.** `dpm remove-active-admin` is refused for a non-test admin, so `unlock` gives the role back through the app's own `removeActiveAdmin()`; the app can only *request* admin via a system consent dialog, so `relock` re-grants it with `dpm set-active-admin` from the adb shell (which holds `MANAGE_DEVICE_ADMINS`). Each side uses its working half, which is what makes the cycle hands-free.
+
+Verify a real install by `lastUpdateTime` advancing while `firstInstallTime` stays put (`adb shell dumpsys package com.unchained.app`) — that pair proves both "the install took effect" and "app data survived".
+
 ### Commitment lock
 `lib/features/dashboard/domain/commitment.dart` is a pure, testable module (no Dart/native boundary) describing how long protection is locked on. The plan picked at onboarding sets a `CommitmentSchedule` (`CommitmentMode.none/forever/fixed/cycle`, `totalDays`, `breakCount`); the lock only starts running (an `startedAt` anchor is recorded) the first time the user turns protection on. `computeStatus()` derives the live `CommitmentStatus` (locked / on a break / completed) from the anchor and current time; `advanceCycle()` rolls a `cycle` schedule's anchor forward if the device was off long enough to miss whole spans. Consumed by `blocking_settings_provider.dart` and the plan/dashboard screens to decide whether the protection toggle is locked.
 

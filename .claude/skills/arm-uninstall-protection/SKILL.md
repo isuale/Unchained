@@ -34,6 +34,21 @@ bash scripts/rearm_uninstall_protection.sh
 It is idempotent and safe to run anytime. It no-ops cleanly if no device is connected
 or the app isn't installed.
 
+## When you need protection *down* first (pushing a new build)
+
+Active device admin makes `flutter install` fail its uninstall step
+(`DELETE_FAILED_DEVICE_POLICY_MANAGER`), and a full clean install impossible. Use the
+developer hatch instead of asking the user to complete the scripture challenge:
+
+```bash
+bash scripts/dev_guard.sh install    # unlock → adb install -r → verify → re-arm
+```
+
+That does the whole cycle hands-free, preserves app data, and re-arms every layer
+including device admin (see CLAUDE.md's "Developer escape hatch"). `unlock` / `relock` /
+`status` are available separately. **Never run `flutter install` while unlocked** — its
+uninstall step succeeds with the guard down and wipes the DB.
+
 ## Interpreting the output
 
 - **Accessibility watchdog: was OFF → re-enabled** — this is the normal post-install
