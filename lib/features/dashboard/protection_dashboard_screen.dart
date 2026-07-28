@@ -47,7 +47,7 @@ class ProtectionDashboardScreen extends ConsumerWidget {
         ),
         error: (e, _) => Center(
           child: Text(
-            'Error loading settings: $e',
+            l.error_loading_settings('$e'),
             style: const TextStyle(color: Colors.white),
           ),
         ),
@@ -299,29 +299,29 @@ class _DashboardBody extends ConsumerWidget {
     String field,
     String label,
   ) async {
+    final l = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF0A0E18),
-        title: const Text(
-          'Reset daily budget?',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          l.dev_reset_budget_title,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'DEV: clears today\'s usage and the 24h lock for "$label" so it\'s '
-          'usable again immediately. Past-day history is kept.',
+          l.dev_reset_budget_body_kept_history(label),
           style: const TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF888888))),
+            child: Text(l.common_cancel,
+                style: const TextStyle(color: Color(0xFF888888))),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Reset',
-                style: TextStyle(color: Color(0xFF1E5FFF))),
+            child: Text(l.dev_reset_confirm,
+                style: const TextStyle(color: Color(0xFF1E5FFF))),
           ),
         ],
       ),
@@ -333,7 +333,9 @@ class _DashboardBody extends ConsumerWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(ok ? '$label budget reset' : 'Reset failed'),
+        content: Text(ok
+            ? l.dev_reset_snackbar_success(label)
+            : l.dev_reset_snackbar_failed),
         behavior: SnackBarBehavior.floating,
         backgroundColor: const Color(0xFF0A0F1C),
       ),
@@ -364,6 +366,7 @@ class _DashboardBody extends ConsumerWidget {
   /// Simple stepper dialog for "how many minutes per day?" (1-180, steps of 5
   /// except down to the 1-minute floor, which exists for fast manual testing).
   Future<int?> _askDailyLimitMinutes(BuildContext context, int initial) {
+    final l = AppLocalizations.of(context)!;
     return showDialog<int>(
       context: context,
       builder: (dialogContext) {
@@ -371,17 +374,17 @@ class _DashboardBody extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
             backgroundColor: const Color(0xFF0A0E18),
-            title: const Text(
-              'Minutes per day',
+            title: Text(
+              l.app_limits_minutes_title,
               style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Allowed today before it gets blocked for the rest of the day.',
-                  style: TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
+                Text(
+                  l.app_limits_minutes_body,
+                  style: const TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -421,14 +424,14 @@ class _DashboardBody extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Cancel',
-                    style: TextStyle(color: Color(0xFF888888))),
+                child: Text(l.common_cancel,
+                    style: const TextStyle(color: Color(0xFF888888))),
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(minutes),
-                child: const Text(
-                  'Confirm',
-                  style: TextStyle(
+                child: Text(
+                  l.common_confirm,
+                  style: const TextStyle(
                       color: Color(0xFF1E5FFF), fontWeight: FontWeight.w700),
                 ),
               ),
@@ -824,12 +827,13 @@ class _CommitmentBanner extends StatelessWidget {
   final CommitmentStatus status;
   final AppLocalizations l;
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
+  List<String> _months(AppLocalizations l) => [
+        l.month_jan, l.month_feb, l.month_mar, l.month_apr,
+        l.month_may, l.month_jun, l.month_jul, l.month_aug,
+        l.month_sep, l.month_oct, l.month_nov, l.month_dec,
+      ];
 
-  String _shortDate(DateTime d) => '${_months[d.month - 1]} ${d.day}';
+  String _shortDate(DateTime d) => '${_months(l)[d.month - 1]} ${d.day}';
 
   @override
   Widget build(BuildContext context) {
@@ -956,6 +960,7 @@ class _FeedGuardPermissionBannerState
   @override
   Widget build(BuildContext context) {
     if (_loading || _enabled) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -968,18 +973,18 @@ class _FeedGuardPermissionBannerState
           const Icon(Icons.warning_amber_rounded,
               color: Color(0xFFFFB800), size: 20),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Enable Accessibility access to enforce these daily limits.',
-              style: TextStyle(color: Color(0xFFB8C0D0), fontSize: 12),
+              l.app_limits_permission_banner,
+              style: const TextStyle(color: Color(0xFFB8C0D0), fontSize: 12),
             ),
           ),
           TextButton(
             onPressed: () async {
               await FeedGuardBridge.openAccessibilitySettings();
             },
-            child: const Text('Enable',
-                style: TextStyle(color: Color(0xFF1E5FFF))),
+            child: Text(l.app_limits_permission_enable,
+                style: const TextStyle(color: Color(0xFF1E5FFF))),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unchained/l10n/app_localizations.dart';
 
 const _accent = Color(0xFF1E5FFF);
 
@@ -32,10 +33,10 @@ class _EmailCheckoutDialogState extends State<_EmailCheckoutDialog> {
   bool _looksLikeEmail(String value) =>
       RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
 
-  void _submit() {
+  void _submit(AppLocalizations l) {
     final email = _controller.text.trim();
     if (!_looksLikeEmail(email)) {
-      setState(() => _error = 'Enter a valid email address.');
+      setState(() => _error = l.email_dialog_invalid);
       return;
     }
     Navigator.of(context).pop(email);
@@ -43,6 +44,7 @@ class _EmailCheckoutDialogState extends State<_EmailCheckoutDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Dialog(
       backgroundColor: const Color(0xFF0A0F1C),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -52,19 +54,18 @@ class _EmailCheckoutDialogState extends State<_EmailCheckoutDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Your email',
-              style: TextStyle(
+            Text(
+              l.email_dialog_title,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "We'll use this to confirm your payment with Stripe and unlock "
-              'the plan once it succeeds.',
-              style: TextStyle(color: Color(0xFF9AA3B2), height: 1.4),
+            Text(
+              l.email_dialog_body,
+              style: const TextStyle(color: Color(0xFF9AA3B2), height: 1.4),
             ),
             const SizedBox(height: 18),
             TextField(
@@ -73,10 +74,10 @@ class _EmailCheckoutDialogState extends State<_EmailCheckoutDialog> {
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _submit(),
+              onSubmitted: (_) => _submit(l),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'you@example.com',
+                hintText: l.common_email_hint,
                 hintStyle: const TextStyle(color: Color(0xFF666666)),
                 errorText: _error,
                 filled: true,
@@ -99,14 +100,14 @@ class _EmailCheckoutDialogState extends State<_EmailCheckoutDialog> {
                 Expanded(
                   child: TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: Color(0xFF9AA3B2))),
+                    child: Text(l.common_cancel,
+                        style: const TextStyle(color: Color(0xFF9AA3B2))),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _submit,
+                    onPressed: () => _submit(l),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _accent,
                       foregroundColor: Colors.white,
@@ -114,7 +115,7 @@ class _EmailCheckoutDialogState extends State<_EmailCheckoutDialog> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Continue'),
+                    child: Text(l.common_continue),
                   ),
                 ),
               ],

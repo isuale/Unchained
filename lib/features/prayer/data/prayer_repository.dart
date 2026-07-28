@@ -33,8 +33,11 @@ final prayerLockEnabledProvider = StreamProvider<bool>((ref) {
   return ref.watch(prayerRepositoryProvider).watchPrayerLockEnabled();
 });
 
-/// Live prayer-content language (en/es/pt).
-final prayerLanguageProvider = StreamProvider<Lang>((ref) {
+/// Live app-wide language (en/es/pt). Originally prayer-only, this now also
+/// drives [AppLocalizations]'s locale for the whole app (see main.dart) and
+/// the guard scripture-lock passage — the underlying `prayerLanguage` DB
+/// column name is a holdover, not a scope restriction.
+final appLanguageProvider = StreamProvider<Lang>((ref) {
   return ref.watch(prayerRepositoryProvider).watchLanguage();
 });
 

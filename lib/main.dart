@@ -6,6 +6,8 @@ import 'package:unchained/core/router/app_router.dart';
 import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/features/prayer/data/app_lock_service.dart';
+import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/domain/prayers.dart';
 import 'package:unchained/features/prayer/presentation/prayer_gate_screen.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 import 'package:unchained/shared/app_credits.dart';
@@ -73,11 +75,22 @@ void main() {
   });
 }
 
-class MyApp extends StatelessWidget {
+/// Maps the app-wide [Lang] setting to the [Locale] the localizations system
+/// understands.
+Locale _localeFor(Lang lang) => switch (lang) {
+      Lang.en => const Locale('en'),
+      Lang.es => const Locale('es'),
+      Lang.pt => const Locale('pt'),
+    };
+
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Defaults to Spanish (matches PrayerRepository.watchLanguage's default)
+    // until the DB row resolves on first read.
+    final lang = ref.watch(appLanguageProvider).asData?.value ?? Lang.es;
     final baseInter = GoogleFonts.interTextTheme(
       ThemeData(brightness: Brightness.dark).textTheme,
     );
@@ -155,10 +168,10 @@ class MyApp extends StatelessWidget {
     );
 
     return MaterialApp.router(
-      title: 'Flutter Demo',
+      title: 'Be Unchained',
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('en'),
+      locale: _localeFor(lang),
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF000000),

@@ -101,6 +101,21 @@ class PS {
   static String charactersCount(Lang l, int matched, int total) => _p(l, '$matched / $total characters', '$matched / $total caracteres', '$matched / $total caracteres');
   static String cancel(Lang l) => _p(l, 'Cancel', 'Cancelar', 'Cancelar');
 
+  // App picker (which apps the prayer lock guards)
+  static String lockAllSwitchTitle(Lang l) => _p(l, 'Lock ALL apps', 'Bloquear TODAS las apps', 'Bloquear TODAS as apps');
+  static String lockAllSwitchSubOn(Lang l) => _p(l, 'Every app you open will require prayer.', 'Toda app abierta pedirá oración.', 'Toda app aberta vai pedir oração.');
+  static String lockAllSwitchSubOff(Lang l) => _p(l, 'Choose below which apps to lock.', 'Elige abajo qué apps bloquear.', 'Escolhe abaixo quais apps bloquear.');
+  static String lockAllExplainerTitle(Lang l) => _p(l, 'Every app will be locked', 'Todas las apps quedarán bloqueadas', 'Todas as apps ficarão bloqueadas');
+  static String lockAllExplainerBody(Lang l) => _p(
+        l,
+        'Opening any app will require prayer to unlock all of them for 24 hours. Turn this off to choose specific apps.',
+        'Al abrir cualquier app tendrás que orar para desbloquearlas todas durante 24 horas. Desactiva esta opción para elegir apps concretas.',
+        'Ao abrir qualquer app terás de orar para desbloqueá-las todas durante 24 horas. Desativa esta opção para escolher apps específicas.',
+      );
+  static String searchAppHint(Lang l) => _p(l, 'Search app…', 'Buscar app…', 'Buscar app…');
+  static String appsLoadError(Lang l) => _p(l, "Couldn't load the apps.", 'No se pudieron cargar las apps.', 'Não foi possível carregar as apps.');
+  static String noResults(Lang l) => _p(l, 'No results.', 'Sin resultados.', 'Sem resultados.');
+
   // Language picker
   static String language(Lang l) => _p(l, 'Language', 'Idioma', 'Idioma');
   static String langName(Lang l) => switch (l) {

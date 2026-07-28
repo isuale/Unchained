@@ -151,6 +151,7 @@
   "app_limits_minutes_body": "Allowed today before it gets blocked for the rest of the day.",
   "app_limits_add": "Add",
   "nav_blocking": "Blocking",
+  "nav_prayer": "Prayer",
   "nav_blocklist": "Blocklist",
   "nav_progress": "Progress",
   "nav_settings": "Settings",
@@ -360,5 +361,140 @@
   "onboarding_q8_a1": "Very guilty / I hate myself",
   "onboarding_q8_a2": "Guilty",
   "onboarding_q8_a3": "Indifferent",
-  "onboarding_q8_a4": "Fine"
+  "onboarding_q8_a4": "Fine",
+  "footer_inspired_by": "Inspired by BlockerX",
+  "guard_card_title": "Uninstall protection",
+  "guard_explainer": "When you head toward Force stop or Uninstall, Be Unchained covers the screen and asks you to copy 800 letters of Scripture within four minutes first. With device administrator on, the system also refuses to uninstall until you deactivate it here — which is gated by the same challenge.",
+  "guard_req_overlay": "Display over other apps",
+  "guard_action_allow": "Allow",
+  "guard_req_accessibility": "Accessibility watchdog",
+  "guard_action_enable": "Enable",
+  "guard_req_device_admin": "Device administrator (hard block)",
+  "guard_action_activate": "Activate",
+  "guard_device_owner_note": "Device owner — uninstall is blocked outright.",
+  "guard_grant_both_hint": "Grant both permissions above to switch protection on.",
+  "guard_turn_on": "Turn on protection",
+  "guard_turn_off": "Turn off protection",
+  "payment_confirming_title": "Confirming your payment…",
+  "payment_confirming_body": "This can take a few seconds while Stripe lets us know.",
+  "payment_not_confirmed_title": "We couldn't confirm your payment yet",
+  "payment_not_confirmed_body": "If you completed checkout, make sure this matches the email you used on the Stripe payment page, then try again.",
+  "payment_check_again": "Check again",
+  "common_email_hint": "you@example.com",
+  "email_dialog_invalid": "Enter a valid email address.",
+  "email_dialog_title": "Your email",
+  "email_dialog_body": "We'll use this to confirm your payment with Stripe and unlock the plan once it succeeds.",
+  "common_continue": "Continue",
+  "owner_dialog_wrong_email": "Wrong email",
+  "owner_dialog_send_failed": "Couldn't send the code — try again",
+  "owner_dialog_resend_failed": "Couldn't resend the code — try again",
+  "owner_dialog_wrong_code": "Wrong or expired code",
+  "owner_dialog_title": "Owner",
+  "owner_dialog_email_hint_text": "Enter the owner's email to continue.",
+  "owner_dialog_email_field_hint": "owner@email.com",
+  "owner_dialog_check_email_title": "Check your email",
+  "owner_dialog_code_hint_text": "Enter the code just emailed to you.",
+  "owner_dialog_resend_code": "Resend code",
+  "owner_dialog_unlock": "Unlock",
+  "owner_dialog_next": "Next",
+  "owner_entry_label": "Owner",
+  "error_loading_settings": "Error loading settings: {error}",
+  "@error_loading_settings": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "common_confirm": "Confirm",
+  "dev_reset_budget_title": "Reset daily budget?",
+  "dev_reset_budget_body": "DEV: clears today's usage and the 24h lock for \"{label}\" so it's usable again immediately.",
+  "@dev_reset_budget_body": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_budget_body_kept_history": "DEV: clears today's usage and the 24h lock for \"{label}\" so it's usable again immediately. Past-day history is kept.",
+  "@dev_reset_budget_body_kept_history": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_confirm": "Reset",
+  "dev_reset_snackbar_success": "{label} budget reset",
+  "@dev_reset_snackbar_success": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_snackbar_failed": "Reset failed",
+  "blocklist_add_success": "\"{value}\" ✓",
+  "@blocklist_add_success": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "month_jan": "Jan",
+  "month_feb": "Feb",
+  "month_mar": "Mar",
+  "month_apr": "Apr",
+  "month_may": "May",
+  "month_jun": "Jun",
+  "month_jul": "Jul",
+  "month_aug": "Aug",
+  "month_sep": "Sep",
+  "month_oct": "Oct",
+  "month_nov": "Nov",
+  "month_dec": "Dec",
+  "settings_section_about": "About",
+  "settings_report_bug_title": "Report a bug",
+  "settings_designed_by": "Designed & developed by\n{name}",
+  "@settings_designed_by": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "settings_section_language": "Language",
+  "terms_title": "Terms & Conditions",
+  "terms_gate_banner": "Please read these Terms & Conditions before using the control panel. If you choose not to read them, you use this app entirely at your own responsibility.",
+  "terms_footer_note": "By continuing you confirm that you have read, understood, and agree to these Terms & Conditions.",
+  "terms_agree_button": "I have read and I agree",
+  "terms_continue_risk_button": "I don't want to read — continue at my own risk",
+  "terms_dialog_title": "Continue without reading?",
+  "terms_dialog_body": "Reading the Terms & Conditions is strongly recommended. If you choose to continue without reading them, you do so entirely at your own responsibility and accept them in full.",
+  "terms_dialog_go_back": "Go back",
+  "terms_dialog_take_responsibility": "I take responsibility",
+  "terms_owner_credit_label": "Owner & developer",
+  "terms_owner_contact": "{email}  (report a bug)",
+  "@terms_owner_contact": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "terms_section1_title": "1. Acceptance of these Terms",
+  "terms_section1_body": "Be Unchained (\"the app\") is a personal tool that helps you block adult and distracting content. By using the app you agree to these Terms & Conditions. If you do not agree with any part of them, you should not use the app.",
+  "terms_section2_title": "2. Purpose and intended use",
+  "terms_section2_body": "The app is intended to support healthy digital habits by filtering content at the network level on your own device, and by helping you manage and limit time spent in distracting apps. It is a self-help aid only and is not a substitute for professional, medical, or psychological advice or treatment.",
+  "terms_section3_title": "3. Social media & app time limits",
+  "terms_section3_body": "Beyond blocking adult content, the app can enforce a daily time limit on Instagram Reels, YouTube Shorts, TikTok, Snapchat Stories, or any other app you choose (\"App Time Limits\"). This works by detecting the app on your screen using Android's Accessibility Service — the app does not monitor your activity elsewhere or send it off your device. If you turn on \"All social media\" mode, once your daily limit for Instagram or YouTube runs out the entire app is blocked for the rest of the day, not just Reels or Shorts. Once any daily limit runs out, that app or feed is locked for a full 24 hours as an anti-circumvention measure, and the limit cannot be changed or removed during that time.",
+  "terms_section4_title": "4. Prayer-based app lock (optional, faith-based feature)",
+  "terms_section4_body": "The app includes an optional feature that locks apps you choose (or every app) behind a short Christian prayer — a Thanksgiving prayer or the Rosary — which must be completed before the app becomes accessible again for a set number of hours. This feature is opt-in, its content is religious in nature, and it is offered purely as a personal accountability tool, not as religious instruction or counsel. Because its content is specifically Christian, you may switch the entire feature off at any time — whatever your faith or lack of one — using the \"Prayer app lock\" switch at the bottom of the prayer tab. Turning it off stops all prayer-based app locking and removes the religious content from that tab; it does not affect content blocking or any other protection. You can also leave it on and choose exactly which apps (if any) it applies to.",
+  "terms_section5_title": "5. No guarantee of effectiveness",
+  "terms_section5_body": "Content blocking is based on DNS-level domain filtering. No filter is perfect: some unwanted content may still get through, and some legitimate content may occasionally be blocked. The app cannot guarantee that every harmful site or app will be blocked at all times. Features that rely on Android's Accessibility Service — App Time Limits, \"All social media\" mode, and the prayer-based app lock — depend on that service staying enabled; disabling it in your device settings will stop those features from working.",
+  "terms_section6_title": "6. Use at your own responsibility",
+  "terms_section6_body": "You use the app at your own responsibility and risk. Reading these terms is your responsibility. If you choose to continue without reading them, you accept them in full and assume all responsibility for your use of the app and any outcome that results from it.",
+  "terms_section7_title": "7. Your data and privacy",
+  "terms_section7_body": "The app stores your settings and assessment results locally on your device. This includes any apps you choose for App Time Limits or the prayer-based app lock, and the local history of completed prayers used to show your streak. It does not sell your personal data. Network requests are processed on-device to decide what to block; the app does not require an account to function.",
+  "terms_section8_title": "8. Device permissions",
+  "terms_section8_body": "To work, the app may use a local VPN service for DNS filtering and, if you enable them, Android's Accessibility Service and device-administration features. The Accessibility Service is used for uninstall protection, for enforcing Social media / App Time Limits, and for the prayer-based app lock. You can review or revoke these permissions in your device settings at any time, which may reduce or disable the corresponding protection.",
+  "terms_section9_title": "9. Limitation of liability",
+  "terms_section9_body": "To the maximum extent permitted by law, the owner and developer of the app shall not be liable for any direct, indirect, or incidental damages arising from the use of, or inability to use, the app, including any content that is or is not blocked.",
+  "terms_section10_title": "10. Changes to these Terms",
+  "terms_section10_body": "These Terms may be updated as the app evolves. Continued use of the app after an update means you accept the revised Terms.",
+  "terms_section11_title": "11. Contact & support",
+  "terms_section11_body": "For questions, bug reports, or support, contact the owner and developer {name} at {email}.",
+  "@terms_section11_body": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "email": { "type": "String" }
+    }
+  }
 }

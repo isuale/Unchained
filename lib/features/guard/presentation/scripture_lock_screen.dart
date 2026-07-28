@@ -53,7 +53,7 @@ class _ScriptureLockScreenState extends ConsumerState<ScriptureLockScreen> {
   late int _passageIndex;
 
   /// The language of the passage the user is copying. Kept in sync with the
-  /// shared [prayerLanguageProvider] on every build; defaults to Spanish.
+  /// shared [appLanguageProvider] on every build; defaults to Spanish.
   Lang _lang = Lang.es;
 
   /// The current passage in the selected language.
@@ -177,12 +177,12 @@ class _ScriptureLockScreenState extends ConsumerState<ScriptureLockScreen> {
     // Drive the passage + UI language from the same setting the prayer screens
     // use, so a change in either place carries over. When the user switches
     // language mid-challenge, wipe what they typed (it was in the old language).
-    ref.listen(prayerLanguageProvider, (prev, next) {
+    ref.listen(appLanguageProvider, (prev, next) {
       final was = prev?.asData?.value;
       final now = next.asData?.value;
       if (now != null && was != null && now != was) _controller.clear();
     });
-    _lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
+    _lang = ref.watch(appLanguageProvider).asData?.value ?? Lang.es;
 
     final matched = _matched;
     final total = _challenge.length;

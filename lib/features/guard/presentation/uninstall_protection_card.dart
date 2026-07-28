@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/guard/presentation/scripture_lock_screen.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
+import 'package:unchained/l10n/app_localizations.dart';
 
 /// Settings card that sets up and reflects the state of uninstall protection.
 ///
@@ -86,6 +87,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: _card,
@@ -99,10 +101,10 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
             children: [
               const Icon(Icons.shield_outlined, color: _accent),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Uninstall protection',
-                  style: TextStyle(
+                  l.guard_card_title,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
@@ -111,7 +113,9 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
               ),
               if (!_loading)
                 Text(
-                  _enabled && _ready ? 'ON' : 'OFF',
+                  _enabled && _ready
+                      ? l.dashboard_protection_active
+                      : l.dashboard_protection_off,
                   style: TextStyle(
                     color: _enabled && _ready ? _good : _dim,
                     fontWeight: FontWeight.w700,
@@ -120,13 +124,9 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'When you head toward Force stop or Uninstall, Be Unchained covers the '
-            'screen and asks you to copy 800 letters of Scripture within four '
-            'minutes first. With device administrator on, the system also refuses '
-            'to uninstall until you deactivate it here — which is gated by the same '
-            'challenge.',
-            style: TextStyle(color: _dim, height: 1.4),
+          Text(
+            l.guard_explainer,
+            style: const TextStyle(color: _dim, height: 1.4),
           ),
           const SizedBox(height: 16),
           if (_loading)
@@ -143,22 +143,22 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
           else ...[
             _requirement(
               done: _overlay,
-              label: 'Display over other apps',
-              actionLabel: 'Allow',
+              label: l.guard_req_overlay,
+              actionLabel: l.guard_action_allow,
               onAction: UninstallGuardService.openOverlaySettings,
             ),
             const SizedBox(height: 10),
             _requirement(
               done: _accessibility,
-              label: 'Accessibility watchdog',
-              actionLabel: 'Enable',
+              label: l.guard_req_accessibility,
+              actionLabel: l.guard_action_enable,
               onAction: UninstallGuardService.openAccessibilitySettings,
             ),
             const SizedBox(height: 10),
             _requirement(
               done: _deviceAdmin,
-              label: 'Device administrator (hard block)',
-              actionLabel: 'Activate',
+              label: l.guard_req_device_admin,
+              actionLabel: l.guard_action_activate,
               onAction: UninstallGuardService.requestDeviceAdmin,
             ),
             if (_deviceOwner) ...[
@@ -169,7 +169,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Device owner — uninstall is blocked outright.',
+                      l.guard_device_owner_note,
                       style: TextStyle(
                         color: _good.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w500,
@@ -180,7 +180,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
               ),
             ],
             const SizedBox(height: 16),
-            _mainButton(),
+            _mainButton(l),
           ],
         ],
       ),
@@ -219,11 +219,11 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
     );
   }
 
-  Widget _mainButton() {
+  Widget _mainButton(AppLocalizations l) {
     if (!_ready) {
-      return const Text(
-        'Grant both permissions above to switch protection on.',
-        style: TextStyle(color: _dim, fontStyle: FontStyle.italic),
+      return Text(
+        l.guard_grant_both_hint,
+        style: const TextStyle(color: _dim, fontStyle: FontStyle.italic),
       );
     }
     if (!_enabled) {
@@ -231,7 +231,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
         width: double.infinity,
         child: ElevatedButton(
           onPressed: _turnOn,
-          child: const Text('Turn on protection'),
+          child: Text(l.guard_turn_on),
         ),
       );
     }
@@ -243,7 +243,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
           foregroundColor: const Color(0xFFFF4D4F),
           side: const BorderSide(color: Color(0xFF3A2030)),
         ),
-        child: const Text('Turn off protection'),
+        child: Text(l.guard_turn_off),
       ),
     );
   }

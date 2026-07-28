@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/plans/domain/owner_access.dart';
 import 'package:unchained/features/plans/domain/owner_email_verification.dart';
+import 'package:unchained/l10n/app_localizations.dart';
 
 /// Two-step owner verification:
 ///  1. The owner's email (checked locally — a wrong email never touches the
@@ -46,9 +47,10 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
   }
 
   Future<void> _submitEmail() async {
+    final l = AppLocalizations.of(context)!;
     if (!OwnerAccess.verifyEmail(_emailController.text)) {
       setState(() {
-        _error = 'Wrong email';
+        _error = l.owner_dialog_wrong_email;
         _emailController.clear();
       });
       return;
@@ -64,12 +66,13 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
       if (sent) {
         _step = _Step.emailCode;
       } else {
-        _error = "Couldn't send the code — try again";
+        _error = l.owner_dialog_send_failed;
       }
     });
   }
 
   Future<void> _resendCode() async {
+    final l = AppLocalizations.of(context)!;
     setState(() {
       _busy = true;
       _error = null;
@@ -78,11 +81,12 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      _error = sent ? null : "Couldn't resend the code — try again";
+      _error = sent ? null : l.owner_dialog_resend_failed;
     });
   }
 
   Future<void> _submitEmailCode() async {
+    final l = AppLocalizations.of(context)!;
     setState(() {
       _busy = true;
       _error = null;
@@ -95,7 +99,7 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
     }
     setState(() {
       _busy = false;
-      _error = 'Wrong or expired code';
+      _error = l.owner_dialog_wrong_code;
       _emailCodeController.clear();
     });
   }
@@ -111,19 +115,20 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final (title, hint, field) = switch (_step) {
       _Step.email => (
-          'Owner',
-          "Enter the owner's email to continue.",
+          l.owner_dialog_title,
+          l.owner_dialog_email_hint_text,
           _buildTextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            hintText: 'owner@email.com',
+            hintText: l.owner_dialog_email_field_hint,
           ),
         ),
       _Step.emailCode => (
-          'Check your email',
-          'Enter the code just emailed to you.',
+          l.owner_dialog_check_email_title,
+          l.owner_dialog_code_hint_text,
           _buildTextField(
             controller: _emailCodeController,
             keyboardType: TextInputType.number,
@@ -175,7 +180,7 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Resend code',
+                    l.owner_dialog_resend_code,
                     style: GoogleFonts.inter(color: _accent, fontSize: 12),
                   ),
                 ),
@@ -187,7 +192,7 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
       actions: [
         TextButton(
           onPressed: _busy ? null : () => Navigator.of(context).pop(false),
-          child: Text('Cancel', style: GoogleFonts.inter(color: _dim)),
+          child: Text(l.common_cancel, style: GoogleFonts.inter(color: _dim)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -205,7 +210,9 @@ class _OwnerUnlockDialogState extends State<_OwnerUnlockDialog> {
                     color: Colors.white,
                   ),
                 )
-              : Text(_step == _Step.emailCode ? 'Unlock' : 'Next'),
+              : Text(_step == _Step.emailCode
+                  ? l.owner_dialog_unlock
+                  : l.owner_dialog_next),
         ),
       ],
     );

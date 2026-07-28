@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unchained/features/prayer/data/installed_apps_service.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/domain/prayer_strings.dart';
+import 'package:unchained/features/prayer/domain/prayers.dart';
 
 /// Lets the user choose what the prayer gate guards: either EVERY app, or a
 /// hand-picked set. The choice and the per-app selection are persisted live
@@ -25,6 +27,7 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = ref.watch(appLanguageProvider).asData?.value ?? Lang.es;
     final lockAll = ref.watch(lockAllAppsProvider).asData?.value ?? false;
     final locked = ref.watch(lockedAppsProvider).asData?.value ?? const [];
     final lockedPkgs = {for (final a in locked) a.packageName};
@@ -33,24 +36,24 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(
-          'Apps bloqueadas',
+          PS.blockedApps(lang),
           style: GoogleFonts.dmSerifDisplay(color: Colors.white, fontSize: 22),
         ),
       ),
       body: Column(
         children: [
-          _lockAllCard(lockAll),
+          _lockAllCard(lockAll, lang),
           if (!lockAll) ...[
-            _searchField(),
-            Expanded(child: _appList(lockedPkgs)),
+            _searchField(lang),
+            Expanded(child: _appList(lockedPkgs, lang)),
           ] else
-            Expanded(child: _lockAllExplainer()),
+            Expanded(child: _lockAllExplainer(lang)),
         ],
       ),
     );
   }
 
-  Widget _lockAllCard(bool lockAll) {
+  Widget _lockAllCard(bool lockAll, Lang lang) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
@@ -64,7 +67,7 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
         onChanged: (v) =>
             ref.read(prayerRepositoryProvider).setLockAllApps(v),
         title: Text(
-          'Bloquear TODAS las apps',
+          PS.lockAllSwitchTitle(lang),
           style: GoogleFonts.inter(
             color: Colors.white,
             fontSize: 16,
@@ -73,15 +76,15 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
         ),
         subtitle: Text(
           lockAll
-              ? 'Toda app abierta pedirá oración.'
-              : 'Elige abajo qué apps bloquear.',
+              ? PS.lockAllSwitchSubOn(lang)
+              : PS.lockAllSwitchSubOff(lang),
           style: GoogleFonts.inter(color: _dim, fontSize: 13),
         ),
       ),
     );
   }
 
-  Widget _lockAllExplainer() {
+  Widget _lockAllExplainer(Lang lang) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -91,16 +94,14 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
             const Icon(Icons.lock, color: _accent, size: 48),
             const SizedBox(height: 16),
             Text(
-              'Todas las apps quedarán bloqueadas',
+              PS.lockAllExplainerTitle(lang),
               style:
                   GoogleFonts.inter(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'Al abrir cualquier app tendrás que orar para desbloquearlas '
-              'todas durante 24 horas. Desactiva esta opción para elegir apps '
-              'concretas.',
+              PS.lockAllExplainerBody(lang),
               style: GoogleFonts.inter(color: _dim, fontSize: 14, height: 1.5),
               textAlign: TextAlign.center,
             ),
@@ -110,7 +111,7 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
     );
   }
 
-  Widget _searchField() {
+  Widget _searchField(Lang lang) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: TextField(
@@ -118,7 +119,7 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
         style: GoogleFonts.inter(color: Colors.white),
         cursorColor: _accent,
         decoration: InputDecoration(
-          hintText: 'Buscar app…',
+          hintText: PS.searchAppHint(lang),
           hintStyle: GoogleFonts.inter(color: _dim),
           prefixIcon: const Icon(Icons.search, color: _dim),
           filled: true,
@@ -141,7 +142,7 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
     );
   }
 
-  Widget _appList(Set<String> lockedPkgs) {
+  Widget _appList(Set<String> lockedPkgs, Lang lang) {
     final asyncApps = ref.watch(installedAppsProvider);
     return asyncApps.when(
       loading: () => const Center(
@@ -149,7 +150,7 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
       ),
       error: (e, _) => Center(
         child: Text(
-          'No se pudieron cargar las apps.',
+          PS.appsLoadError(lang),
           style: GoogleFonts.inter(color: _dim),
         ),
       ),
@@ -162,7 +163,7 @@ class _AppPickerScreenState extends ConsumerState<AppPickerScreen> {
         if (filtered.isEmpty) {
           return Center(
             child: Text(
-              'Sin resultados.',
+              PS.noResults(lang),
               style: GoogleFonts.inter(color: _dim),
             ),
           );

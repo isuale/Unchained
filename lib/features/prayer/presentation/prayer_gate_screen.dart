@@ -185,7 +185,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   @override
   Widget build(BuildContext context) {
-    final lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
+    final lang = ref.watch(appLanguageProvider).asData?.value ?? Lang.es;
 
     return PopScope(
       canPop: false,

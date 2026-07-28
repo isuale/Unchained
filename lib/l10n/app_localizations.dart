@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,6 +97,7 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('es'),
+    Locale('pt'),
   ];
 
   /// No description provided for @app_title.
@@ -853,6 +855,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Bloqueo'**
   String get nav_blocking;
+
+  /// No description provided for @nav_prayer.
+  ///
+  /// In es, this message translates to:
+  /// **'Oración'**
+  String get nav_prayer;
 
   /// No description provided for @nav_blocklist.
   ///
@@ -1711,6 +1719,570 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Bien'**
   String get onboarding_q8_a4;
+
+  /// No description provided for @footer_inspired_by.
+  ///
+  /// In es, this message translates to:
+  /// **'Inspirado en BlockerX'**
+  String get footer_inspired_by;
+
+  /// No description provided for @guard_card_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Protección contra desinstalación'**
+  String get guard_card_title;
+
+  /// No description provided for @guard_explainer.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando intentes forzar la detención o desinstalar la app, Be Unchained cubre la pantalla y te pide copiar 800 letras de la Escritura en cuatro minutos. Con el administrador de dispositivo activado, el sistema también se niega a desinstalar hasta que lo desactives aquí, lo cual está protegido por el mismo desafío.'**
+  String get guard_explainer;
+
+  /// No description provided for @guard_req_overlay.
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar sobre otras apps'**
+  String get guard_req_overlay;
+
+  /// No description provided for @guard_action_allow.
+  ///
+  /// In es, this message translates to:
+  /// **'Permitir'**
+  String get guard_action_allow;
+
+  /// No description provided for @guard_req_accessibility.
+  ///
+  /// In es, this message translates to:
+  /// **'Vigilante de accesibilidad'**
+  String get guard_req_accessibility;
+
+  /// No description provided for @guard_action_enable.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar'**
+  String get guard_action_enable;
+
+  /// No description provided for @guard_req_device_admin.
+  ///
+  /// In es, this message translates to:
+  /// **'Administrador de dispositivo (bloqueo estricto)'**
+  String get guard_req_device_admin;
+
+  /// No description provided for @guard_action_activate.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar'**
+  String get guard_action_activate;
+
+  /// No description provided for @guard_device_owner_note.
+  ///
+  /// In es, this message translates to:
+  /// **'Propietario del dispositivo: la desinstalación queda bloqueada por completo.'**
+  String get guard_device_owner_note;
+
+  /// No description provided for @guard_grant_both_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'Concede ambos permisos arriba para activar la protección.'**
+  String get guard_grant_both_hint;
+
+  /// No description provided for @guard_turn_on.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar protección'**
+  String get guard_turn_on;
+
+  /// No description provided for @guard_turn_off.
+  ///
+  /// In es, this message translates to:
+  /// **'Desactivar protección'**
+  String get guard_turn_off;
+
+  /// No description provided for @payment_confirming_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmando tu pago…'**
+  String get payment_confirming_title;
+
+  /// No description provided for @payment_confirming_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Esto puede tardar unos segundos mientras Stripe nos avisa.'**
+  String get payment_confirming_body;
+
+  /// No description provided for @payment_not_confirmed_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no pudimos confirmar tu pago'**
+  String get payment_not_confirmed_title;
+
+  /// No description provided for @payment_not_confirmed_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Si completaste el pago, asegúrate de que coincida con el correo que usaste en la página de pago de Stripe y vuelve a intentarlo.'**
+  String get payment_not_confirmed_body;
+
+  /// No description provided for @payment_check_again.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprobar de nuevo'**
+  String get payment_check_again;
+
+  /// No description provided for @common_email_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'tucorreo@ejemplo.com'**
+  String get common_email_hint;
+
+  /// No description provided for @email_dialog_invalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce una dirección de correo válida.'**
+  String get email_dialog_invalid;
+
+  /// No description provided for @email_dialog_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu correo'**
+  String get email_dialog_title;
+
+  /// No description provided for @email_dialog_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo usaremos para confirmar tu pago con Stripe y desbloquear el plan en cuanto se complete.'**
+  String get email_dialog_body;
+
+  /// No description provided for @common_continue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get common_continue;
+
+  /// No description provided for @owner_dialog_wrong_email.
+  ///
+  /// In es, this message translates to:
+  /// **'Correo incorrecto'**
+  String get owner_dialog_wrong_email;
+
+  /// No description provided for @owner_dialog_send_failed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo enviar el código; inténtalo de nuevo'**
+  String get owner_dialog_send_failed;
+
+  /// No description provided for @owner_dialog_resend_failed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo reenviar el código; inténtalo de nuevo'**
+  String get owner_dialog_resend_failed;
+
+  /// No description provided for @owner_dialog_wrong_code.
+  ///
+  /// In es, this message translates to:
+  /// **'Código incorrecto o caducado'**
+  String get owner_dialog_wrong_code;
+
+  /// No description provided for @owner_dialog_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Propietario'**
+  String get owner_dialog_title;
+
+  /// No description provided for @owner_dialog_email_hint_text.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce el correo del propietario para continuar.'**
+  String get owner_dialog_email_hint_text;
+
+  /// No description provided for @owner_dialog_email_field_hint.
+  ///
+  /// In es, this message translates to:
+  /// **'propietario@correo.com'**
+  String get owner_dialog_email_field_hint;
+
+  /// No description provided for @owner_dialog_check_email_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa tu correo'**
+  String get owner_dialog_check_email_title;
+
+  /// No description provided for @owner_dialog_code_hint_text.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce el código que acabamos de enviarte.'**
+  String get owner_dialog_code_hint_text;
+
+  /// No description provided for @owner_dialog_resend_code.
+  ///
+  /// In es, this message translates to:
+  /// **'Reenviar código'**
+  String get owner_dialog_resend_code;
+
+  /// No description provided for @owner_dialog_unlock.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquear'**
+  String get owner_dialog_unlock;
+
+  /// No description provided for @owner_dialog_next.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente'**
+  String get owner_dialog_next;
+
+  /// No description provided for @owner_entry_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Propietario'**
+  String get owner_entry_label;
+
+  /// No description provided for @error_loading_settings.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al cargar la configuración: {error}'**
+  String error_loading_settings(String error);
+
+  /// No description provided for @common_confirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar'**
+  String get common_confirm;
+
+  /// No description provided for @dev_reset_budget_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Reiniciar el presupuesto diario?'**
+  String get dev_reset_budget_title;
+
+  /// No description provided for @dev_reset_budget_body.
+  ///
+  /// In es, this message translates to:
+  /// **'DEV: borra el uso de hoy y el bloqueo de 24h para \"{label}\" para que vuelva a estar disponible de inmediato.'**
+  String dev_reset_budget_body(String label);
+
+  /// No description provided for @dev_reset_budget_body_kept_history.
+  ///
+  /// In es, this message translates to:
+  /// **'DEV: borra el uso de hoy y el bloqueo de 24h para \"{label}\" para que vuelva a estar disponible de inmediato. Se conserva el historial de días anteriores.'**
+  String dev_reset_budget_body_kept_history(String label);
+
+  /// No description provided for @dev_reset_confirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Reiniciar'**
+  String get dev_reset_confirm;
+
+  /// No description provided for @dev_reset_snackbar_success.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto de {label} reiniciado'**
+  String dev_reset_snackbar_success(String label);
+
+  /// No description provided for @dev_reset_snackbar_failed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo reiniciar'**
+  String get dev_reset_snackbar_failed;
+
+  /// No description provided for @blocklist_add_success.
+  ///
+  /// In es, this message translates to:
+  /// **'«{value}» ✓'**
+  String blocklist_add_success(String value);
+
+  /// No description provided for @month_jan.
+  ///
+  /// In es, this message translates to:
+  /// **'ene'**
+  String get month_jan;
+
+  /// No description provided for @month_feb.
+  ///
+  /// In es, this message translates to:
+  /// **'feb'**
+  String get month_feb;
+
+  /// No description provided for @month_mar.
+  ///
+  /// In es, this message translates to:
+  /// **'mar'**
+  String get month_mar;
+
+  /// No description provided for @month_apr.
+  ///
+  /// In es, this message translates to:
+  /// **'abr'**
+  String get month_apr;
+
+  /// No description provided for @month_may.
+  ///
+  /// In es, this message translates to:
+  /// **'may'**
+  String get month_may;
+
+  /// No description provided for @month_jun.
+  ///
+  /// In es, this message translates to:
+  /// **'jun'**
+  String get month_jun;
+
+  /// No description provided for @month_jul.
+  ///
+  /// In es, this message translates to:
+  /// **'jul'**
+  String get month_jul;
+
+  /// No description provided for @month_aug.
+  ///
+  /// In es, this message translates to:
+  /// **'ago'**
+  String get month_aug;
+
+  /// No description provided for @month_sep.
+  ///
+  /// In es, this message translates to:
+  /// **'sep'**
+  String get month_sep;
+
+  /// No description provided for @month_oct.
+  ///
+  /// In es, this message translates to:
+  /// **'oct'**
+  String get month_oct;
+
+  /// No description provided for @month_nov.
+  ///
+  /// In es, this message translates to:
+  /// **'nov'**
+  String get month_nov;
+
+  /// No description provided for @month_dec.
+  ///
+  /// In es, this message translates to:
+  /// **'dic'**
+  String get month_dec;
+
+  /// No description provided for @settings_section_about.
+  ///
+  /// In es, this message translates to:
+  /// **'Acerca de'**
+  String get settings_section_about;
+
+  /// No description provided for @settings_report_bug_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar un error'**
+  String get settings_report_bug_title;
+
+  /// No description provided for @settings_designed_by.
+  ///
+  /// In es, this message translates to:
+  /// **'Diseñado y desarrollado por\n{name}'**
+  String settings_designed_by(String name);
+
+  /// No description provided for @settings_section_language.
+  ///
+  /// In es, this message translates to:
+  /// **'Idioma'**
+  String get settings_section_language;
+
+  /// No description provided for @terms_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Términos y Condiciones'**
+  String get terms_title;
+
+  /// No description provided for @terms_gate_banner.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor, lee estos Términos y Condiciones antes de usar el panel de control. Si decides no leerlos, usas esta aplicación bajo tu entera responsabilidad.'**
+  String get terms_gate_banner;
+
+  /// No description provided for @terms_footer_note.
+  ///
+  /// In es, this message translates to:
+  /// **'Al continuar, confirmas que has leído, entendido y aceptas estos Términos y Condiciones.'**
+  String get terms_footer_note;
+
+  /// No description provided for @terms_agree_button.
+  ///
+  /// In es, this message translates to:
+  /// **'He leído y acepto'**
+  String get terms_agree_button;
+
+  /// No description provided for @terms_continue_risk_button.
+  ///
+  /// In es, this message translates to:
+  /// **'No quiero leer: continuar bajo mi propio riesgo'**
+  String get terms_continue_risk_button;
+
+  /// No description provided for @terms_dialog_title.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Continuar sin leer?'**
+  String get terms_dialog_title;
+
+  /// No description provided for @terms_dialog_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Se recomienda encarecidamente leer los Términos y Condiciones. Si decides continuar sin leerlos, lo haces bajo tu entera responsabilidad y los aceptas en su totalidad.'**
+  String get terms_dialog_body;
+
+  /// No description provided for @terms_dialog_go_back.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver'**
+  String get terms_dialog_go_back;
+
+  /// No description provided for @terms_dialog_take_responsibility.
+  ///
+  /// In es, this message translates to:
+  /// **'Asumo la responsabilidad'**
+  String get terms_dialog_take_responsibility;
+
+  /// No description provided for @terms_owner_credit_label.
+  ///
+  /// In es, this message translates to:
+  /// **'Propietario y desarrollador'**
+  String get terms_owner_credit_label;
+
+  /// No description provided for @terms_owner_contact.
+  ///
+  /// In es, this message translates to:
+  /// **'{email}  (reportar un error)'**
+  String terms_owner_contact(String email);
+
+  /// No description provided for @terms_section1_title.
+  ///
+  /// In es, this message translates to:
+  /// **'1. Aceptación de estos Términos'**
+  String get terms_section1_title;
+
+  /// No description provided for @terms_section1_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Be Unchained («la aplicación») es una herramienta personal que te ayuda a bloquear contenido para adultos y contenido que distrae. Al usar la aplicación, aceptas estos Términos y Condiciones. Si no estás de acuerdo con alguna parte de ellos, no debes usar la aplicación.'**
+  String get terms_section1_body;
+
+  /// No description provided for @terms_section2_title.
+  ///
+  /// In es, this message translates to:
+  /// **'2. Finalidad y uso previsto'**
+  String get terms_section2_title;
+
+  /// No description provided for @terms_section2_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La aplicación tiene como fin apoyar hábitos digitales saludables filtrando contenido a nivel de red en tu propio dispositivo, y ayudándote a gestionar y limitar el tiempo dedicado a aplicaciones que distraen. Es únicamente una ayuda de autoayuda y no sustituye el asesoramiento o tratamiento profesional, médico o psicológico.'**
+  String get terms_section2_body;
+
+  /// No description provided for @terms_section3_title.
+  ///
+  /// In es, this message translates to:
+  /// **'3. Redes sociales y límites de tiempo de uso'**
+  String get terms_section3_title;
+
+  /// No description provided for @terms_section3_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Además de bloquear contenido para adultos, la aplicación puede imponer un límite de tiempo diario en Instagram Reels, YouTube Shorts, TikTok, Historias de Snapchat, o cualquier otra aplicación que elijas («Límites de tiempo de aplicaciones»). Esto funciona detectando la aplicación en tu pantalla mediante el Servicio de Accesibilidad de Android; la aplicación no monitorea tu actividad en ningún otro lugar ni la envía fuera de tu dispositivo. Si activas el modo «Todas las redes sociales», una vez que se agote tu límite diario de Instagram o YouTube, se bloqueará la aplicación entera por el resto del día, no solo los Reels o Shorts. En cuanto se agota cualquier límite diario, esa aplicación o feed queda bloqueado durante 24 horas completas como medida contra los intentos de evadir el límite, y este no se puede cambiar ni eliminar durante ese tiempo.'**
+  String get terms_section3_body;
+
+  /// No description provided for @terms_section4_title.
+  ///
+  /// In es, this message translates to:
+  /// **'4. Bloqueo de aplicaciones mediante oración (función opcional, de carácter religioso)'**
+  String get terms_section4_title;
+
+  /// No description provided for @terms_section4_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La aplicación incluye una función opcional que bloquea las aplicaciones que elijas (o todas) detrás de una breve oración cristiana —una oración de acción de gracias o el Rosario— que debe completarse antes de que la aplicación vuelva a estar accesible durante un número determinado de horas. Esta función es opcional y debes activarla tú mismo; su contenido es de carácter religioso y se ofrece únicamente como una herramienta personal de responsabilidad, no como instrucción o consejo religioso. Dado que su contenido es específicamente cristiano, puedes desactivar la función por completo en cualquier momento —sea cual sea tu fe o si no tienes ninguna— usando el interruptor «Bloqueo con oración» al final de la pestaña de oración. Al desactivarla, se detiene todo bloqueo basado en oración y se elimina el contenido religioso de esa pestaña; esto no afecta al bloqueo de contenido ni a ninguna otra protección. También puedes dejarla activada y elegir exactamente a qué aplicaciones (si acaso) se aplica.'**
+  String get terms_section4_body;
+
+  /// No description provided for @terms_section5_title.
+  ///
+  /// In es, this message translates to:
+  /// **'5. Sin garantía de eficacia'**
+  String get terms_section5_title;
+
+  /// No description provided for @terms_section5_body.
+  ///
+  /// In es, this message translates to:
+  /// **'El bloqueo de contenido se basa en el filtrado de dominios a nivel de DNS. Ningún filtro es perfecto: es posible que algo de contenido no deseado llegue a pasar, y que ocasionalmente se bloquee contenido legítimo. La aplicación no puede garantizar que todo sitio o aplicación dañina quede bloqueada en todo momento. Las funciones que dependen del Servicio de Accesibilidad de Android —Límites de tiempo de aplicaciones, el modo «Todas las redes sociales» y el bloqueo con oración— requieren que ese servicio permanezca activado; desactivarlo en la configuración de tu dispositivo hará que esas funciones dejen de funcionar.'**
+  String get terms_section5_body;
+
+  /// No description provided for @terms_section6_title.
+  ///
+  /// In es, this message translates to:
+  /// **'6. Uso bajo tu propia responsabilidad'**
+  String get terms_section6_title;
+
+  /// No description provided for @terms_section6_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Usas la aplicación bajo tu propia responsabilidad y riesgo. Leer estos términos es responsabilidad tuya. Si decides continuar sin leerlos, los aceptas en su totalidad y asumes toda la responsabilidad por el uso que hagas de la aplicación y cualquier resultado que se derive de ello.'**
+  String get terms_section6_body;
+
+  /// No description provided for @terms_section7_title.
+  ///
+  /// In es, this message translates to:
+  /// **'7. Tus datos y tu privacidad'**
+  String get terms_section7_title;
+
+  /// No description provided for @terms_section7_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La aplicación almacena tu configuración y los resultados de tu evaluación localmente en tu dispositivo. Esto incluye las aplicaciones que elijas para los Límites de tiempo o el bloqueo con oración, y el historial local de oraciones completadas que se usa para mostrar tu racha. No vende tus datos personales. Las solicitudes de red se procesan en el propio dispositivo para decidir qué bloquear; la aplicación no requiere una cuenta para funcionar.'**
+  String get terms_section7_body;
+
+  /// No description provided for @terms_section8_title.
+  ///
+  /// In es, this message translates to:
+  /// **'8. Permisos del dispositivo'**
+  String get terms_section8_title;
+
+  /// No description provided for @terms_section8_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Para funcionar, la aplicación puede usar un servicio VPN local para el filtrado de DNS y, si los activas, el Servicio de Accesibilidad y las funciones de administración de dispositivo de Android. El Servicio de Accesibilidad se usa para la protección contra desinstalación, para hacer cumplir los Límites de tiempo de redes sociales/aplicaciones, y para el bloqueo con oración. Puedes revisar o revocar estos permisos en la configuración de tu dispositivo en cualquier momento, lo cual puede reducir o desactivar la protección correspondiente.'**
+  String get terms_section8_body;
+
+  /// No description provided for @terms_section9_title.
+  ///
+  /// In es, this message translates to:
+  /// **'9. Limitación de responsabilidad'**
+  String get terms_section9_title;
+
+  /// No description provided for @terms_section9_body.
+  ///
+  /// In es, this message translates to:
+  /// **'En la máxima medida permitida por la ley, el propietario y desarrollador de la aplicación no será responsable de ningún daño directo, indirecto o incidental derivado del uso, o de la imposibilidad de uso, de la aplicación, incluyendo cualquier contenido que sea o no bloqueado.'**
+  String get terms_section9_body;
+
+  /// No description provided for @terms_section10_title.
+  ///
+  /// In es, this message translates to:
+  /// **'10. Cambios en estos Términos'**
+  String get terms_section10_title;
+
+  /// No description provided for @terms_section10_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Estos Términos pueden actualizarse a medida que la aplicación evolucione. Seguir usando la aplicación después de una actualización significa que aceptas los Términos revisados.'**
+  String get terms_section10_body;
+
+  /// No description provided for @terms_section11_title.
+  ///
+  /// In es, this message translates to:
+  /// **'11. Contacto y soporte'**
+  String get terms_section11_title;
+
+  /// No description provided for @terms_section11_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Para preguntas, reportes de errores o soporte, contacta al propietario y desarrollador {name} en {email}.'**
+  String terms_section11_body(String name, String email);
 }
 
 class _AppLocalizationsDelegate
@@ -1724,7 +2296,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+      <String>['en', 'es', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1737,6 +2309,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(

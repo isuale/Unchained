@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
+import 'package:unchained/l10n/app_localizations.dart';
 import 'package:unchained/shared/app_credits.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -58,33 +59,32 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
   }
 
   Future<void> _continueAtOwnRisk() async {
+    final l = AppLocalizations.of(context)!;
     final proceed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: _bg,
-        title: const Text(
-          'Continue without reading?',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          l.terms_dialog_title,
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Reading the Terms & Conditions is strongly recommended. If you '
-          'choose to continue without reading them, you do so entirely at your '
-          'own responsibility and accept them in full.',
-          style: TextStyle(color: _body),
+        content: Text(
+          l.terms_dialog_body,
+          style: const TextStyle(color: _body),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(
-              'Go back',
-              style: TextStyle(color: _muted),
+            child: Text(
+              l.terms_dialog_go_back,
+              style: const TextStyle(color: _muted),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'I take responsibility',
-              style: TextStyle(
+            child: Text(
+              l.terms_dialog_take_responsibility,
+              style: const TextStyle(
                 color: _primary,
                 fontWeight: FontWeight.w600,
               ),
@@ -101,6 +101,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final isGate = widget.isGate;
     // In gate mode the screen is back-proof: the system back gesture/button
     // does nothing, so the user can only leave by choosing a button.
@@ -112,7 +113,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
           backgroundColor: Colors.black,
           elevation: 0,
           automaticallyImplyLeading: !isGate,
-          title: const Text('Terms & Conditions'),
+          title: Text(l.terms_title),
           centerTitle: true,
         ),
         body: SafeArea(
@@ -132,18 +133,15 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                             color: _primary.withValues(alpha: 0.35),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.info_outline, color: _primary, size: 22),
-                            SizedBox(width: 12),
+                            const Icon(Icons.info_outline, color: _primary, size: 22),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Please read these Terms & Conditions before '
-                                'using the control panel. If you choose not to '
-                                'read them, you use this app entirely at your '
-                                'own responsibility.',
-                                style: TextStyle(
+                                l.terms_gate_banner,
+                                style: const TextStyle(
                                   color: _body,
                                   fontSize: 14,
                                   height: 1.4,
@@ -155,12 +153,11 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                       ),
                       const SizedBox(height: 24),
                     ],
-                    ..._terms.map(_section),
+                    ..._termsFor(l).map(_section),
                     const SizedBox(height: 8),
-                    const Text(
-                      'By continuing you confirm that you have read, '
-                      'understood, and agree to these Terms & Conditions.',
-                      style: TextStyle(
+                    Text(
+                      l.terms_footer_note,
+                      style: const TextStyle(
                         color: _muted,
                         fontSize: 13,
                         height: 1.4,
@@ -172,7 +169,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                   ],
                 ),
               ),
-              if (isGate) _gateActions(),
+              if (isGate) _gateActions(l),
             ],
           ),
         ),
@@ -180,7 +177,7 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
     );
   }
 
-  Widget _gateActions() {
+  Widget _gateActions(AppLocalizations l) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: const BoxDecoration(
@@ -202,19 +199,19 @@ class _TermsScreenState extends ConsumerState<TermsScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text(
-                'I have read and I agree',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              child: Text(
+                l.terms_agree_button,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: _continueAtOwnRisk,
-            child: const Text(
-              "I don't want to read — continue at my own risk",
+            child: Text(
+              l.terms_continue_risk_button,
               textAlign: TextAlign.center,
-              style: TextStyle(color: _muted, fontSize: 13),
+              style: const TextStyle(color: _muted, fontSize: 13),
             ),
           ),
         ],
@@ -256,6 +253,7 @@ class _OwnerCredit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -265,9 +263,9 @@ class _OwnerCredit extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Owner & developer',
-            style: TextStyle(
+          Text(
+            l.terms_owner_credit_label,
+            style: const TextStyle(
               color: Color(0xFF7A8294),
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -296,7 +294,7 @@ class _OwnerCredit extends StatelessWidget {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      '${AppCredits.supportEmail}  (report a bug)',
+                      l.terms_owner_contact(AppCredits.supportEmail),
                       style: const TextStyle(
                         color: Color(0xFF8AA6FF),
                         fontSize: 14,
@@ -319,104 +317,19 @@ class _TermsSection {
   final String body;
 }
 
-const List<_TermsSection> _terms = [
-  _TermsSection(
-    '1. Acceptance of these Terms',
-    'Be Unchained ("the app") is a personal tool that helps you block adult and '
-        'distracting content. By using the app you agree to these Terms & '
-        'Conditions. If you do not agree with any part of them, you should not '
-        'use the app.',
-  ),
-  _TermsSection(
-    '2. Purpose and intended use',
-    'The app is intended to support healthy digital habits by filtering '
-        'content at the network level on your own device, and by helping you '
-        'manage and limit time spent in distracting apps. It is a self-help '
-        'aid only and is not a substitute for professional, medical, or '
-        'psychological advice or treatment.',
-  ),
-  _TermsSection(
-    '3. Social media & app time limits',
-    'Beyond blocking adult content, the app can enforce a daily time limit on '
-        'Instagram Reels, YouTube Shorts, TikTok, Snapchat Stories, or any '
-        'other app you choose ("App Time Limits"). This works by detecting '
-        'the app on your screen using Android\'s Accessibility Service — the '
-        'app does not monitor your activity elsewhere or send it off your '
-        'device. If you turn on "All social media" mode, once your daily '
-        'limit for Instagram or YouTube runs out the entire app is blocked '
-        'for the rest of the day, not just Reels or Shorts. Once any daily '
-        'limit runs out, that app or feed is locked for a full 24 hours as an '
-        'anti-circumvention measure, and the limit cannot be changed or '
-        'removed during that time.',
-  ),
-  _TermsSection(
-    '4. Prayer-based app lock (optional, faith-based feature)',
-    'The app includes an optional feature that locks apps you choose (or '
-        'every app) behind a short Christian prayer — a Thanksgiving prayer '
-        'or the Rosary — which must be completed before the app becomes '
-        'accessible again for a set number of hours. This feature is opt-in, '
-        'its content is religious in nature, and it is offered purely as a '
-        'personal accountability tool, not as religious instruction or '
-        'counsel. Because its content is specifically Christian, you may '
-        'switch the entire feature off at any time — whatever your faith or '
-        'lack of one — using the "Prayer app lock" switch at the bottom of the '
-        'prayer tab. Turning it off stops all prayer-based app locking and '
-        'removes the religious content from that tab; it does not affect '
-        'content blocking or any other protection. You can also leave it on '
-        'and choose exactly which apps (if any) it applies to.',
-  ),
-  _TermsSection(
-    '5. No guarantee of effectiveness',
-    'Content blocking is based on DNS-level domain filtering. No filter is '
-        'perfect: some unwanted content may still get through, and some '
-        'legitimate content may occasionally be blocked. The app cannot '
-        'guarantee that every harmful site or app will be blocked at all '
-        'times. Features that rely on Android\'s Accessibility Service — App '
-        'Time Limits, "All social media" mode, and the prayer-based app lock '
-        '— depend on that service staying enabled; disabling it in your '
-        'device settings will stop those features from working.',
-  ),
-  _TermsSection(
-    '6. Use at your own responsibility',
-    'You use the app at your own responsibility and risk. Reading these terms '
-        'is your responsibility. If you choose to continue without reading '
-        'them, you accept them in full and assume all responsibility for your '
-        'use of the app and any outcome that results from it.',
-  ),
-  _TermsSection(
-    '7. Your data and privacy',
-    'The app stores your settings and assessment results locally on your '
-        'device. This includes any apps you choose for App Time Limits or the '
-        'prayer-based app lock, and the local history of completed prayers '
-        'used to show your streak. It does not sell your personal data. '
-        'Network requests are processed on-device to decide what to block; '
-        'the app does not require an account to function.',
-  ),
-  _TermsSection(
-    '8. Device permissions',
-    'To work, the app may use a local VPN service for DNS filtering and, if '
-        'you enable them, Android\'s Accessibility Service and '
-        'device-administration features. The Accessibility Service is used '
-        'for uninstall protection, for enforcing Social media / App Time '
-        'Limits, and for the prayer-based app lock. You can review or revoke '
-        'these permissions in your device settings at any time, which may '
-        'reduce or disable the corresponding protection.',
-  ),
-  _TermsSection(
-    '9. Limitation of liability',
-    'To the maximum extent permitted by law, the owner and developer of the '
-        'app shall not be liable for any direct, indirect, or incidental '
-        'damages arising from the use of, or inability to use, the app, '
-        'including any content that is or is not blocked.',
-  ),
-  _TermsSection(
-    '10. Changes to these Terms',
-    'These Terms may be updated as the app evolves. Continued use of the app '
-        'after an update means you accept the revised Terms.',
-  ),
-  _TermsSection(
-    '11. Contact & support',
-    'For questions, bug reports, or support, contact the owner and developer '
-        '${AppCredits.ownerName} at ${AppCredits.supportEmail}.',
-  ),
-];
+List<_TermsSection> _termsFor(AppLocalizations l) => [
+      _TermsSection(l.terms_section1_title, l.terms_section1_body),
+      _TermsSection(l.terms_section2_title, l.terms_section2_body),
+      _TermsSection(l.terms_section3_title, l.terms_section3_body),
+      _TermsSection(l.terms_section4_title, l.terms_section4_body),
+      _TermsSection(l.terms_section5_title, l.terms_section5_body),
+      _TermsSection(l.terms_section6_title, l.terms_section6_body),
+      _TermsSection(l.terms_section7_title, l.terms_section7_body),
+      _TermsSection(l.terms_section8_title, l.terms_section8_body),
+      _TermsSection(l.terms_section9_title, l.terms_section9_body),
+      _TermsSection(l.terms_section10_title, l.terms_section10_body),
+      _TermsSection(
+        l.terms_section11_title,
+        l.terms_section11_body(AppCredits.ownerName, AppCredits.supportEmail),
+      ),
+    ];

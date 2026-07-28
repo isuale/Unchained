@@ -151,6 +151,7 @@
   "app_limits_minutes_body": "Permitido hoy antes de bloquearse por el resto del día.",
   "app_limits_add": "Añadir",
   "nav_blocking": "Bloqueo",
+  "nav_prayer": "Oración",
   "nav_blocklist": "Lista",
   "nav_progress": "Progreso",
   "nav_settings": "Ajustes",
@@ -360,5 +361,140 @@
   "onboarding_q8_a1": "Muy culpable / Me odio a mí mismo",
   "onboarding_q8_a2": "Culpable",
   "onboarding_q8_a3": "Indiferente",
-  "onboarding_q8_a4": "Bien"
+  "onboarding_q8_a4": "Bien",
+  "footer_inspired_by": "Inspirado en BlockerX",
+  "guard_card_title": "Protección contra desinstalación",
+  "guard_explainer": "Cuando intentes forzar la detención o desinstalar la app, Be Unchained cubre la pantalla y te pide copiar 800 letras de la Escritura en cuatro minutos. Con el administrador de dispositivo activado, el sistema también se niega a desinstalar hasta que lo desactives aquí, lo cual está protegido por el mismo desafío.",
+  "guard_req_overlay": "Mostrar sobre otras apps",
+  "guard_action_allow": "Permitir",
+  "guard_req_accessibility": "Vigilante de accesibilidad",
+  "guard_action_enable": "Activar",
+  "guard_req_device_admin": "Administrador de dispositivo (bloqueo estricto)",
+  "guard_action_activate": "Activar",
+  "guard_device_owner_note": "Propietario del dispositivo: la desinstalación queda bloqueada por completo.",
+  "guard_grant_both_hint": "Concede ambos permisos arriba para activar la protección.",
+  "guard_turn_on": "Activar protección",
+  "guard_turn_off": "Desactivar protección",
+  "payment_confirming_title": "Confirmando tu pago…",
+  "payment_confirming_body": "Esto puede tardar unos segundos mientras Stripe nos avisa.",
+  "payment_not_confirmed_title": "Aún no pudimos confirmar tu pago",
+  "payment_not_confirmed_body": "Si completaste el pago, asegúrate de que coincida con el correo que usaste en la página de pago de Stripe y vuelve a intentarlo.",
+  "payment_check_again": "Comprobar de nuevo",
+  "common_email_hint": "tucorreo@ejemplo.com",
+  "email_dialog_invalid": "Introduce una dirección de correo válida.",
+  "email_dialog_title": "Tu correo",
+  "email_dialog_body": "Lo usaremos para confirmar tu pago con Stripe y desbloquear el plan en cuanto se complete.",
+  "common_continue": "Continuar",
+  "owner_dialog_wrong_email": "Correo incorrecto",
+  "owner_dialog_send_failed": "No se pudo enviar el código; inténtalo de nuevo",
+  "owner_dialog_resend_failed": "No se pudo reenviar el código; inténtalo de nuevo",
+  "owner_dialog_wrong_code": "Código incorrecto o caducado",
+  "owner_dialog_title": "Propietario",
+  "owner_dialog_email_hint_text": "Introduce el correo del propietario para continuar.",
+  "owner_dialog_email_field_hint": "propietario@correo.com",
+  "owner_dialog_check_email_title": "Revisa tu correo",
+  "owner_dialog_code_hint_text": "Introduce el código que acabamos de enviarte.",
+  "owner_dialog_resend_code": "Reenviar código",
+  "owner_dialog_unlock": "Desbloquear",
+  "owner_dialog_next": "Siguiente",
+  "owner_entry_label": "Propietario",
+  "error_loading_settings": "Error al cargar la configuración: {error}",
+  "@error_loading_settings": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "common_confirm": "Confirmar",
+  "dev_reset_budget_title": "¿Reiniciar el presupuesto diario?",
+  "dev_reset_budget_body": "DEV: borra el uso de hoy y el bloqueo de 24h para \"{label}\" para que vuelva a estar disponible de inmediato.",
+  "@dev_reset_budget_body": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_budget_body_kept_history": "DEV: borra el uso de hoy y el bloqueo de 24h para \"{label}\" para que vuelva a estar disponible de inmediato. Se conserva el historial de días anteriores.",
+  "@dev_reset_budget_body_kept_history": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_confirm": "Reiniciar",
+  "dev_reset_snackbar_success": "Presupuesto de {label} reiniciado",
+  "@dev_reset_snackbar_success": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_snackbar_failed": "No se pudo reiniciar",
+  "blocklist_add_success": "«{value}» ✓",
+  "@blocklist_add_success": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "month_jan": "ene",
+  "month_feb": "feb",
+  "month_mar": "mar",
+  "month_apr": "abr",
+  "month_may": "may",
+  "month_jun": "jun",
+  "month_jul": "jul",
+  "month_aug": "ago",
+  "month_sep": "sep",
+  "month_oct": "oct",
+  "month_nov": "nov",
+  "month_dec": "dic",
+  "settings_section_about": "Acerca de",
+  "settings_report_bug_title": "Reportar un error",
+  "settings_designed_by": "Diseñado y desarrollado por\n{name}",
+  "@settings_designed_by": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "settings_section_language": "Idioma",
+  "terms_title": "Términos y Condiciones",
+  "terms_gate_banner": "Por favor, lee estos Términos y Condiciones antes de usar el panel de control. Si decides no leerlos, usas esta aplicación bajo tu entera responsabilidad.",
+  "terms_footer_note": "Al continuar, confirmas que has leído, entendido y aceptas estos Términos y Condiciones.",
+  "terms_agree_button": "He leído y acepto",
+  "terms_continue_risk_button": "No quiero leer: continuar bajo mi propio riesgo",
+  "terms_dialog_title": "¿Continuar sin leer?",
+  "terms_dialog_body": "Se recomienda encarecidamente leer los Términos y Condiciones. Si decides continuar sin leerlos, lo haces bajo tu entera responsabilidad y los aceptas en su totalidad.",
+  "terms_dialog_go_back": "Volver",
+  "terms_dialog_take_responsibility": "Asumo la responsabilidad",
+  "terms_owner_credit_label": "Propietario y desarrollador",
+  "terms_owner_contact": "{email}  (reportar un error)",
+  "@terms_owner_contact": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "terms_section1_title": "1. Aceptación de estos Términos",
+  "terms_section1_body": "Be Unchained («la aplicación») es una herramienta personal que te ayuda a bloquear contenido para adultos y contenido que distrae. Al usar la aplicación, aceptas estos Términos y Condiciones. Si no estás de acuerdo con alguna parte de ellos, no debes usar la aplicación.",
+  "terms_section2_title": "2. Finalidad y uso previsto",
+  "terms_section2_body": "La aplicación tiene como fin apoyar hábitos digitales saludables filtrando contenido a nivel de red en tu propio dispositivo, y ayudándote a gestionar y limitar el tiempo dedicado a aplicaciones que distraen. Es únicamente una ayuda de autoayuda y no sustituye el asesoramiento o tratamiento profesional, médico o psicológico.",
+  "terms_section3_title": "3. Redes sociales y límites de tiempo de uso",
+  "terms_section3_body": "Además de bloquear contenido para adultos, la aplicación puede imponer un límite de tiempo diario en Instagram Reels, YouTube Shorts, TikTok, Historias de Snapchat, o cualquier otra aplicación que elijas («Límites de tiempo de aplicaciones»). Esto funciona detectando la aplicación en tu pantalla mediante el Servicio de Accesibilidad de Android; la aplicación no monitorea tu actividad en ningún otro lugar ni la envía fuera de tu dispositivo. Si activas el modo «Todas las redes sociales», una vez que se agote tu límite diario de Instagram o YouTube, se bloqueará la aplicación entera por el resto del día, no solo los Reels o Shorts. En cuanto se agota cualquier límite diario, esa aplicación o feed queda bloqueado durante 24 horas completas como medida contra los intentos de evadir el límite, y este no se puede cambiar ni eliminar durante ese tiempo.",
+  "terms_section4_title": "4. Bloqueo de aplicaciones mediante oración (función opcional, de carácter religioso)",
+  "terms_section4_body": "La aplicación incluye una función opcional que bloquea las aplicaciones que elijas (o todas) detrás de una breve oración cristiana —una oración de acción de gracias o el Rosario— que debe completarse antes de que la aplicación vuelva a estar accesible durante un número determinado de horas. Esta función es opcional y debes activarla tú mismo; su contenido es de carácter religioso y se ofrece únicamente como una herramienta personal de responsabilidad, no como instrucción o consejo religioso. Dado que su contenido es específicamente cristiano, puedes desactivar la función por completo en cualquier momento —sea cual sea tu fe o si no tienes ninguna— usando el interruptor «Bloqueo con oración» al final de la pestaña de oración. Al desactivarla, se detiene todo bloqueo basado en oración y se elimina el contenido religioso de esa pestaña; esto no afecta al bloqueo de contenido ni a ninguna otra protección. También puedes dejarla activada y elegir exactamente a qué aplicaciones (si acaso) se aplica.",
+  "terms_section5_title": "5. Sin garantía de eficacia",
+  "terms_section5_body": "El bloqueo de contenido se basa en el filtrado de dominios a nivel de DNS. Ningún filtro es perfecto: es posible que algo de contenido no deseado llegue a pasar, y que ocasionalmente se bloquee contenido legítimo. La aplicación no puede garantizar que todo sitio o aplicación dañina quede bloqueada en todo momento. Las funciones que dependen del Servicio de Accesibilidad de Android —Límites de tiempo de aplicaciones, el modo «Todas las redes sociales» y el bloqueo con oración— requieren que ese servicio permanezca activado; desactivarlo en la configuración de tu dispositivo hará que esas funciones dejen de funcionar.",
+  "terms_section6_title": "6. Uso bajo tu propia responsabilidad",
+  "terms_section6_body": "Usas la aplicación bajo tu propia responsabilidad y riesgo. Leer estos términos es responsabilidad tuya. Si decides continuar sin leerlos, los aceptas en su totalidad y asumes toda la responsabilidad por el uso que hagas de la aplicación y cualquier resultado que se derive de ello.",
+  "terms_section7_title": "7. Tus datos y tu privacidad",
+  "terms_section7_body": "La aplicación almacena tu configuración y los resultados de tu evaluación localmente en tu dispositivo. Esto incluye las aplicaciones que elijas para los Límites de tiempo o el bloqueo con oración, y el historial local de oraciones completadas que se usa para mostrar tu racha. No vende tus datos personales. Las solicitudes de red se procesan en el propio dispositivo para decidir qué bloquear; la aplicación no requiere una cuenta para funcionar.",
+  "terms_section8_title": "8. Permisos del dispositivo",
+  "terms_section8_body": "Para funcionar, la aplicación puede usar un servicio VPN local para el filtrado de DNS y, si los activas, el Servicio de Accesibilidad y las funciones de administración de dispositivo de Android. El Servicio de Accesibilidad se usa para la protección contra desinstalación, para hacer cumplir los Límites de tiempo de redes sociales/aplicaciones, y para el bloqueo con oración. Puedes revisar o revocar estos permisos en la configuración de tu dispositivo en cualquier momento, lo cual puede reducir o desactivar la protección correspondiente.",
+  "terms_section9_title": "9. Limitación de responsabilidad",
+  "terms_section9_body": "En la máxima medida permitida por la ley, el propietario y desarrollador de la aplicación no será responsable de ningún daño directo, indirecto o incidental derivado del uso, o de la imposibilidad de uso, de la aplicación, incluyendo cualquier contenido que sea o no bloqueado.",
+  "terms_section10_title": "10. Cambios en estos Términos",
+  "terms_section10_body": "Estos Términos pueden actualizarse a medida que la aplicación evolucione. Seguir usando la aplicación después de una actualización significa que aceptas los Términos revisados.",
+  "terms_section11_title": "11. Contacto y soporte",
+  "terms_section11_body": "Para preguntas, reportes de errores o soporte, contacta al propietario y desarrollador {name} en {email}.",
+  "@terms_section11_body": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "email": { "type": "String" }
+    }
+  }
 }

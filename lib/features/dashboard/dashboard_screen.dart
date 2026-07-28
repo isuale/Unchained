@@ -55,10 +55,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             activeIcon: const Icon(Icons.shield),
             label: l.nav_blocking,
           ),
-        _Tab.prayer => const BottomNavigationBarItem(
-            icon: Icon(Icons.volunteer_activism_outlined),
-            activeIcon: Icon(Icons.volunteer_activism),
-            label: 'Oración',
+        _Tab.prayer => BottomNavigationBarItem(
+            icon: const Icon(Icons.volunteer_activism_outlined),
+            activeIcon: const Icon(Icons.volunteer_activism),
+            label: l.nav_prayer,
           ),
         _Tab.blocklist => BottomNavigationBarItem(
             icon: const Icon(Icons.block_flipped),

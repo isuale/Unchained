@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unchained/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Single source of truth for the app's authorship credit and support contact.
@@ -10,11 +11,6 @@ class AppCredits {
   static const String ownerName = 'Alessandro Lozada Alvarez';
   static const String supportEmail = 'imblueale@gmail.com';
   static const String bugReportSubject = 'Be Unchained — Bug report';
-
-  /// Attribution for the app that inspired this one. Deliberately worded as
-  /// "inspired by" rather than a bare name: Be Unchained is not affiliated with,
-  /// endorsed by, or a product of BlockerX, and the footer must not suggest it is.
-  static const String inspirationCredit = 'Inspired by BlockerX';
 
   /// Opens the user's mail app with a pre-filled message to the support address.
   /// Silently no-ops if no mail client is available, so it is safe to call from
@@ -45,6 +41,7 @@ class AppFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     if (keyboardOpen) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context)!;
 
     return Material(
       color: Colors.black,
@@ -78,9 +75,9 @@ class AppFooter extends StatelessWidget {
                   ),
                 ),
               ),
-              const Text(
-                '  ·  ${AppCredits.inspirationCredit}',
-                style: TextStyle(
+              Text(
+                '  ·  ${l.footer_inspired_by}',
+                style: const TextStyle(
                   color: _muted,
                   fontSize: 10.5,
                   height: 1.2,

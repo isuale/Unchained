@@ -1,0 +1,500 @@
+{
+  "@@locale": "pt",
+  "app_title": "Be Unchained",
+  "welcome_tagline": "Break Free. Live Free.",
+  "welcome_get_started": "Começar",
+  "welcome_have_account": "Já tens conta?",
+  "welcome_sign_in": "Iniciar sessão",
+  "ai_plan_recommended_label": "Recomendado para ti",
+  "ai_plan_title": "Plano IA",
+  "ai_plan_subtitle": "Personalizado à tua situação",
+  "ai_plan_price_period": "por mês",
+  "ai_plan_currency": "EUR",
+  "ai_plan_feature_1": "Bloqueia todos os sites pornográficos",
+  "ai_plan_feature_2": "Sem anúncios",
+  "ai_plan_feature_3": "Escolhe a duração do teu bloqueio",
+  "ai_plan_feature_4": "Bloqueia apps com temporizador",
+  "ai_plan_feature_5": "A IA personalizada calcula os dias exatos",
+  "ai_plan_cta": "Começar Plano IA",
+  "ai_plan_view_others": "Ver outros planos",
+  "analyzing_title": "A analisar o teu perfil",
+  "analyzing_step_1": "A analisar os teus gatilhos...",
+  "analyzing_step_2": "A avaliar a frequência...",
+  "analyzing_step_3": "A calcular a gravidade...",
+  "analyzing_step_4": "A preparar o teu plano...",
+  "analyzing_addicted_label": "% de dependência",
+  "analyzing_recommend_label": "Recomendamos",
+  "analyzing_plan_free_trial_name": "Teste Gratuito",
+  "analyzing_plan_free_trial_desc": "Experimenta sem compromisso, grátis durante 1 mês",
+  "analyzing_plan_monthly_name": "Mensal",
+  "analyzing_plan_monthly_desc": "Controlo personalizado do teu bloqueio",
+  "analyzing_plan_ai_plan_name": "Plano IA",
+  "analyzing_plan_ai_plan_desc": "A IA personalizada calcula os dias exatos para ti",
+  "analyzing_plan_forever_name": "Para Sempre",
+  "analyzing_plan_forever_desc": "Bloqueio permanente e total de tudo o que escolheres",
+  "analyzing_see_plan_button": "Ver o Meu Plano",
+  "analyzing_view_others_button": "Ver outros planos",
+  "free_trial_name": "Teste Gratuito",
+  "free_trial_price": "Grátis durante 1 mês",
+  "free_trial_feature_1": "Bloqueio de sites pornográficos",
+  "free_trial_feature_2": "Sem anúncios",
+  "free_trial_feature_3": "Acompanhamento básico do progresso",
+  "free_trial_cta": "Começar Teste Gratuito",
+  "monthly_name": "Mensal",
+  "monthly_price": "5,99 € / mês",
+  "monthly_feature_1": "Tudo do Teste Gratuito",
+  "monthly_feature_2": "Escolhe os teus dias de recuperação",
+  "monthly_feature_3": "Bloqueia apps com temporizador personalizado",
+  "monthly_cta": "Obter Mensal",
+  "forever_name": "Para Sempre",
+  "forever_price": "15,99 € / mês",
+  "forever_feature_1": "Tudo do plano Mensal",
+  "forever_feature_2": "Modo de bloqueio permanente — a proteção fica sempre ativada",
+  "forever_feature_3": "Lista personalizada de sites bloqueados e permitidos",
+  "forever_feature_4": "Bloqueia feeds que distraem: Reels, Shorts, TikTok e Histórias do Snapchat",
+  "forever_feature_5": "Proteção contra desinstalação — a app não pode ser removida enquanto estiver bloqueada",
+  "forever_tagline": "O nosso plano mais forte — uma proteção que fica ativada para sempre.",
+  "forever_cta": "Obter Para Sempre",
+  "ai_plan_price_short": "9,99 € / mês",
+  "plans_all_title": "Todos os planos",
+  "plans_recommended_badge": "Recomendado",
+  "plans_card_cta": "Ver plano",
+  "common_coming_soon": "Brevemente",
+  "common_working_on_it": "Em desenvolvimento",
+  "protection_activate": "Ativar proteção",
+  "protection_stop": "Parar proteção",
+  "protection_status_on": "Protegido",
+  "protection_status_off": "Não ativo",
+  "dashboard_plan_pill_free_trial": "Teste Gratuito",
+  "dashboard_plan_pill_monthly": "Mensal",
+  "dashboard_plan_pill_ai_plan": "Plano IA",
+  "dashboard_plan_pill_forever": "Para Sempre",
+  "dashboard_streak": "{days} dias protegido",
+  "@dashboard_streak": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "dashboard_protection_title": "Proteção",
+  "dashboard_protection_active": "Ativa",
+  "dashboard_protection_off": "Desativada",
+  "dashboard_strictness_title": "NÍVEL DE PROTEÇÃO",
+  "dashboard_strictness_basic": "Básico",
+  "dashboard_strictness_strict": "Estrito",
+  "dashboard_section_core": "Proteção principal",
+  "dashboard_section_social": "Bloqueio social",
+  "dashboard_section_content": "Filtros de conteúdo",
+  "dashboard_section_app": "Controlo de apps",
+  "dashboard_section_advanced": "Avançado",
+  "dashboard_advanced_subtitle": "Aumenta o nível de proteção",
+  "dashboard_coming_soon": "Em desenvolvimento",
+  "dashboard_porn_websites_blocked": "Sites pornográficos bloqueados",
+  "dashboard_porn_always_on": "Sempre ativo com a Proteção",
+  "dashboard_search_filtering": "Filtragem de resultados de pesquisa",
+  "dashboard_social_mode_reels_shorts": "Reels e Shorts",
+  "dashboard_social_mode_all": "Todas as redes sociais",
+  "social_mode_all_warning_title": "Bloquear a app inteira?",
+  "social_mode_all_warning_body": "Neste momento, o Instagram e o YouTube só são bloqueados enquanto estás mesmo a ver Reels ou Shorts — o resto dessas apps continua acessível. Mudar para \"Todas as redes sociais\" altera isso: assim que o limite diário de hoje se esgotar, a app INTEIRA fica bloqueada pelo resto do dia, não só os Reels ou Shorts — da mesma forma que funcionam os Limites de Tempo em Apps. Tens a certeza?",
+  "social_mode_all_warning_confirm": "Bloquear a app inteira",
+  "dashboard_block_reels": "Bloquear Reels do Instagram",
+  "dashboard_block_shorts": "Bloquear YouTube Shorts",
+  "dashboard_block_tiktok": "Bloquear TikTok",
+  "dashboard_block_snapchat": "Bloquear Histórias do Snapchat",
+  "feed_guard_locked_tooltip": "Bloqueio de 24h",
+  "feed_guard_locked_sublabel": "Bloqueado · faltam {time}",
+  "@feed_guard_locked_sublabel": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "feed_guard_locked_message": "Limite diário atingido. Bloqueado durante 24 horas — desbloqueia em {time}.",
+  "@feed_guard_locked_message": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "feed_guard_locked_refused": "Não é possível alterar isto — ainda dentro do bloqueio de 24 horas.",
+  "dashboard_block_shopping": "Bloquear sites de compras",
+  "dashboard_block_gambling": "Bloquear sites de apostas",
+  "dashboard_block_image_search": "Bloquear pesquisa de imagens e vídeos",
+  "dashboard_app_time_limits": "Limites de tempo em apps",
+  "dashboard_custom_apps_blocklist": "Lista personalizada de apps bloqueadas",
+  "dashboard_block_in_app_browsers": "Bloquear navegadores dentro de apps",
+  "dashboard_prevent_uninstall": "Impedir desinstalação",
+  "dashboard_accountability_partner": "Parceiro de responsabilização",
+  "dashboard_custom_block_screen": "Ecrã de bloqueio personalizado",
+  "dashboard_custom_websites_blocklist": "Lista personalizada de sites bloqueados",
+  "app_limits_screen_title": "Limites de tempo em apps",
+  "app_limits_manage_row_label": "Gerir apps limitadas",
+  "app_limits_manage_row_sublabel_none": "Toca para escolher as apps",
+  "app_limits_manage_row_sublabel_count": "{count} apps limitadas",
+  "@app_limits_manage_row_sublabel_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "app_limits_search_hint": "Pesquisar apps…",
+  "app_limits_section_limited": "Limitadas",
+  "app_limits_section_all": "Todas as apps",
+  "app_limits_empty_search": "Nenhuma app encontrada.",
+  "app_limits_permission_banner": "Ativa o acesso de Acessibilidade para aplicar estes limites diários.",
+  "app_limits_permission_enable": "Ativar",
+  "app_limits_remove_title": "Remover limite?",
+  "app_limits_remove_body": "{app} deixará de ter um limite de tempo diário.",
+  "@app_limits_remove_body": {
+    "placeholders": {
+      "app": { "type": "String" }
+    }
+  },
+  "app_limits_remove_confirm": "Remover",
+  "app_limits_minutes_title": "Minutos por dia",
+  "app_limits_minutes_body": "Permitido hoje antes de ser bloqueado pelo resto do dia.",
+  "app_limits_add": "Adicionar",
+  "nav_blocking": "Bloqueio",
+  "nav_prayer": "Oração",
+  "nav_blocklist": "Lista",
+  "nav_progress": "Progresso",
+  "nav_settings": "Definições",
+  "plan_activating": "A ativar o teu plano...",
+  "plan_activated": "Plano ativado",
+  "analyzing_skip_to_plans": "Saltar e escolher um plano",
+  "lock_forever_only": "Só Para Sempre",
+  "lock_monthly_plus": "Mensal+",
+  "stub_blocklist_title": "Lista",
+  "blocklist_tab_block": "Lista de bloqueio",
+  "blocklist_tab_allow": "Lista branca",
+  "blocklist_block_header": "Sites bloqueados",
+  "blocklist_block_sub": "Estes sites estão bloqueados. Adiciona qualquer site pornográfico ou que te distraia que passe despercebido.",
+  "blocklist_block_permanent_note": "Os sites que adicionares aqui não podem ser removidos. Verifica bem o endereço antes de o adicionar.",
+  "blocklist_allow_header": "Sites permitidos",
+  "blocklist_allow_sub": "Os sites que adicionares aqui nunca são bloqueados. Os sites seguros mais populares já estão permitidos automaticamente.",
+  "blocklist_builtin": "Predefinido",
+  "blocklist_builtin_summary": "{count} sites pornográficos conhecidos são bloqueados automaticamente",
+  "@blocklist_builtin_summary": { "placeholders": { "count": { "type": "int" } } },
+  "blocklist_add_block_hint": "Adiciona um site para bloquear (ex.: example.com)",
+  "blocklist_add_allow_hint": "Adiciona um site para desbloquear (ex.: example.com)",
+  "blocklist_add": "Adicionar",
+  "blocklist_block_empty": "Ainda não adicionaste nenhum site bloqueado.",
+  "blocklist_allow_empty": "Ainda não permitiste nenhum site.",
+  "blocklist_invalid": "Introduz um site válido como example.com",
+  "blocklist_duplicate": "Esse site já está na lista",
+  "blocklist_blocked_added": "{domain} está agora bloqueado",
+  "@blocklist_blocked_added": { "placeholders": { "domain": { "type": "String" } } },
+  "blocklist_allowed_added": "{domain} está agora permitido",
+  "@blocklist_allowed_added": { "placeholders": { "domain": { "type": "String" } } },
+  "blocklist_remove": "Remover",
+  "stub_progress_title": "Progresso",
+  "progress_days_label": "dias protegido",
+  "progress_since": "desde {date}",
+  "@progress_since": { "placeholders": { "date": { "type": "String" } } },
+  "progress_weekly_section": "Progresso semanal",
+  "progress_milestones_section": "Marcos",
+  "progress_off_title": "A proteção está desativada",
+  "progress_off_subtitle": "Ativa a proteção para começares a construir a tua sequência",
+  "progress_week_tooltip": "Semana {week}: {days}/7 dias",
+  "@progress_week_tooltip": {
+    "placeholders": {
+      "week": { "type": "int" },
+      "days": { "type": "int" }
+    }
+  },
+  "progress_journey_section": "Dias protegido vs. tentações",
+  "progress_journey_temptations_label": "tentações bloqueadas",
+  "progress_journey_legend_days": "Dias protegido",
+  "progress_journey_legend_temptations": "Tentações",
+  "progress_journey_down": "À medida que a tua sequência cresceu, as tentações desceram {percent}%",
+  "@progress_journey_down": { "placeholders": { "percent": { "type": "int" } } },
+  "progress_journey_up": "As tentações subiram {percent}% — não desistas",
+  "@progress_journey_up": { "placeholders": { "percent": { "type": "int" } } },
+  "progress_journey_flat": "Mantém-se estável enquanto a tua sequência cresce",
+  "progress_journey_building": "Continua assim — a relação aparece depois de uma semana",
+  "progress_journey_tooltip_day": "Dia {day} protegido",
+  "@progress_journey_tooltip_day": { "placeholders": { "day": { "type": "int" } } },
+  "progress_journey_tooltip_blocked": "{count} bloqueadas",
+  "@progress_journey_tooltip_blocked": { "placeholders": { "count": { "type": "int" } } },
+  "progress_trends_section": "As tuas tendências",
+  "progress_blocked_trend_title": "Tentações bloqueadas",
+  "progress_trend_down": "Desceu {percent}% em relação à tua primeira semana",
+  "@progress_trend_down": { "placeholders": { "percent": { "type": "int" } } },
+  "progress_trend_up": "Subiu {percent}% em relação à tua primeira semana",
+  "@progress_trend_up": { "placeholders": { "percent": { "type": "int" } } },
+  "progress_trend_flat": "Mantém-se estável",
+  "progress_trend_need_data": "Continua assim — a tua tendência vai aparecer depois de uma semana",
+  "progress_trend_unit_blocked": "bloqueadas",
+  "progress_trend_unit_minutes": "min",
+  "stub_settings_title": "Definições",
+  "stub_accountability_title": "Responsabilização",
+  "settings_section_session": "Sessão",
+  "settings_leave_session_title": "Sair da sessão",
+  "settings_leave_session_subtitle": "Recomeçar como novo utilizador",
+  "settings_leave_session_dialog_title": "Sair da sessão?",
+  "settings_leave_session_dialog_body": "Isto vai apagar o teu plano e as tuas respostas e levar-te de volta ao início. A proteção será desativada.",
+  "settings_leave_session_action": "Sair",
+  "common_cancel": "Cancelar",
+  "protection_permission_needed": "É necessária permissão para ativar a Proteção",
+  "protection_start_failed": "Não foi possível iniciar a Proteção",
+  "commitment_warning_title": "Modo Compromisso",
+  "commitment_warning_body": "A Proteção ficará ATIVADA e NÃO vais conseguir desativá-la durante {days} dias. É esse o objetivo — tira-te a escolha num momento de fraqueza. Depois disso tens uma pequena pausa e volta a bloquear-se por ainda mais tempo. Tens a certeza?",
+  "@commitment_warning_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_warning_confirm": "Quero comprometer-me",
+  "commitment_locked_banner": "Comprometido · faltam {days} dias",
+  "@commitment_locked_banner": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_locked_sub": "A Proteção não pode ser desativada até {date}",
+  "@commitment_locked_sub": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "commitment_break_banner": "Pausa aberta · faltam {minutes} min",
+  "@commitment_break_banner": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "commitment_break_sub": "Podes desativar a proteção agora. Volta a bloquear-se automaticamente — desta vez por mais tempo.",
+  "commitment_locked_toast": "Bloqueado durante mais {days} dias. Foi esse o teu compromisso.",
+  "@commitment_locked_toast": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_cannot_leave": "Não podes sair enquanto a Proteção estiver bloqueada.",
+  "commitment_warning_forever_title": "Bloqueio Para Sempre",
+  "commitment_warning_forever_body": "A Proteção ficará ATIVADA permanentemente e NUNCA vais conseguir desativá-la. Isto é para sempre. Tens a certeza?",
+  "commitment_warning_fixed_body": "A Proteção ficará ATIVADA e não vais conseguir desativá-la durante {days} dias (exceto durante as pausas). Quando o período terminar, recuperas o controlo. Tens a certeza?",
+  "@commitment_warning_fixed_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_warning_cycle_body": "A Proteção ficará ATIVADA num ciclo de {days} dias que se repete para sempre. Só podes desativá-la durante as pausas. Tens a certeza?",
+  "@commitment_warning_cycle_body": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "commitment_forever_banner": "Comprometido para sempre",
+  "commitment_forever_sub": "A Proteção está bloqueada de forma permanente.",
+  "commitment_forever_toast": "Isto é para sempre. A Proteção não pode ser desativada.",
+  "schedule_summary_days": "{days} dias de proteção",
+  "@schedule_summary_days": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "schedule_summary_breaks": "{count} pausas de 30 min",
+  "@schedule_summary_breaks": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "schedule_summary_no_breaks": "Sem pausas",
+  "schedule_summary_constant": "Repete-se para sempre (ciclo)",
+  "schedule_summary_once": "Termina quando concluído",
+  "monthly_setup_title": "Configura o teu plano",
+  "monthly_setup_subtitle": "Escolhe quantos dias queres de proteção e se queres pausas.",
+  "monthly_setup_days_label": "Dias de proteção",
+  "monthly_setup_breaks_label": "Pausas",
+  "monthly_setup_breaks_with": "Com pausas",
+  "monthly_setup_breaks_without": "Sem pausas",
+  "monthly_setup_break_count_label": "Número de pausas",
+  "monthly_setup_break_note": "Cada pausa dura 30 minutos e é distribuída de forma uniforme.",
+  "monthly_setup_constant_label": "Constante (nunca termina)",
+  "monthly_setup_constant_sub": "Nunca termina — quando se completa, recomeça em ciclo.",
+  "monthly_setup_summary_label": "RESUMO",
+  "monthly_setup_activate": "Ativar plano",
+  "ai_plan_computed_label": "O TEU PLANO CALCULADO PELA IA",
+  "onboarding_continue": "Continuar",
+  "onboarding_back": "Voltar",
+  "onboarding_question_progress": "Pergunta {current} de {total}",
+  "@onboarding_question_progress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "onboarding_q1_text": "Que idade tinhas quando viste pornografia pela primeira vez?",
+  "onboarding_q1_a1": "Menos de 12 anos",
+  "onboarding_q1_a2": "Entre 12 e 15 anos",
+  "onboarding_q1_a3": "Entre 16 e 18 anos",
+  "onboarding_q1_a4": "Mais de 18 anos",
+  "onboarding_q2_text": "Com que frequência vês pornografia?",
+  "onboarding_q2_a1": "Todos os dias",
+  "onboarding_q2_a2": "Várias vezes por semana",
+  "onboarding_q2_a3": "Uma vez por semana",
+  "onboarding_q2_a4": "Menos de uma vez por semana",
+  "onboarding_q3_text": "Quantas horas por semana passas a ver pornografia?",
+  "onboarding_q3_a1": "Mais de 10 horas",
+  "onboarding_q3_a2": "Entre 5 e 10 horas",
+  "onboarding_q3_a3": "Entre 2 e 5 horas",
+  "onboarding_q3_a4": "Menos de 2 horas",
+  "onboarding_q4_text": "Já tentaste deixar antes?",
+  "onboarding_q4_a1": "Sim, muitas vezes",
+  "onboarding_q4_a2": "Sim, às vezes",
+  "onboarding_q4_a3": "Sim, uma ou duas vezes",
+  "onboarding_q4_a4": "Não, nunca",
+  "onboarding_q5_text": "Isso afetou as tuas relações pessoais?",
+  "onboarding_q5_a1": "Significativamente",
+  "onboarding_q5_a2": "Consideravelmente",
+  "onboarding_q5_a3": "Um pouco",
+  "onboarding_q5_a4": "Nada",
+  "onboarding_q6_text": "Isso afetou o teu trabalho ou os teus estudos?",
+  "onboarding_q6_a1": "Significativamente",
+  "onboarding_q6_a2": "Consideravelmente",
+  "onboarding_q6_a3": "Um pouco",
+  "onboarding_q6_a4": "Nada",
+  "onboarding_q7_text": "Qual é o teu principal gatilho?",
+  "onboarding_q7_a1": "Stress",
+  "onboarding_q7_a2": "Solidão",
+  "onboarding_q7_a3": "Tédio",
+  "onboarding_q7_a4": "Hábito, faço-o sem pensar",
+  "onboarding_q7_a5": "Outro",
+  "onboarding_q8_text": "Como te sentes depois de ver?",
+  "onboarding_q8_a1": "Muito culpado / Odeio-me a mim mesmo",
+  "onboarding_q8_a2": "Culpado",
+  "onboarding_q8_a3": "Indiferente",
+  "onboarding_q8_a4": "Bem",
+  "footer_inspired_by": "Inspirado no BlockerX",
+  "guard_card_title": "Proteção contra desinstalação",
+  "guard_explainer": "Quando tentares forçar a paragem ou desinstalar a app, o Be Unchained cobre o ecrã e pede-te para copiares 800 letras da Escritura em quatro minutos. Com o administrador de dispositivo ativado, o sistema também recusa desinstalar até desativares isto aqui — o que está protegido pelo mesmo desafio.",
+  "guard_req_overlay": "Mostrar sobre outras apps",
+  "guard_action_allow": "Permitir",
+  "guard_req_accessibility": "Vigilante de acessibilidade",
+  "guard_action_enable": "Ativar",
+  "guard_req_device_admin": "Administrador de dispositivo (bloqueio rígido)",
+  "guard_action_activate": "Ativar",
+  "guard_device_owner_note": "Proprietário do dispositivo — a desinstalação fica bloqueada por completo.",
+  "guard_grant_both_hint": "Concede as duas permissões acima para ativar a proteção.",
+  "guard_turn_on": "Ativar proteção",
+  "guard_turn_off": "Desativar proteção",
+  "payment_confirming_title": "A confirmar o teu pagamento…",
+  "payment_confirming_body": "Isto pode demorar alguns segundos enquanto a Stripe nos avisa.",
+  "payment_not_confirmed_title": "Ainda não conseguimos confirmar o teu pagamento",
+  "payment_not_confirmed_body": "Se concluíste o checkout, confirma que corresponde ao e-mail que usaste na página de pagamento da Stripe e tenta novamente.",
+  "payment_check_again": "Verificar novamente",
+  "common_email_hint": "teu@exemplo.com",
+  "email_dialog_invalid": "Introduz um endereço de e-mail válido.",
+  "email_dialog_title": "O teu e-mail",
+  "email_dialog_body": "Vamos usá-lo para confirmar o teu pagamento com a Stripe e desbloquear o plano assim que for concluído com sucesso.",
+  "common_continue": "Continuar",
+  "owner_dialog_wrong_email": "E-mail incorreto",
+  "owner_dialog_send_failed": "Não foi possível enviar o código — tenta novamente",
+  "owner_dialog_resend_failed": "Não foi possível reenviar o código — tenta novamente",
+  "owner_dialog_wrong_code": "Código incorreto ou expirado",
+  "owner_dialog_title": "Proprietário",
+  "owner_dialog_email_hint_text": "Introduz o e-mail do proprietário para continuar.",
+  "owner_dialog_email_field_hint": "proprietario@email.com",
+  "owner_dialog_check_email_title": "Verifica o teu e-mail",
+  "owner_dialog_code_hint_text": "Introduz o código que te acabámos de enviar.",
+  "owner_dialog_resend_code": "Reenviar código",
+  "owner_dialog_unlock": "Desbloquear",
+  "owner_dialog_next": "Seguinte",
+  "owner_entry_label": "Proprietário",
+  "error_loading_settings": "Erro ao carregar as definições: {error}",
+  "@error_loading_settings": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "common_confirm": "Confirmar",
+  "dev_reset_budget_title": "Repor o orçamento diário?",
+  "dev_reset_budget_body": "DEV: limpa o uso de hoje e o bloqueio de 24h para \"{label}\" para que fique novamente disponível de imediato.",
+  "@dev_reset_budget_body": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_budget_body_kept_history": "DEV: limpa o uso de hoje e o bloqueio de 24h para \"{label}\" para que fique novamente disponível de imediato. O histórico de dias anteriores é mantido.",
+  "@dev_reset_budget_body_kept_history": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_confirm": "Repor",
+  "dev_reset_snackbar_success": "Orçamento de {label} reposto",
+  "@dev_reset_snackbar_success": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "dev_reset_snackbar_failed": "Falha ao repor",
+  "blocklist_add_success": "\"{value}\" ✓",
+  "@blocklist_add_success": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "month_jan": "jan",
+  "month_feb": "fev",
+  "month_mar": "mar",
+  "month_apr": "abr",
+  "month_may": "mai",
+  "month_jun": "jun",
+  "month_jul": "jul",
+  "month_aug": "ago",
+  "month_sep": "set",
+  "month_oct": "out",
+  "month_nov": "nov",
+  "month_dec": "dez",
+  "settings_section_about": "Sobre",
+  "settings_report_bug_title": "Reportar um erro",
+  "settings_designed_by": "Concebido e desenvolvido por\n{name}",
+  "@settings_designed_by": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "settings_section_language": "Idioma",
+  "terms_title": "Termos e Condições",
+  "terms_gate_banner": "Por favor, leia estes Termos e Condições antes de usar o painel de controlo. Se optares por não os ler, usas esta aplicação sob a tua inteira responsabilidade.",
+  "terms_footer_note": "Ao continuar, confirmas que leste, entendeste e concordas com estes Termos e Condições.",
+  "terms_agree_button": "Li e concordo",
+  "terms_continue_risk_button": "Não quero ler: continuar por minha conta e risco",
+  "terms_dialog_title": "Continuar sem ler?",
+  "terms_dialog_body": "É altamente recomendável ler os Termos e Condições. Se optares por continuar sem os ler, fá-lo sob a tua inteira responsabilidade e aceita-los integralmente.",
+  "terms_dialog_go_back": "Voltar",
+  "terms_dialog_take_responsibility": "Assumo a responsabilidade",
+  "terms_owner_credit_label": "Proprietário e programador",
+  "terms_owner_contact": "{email}  (reportar um erro)",
+  "@terms_owner_contact": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "terms_section1_title": "1. Aceitação destes Termos",
+  "terms_section1_body": "O Be Unchained (\"a aplicação\") é uma ferramenta pessoal que te ajuda a bloquear conteúdo adulto e conteúdo que distrai. Ao usar a aplicação, concordas com estes Termos e Condições. Se não concordares com alguma parte deles, não deves usar a aplicação.",
+  "terms_section2_title": "2. Finalidade e uso pretendido",
+  "terms_section2_body": "A aplicação tem como objetivo apoiar hábitos digitais saudáveis, filtrando conteúdo ao nível da rede no teu próprio dispositivo, e ajudando-te a gerir e limitar o tempo gasto em aplicações que distraem. É apenas uma ferramenta de autoajuda e não substitui aconselhamento ou tratamento profissional, médico ou psicológico.",
+  "terms_section3_title": "3. Redes sociais e limites de tempo de uso",
+  "terms_section3_body": "Além de bloquear conteúdo adulto, a aplicação pode impor um limite de tempo diário no Instagram Reels, YouTube Shorts, TikTok, Stories do Snapchat, ou qualquer outra aplicação que escolheres (\"Limites de tempo de aplicações\"). Isto funciona detetando a aplicação no teu ecrã através do Serviço de Acessibilidade do Android; a aplicação não monitoriza a tua atividade em nenhum outro lugar nem a envia para fora do teu dispositivo. Se ativares o modo \"Todas as redes sociais\", assim que o teu limite diário do Instagram ou YouTube se esgotar, a aplicação inteira será bloqueada pelo resto do dia, não apenas os Reels ou Shorts. Assim que qualquer limite diário se esgota, essa aplicação ou feed fica bloqueado durante 24 horas completas como medida contra tentativas de contornar o limite, e este não pode ser alterado ou removido durante esse período.",
+  "terms_section4_title": "4. Bloqueio de aplicações por meio de oração (funcionalidade opcional, de caráter religioso)",
+  "terms_section4_body": "A aplicação inclui uma funcionalidade opcional que bloqueia as aplicações que escolheres (ou todas) atrás de uma breve oração cristã — uma oração de ação de graças ou o Rosário — que deve ser concluída antes de a aplicação voltar a ficar acessível durante um número determinado de horas. Esta funcionalidade é opcional e tens de a ativar tu próprio; o seu conteúdo é de natureza religiosa e é oferecida puramente como uma ferramenta pessoal de responsabilização, não como instrução ou aconselhamento religioso. Como o seu conteúdo é especificamente cristão, podes desativar a funcionalidade por completo a qualquer momento — seja qual for a tua fé ou a ausência dela — usando o interruptor \"Bloqueio com oração\" no fundo do separador de oração. Ao desativá-la, todo o bloqueio baseado em oração é interrompido e o conteúdo religioso é removido desse separador; isto não afeta o bloqueio de conteúdo nem qualquer outra proteção. Também podes deixá-la ativada e escolher exatamente a quais aplicações (se alguma) se aplica.",
+  "terms_section5_title": "5. Sem garantia de eficácia",
+  "terms_section5_body": "O bloqueio de conteúdo baseia-se na filtragem de domínios ao nível do DNS. Nenhum filtro é perfeito: é possível que algum conteúdo indesejado ainda passe, e que conteúdo legítimo seja ocasionalmente bloqueado. A aplicação não pode garantir que todo o site ou aplicação prejudicial será bloqueado em todos os momentos. As funcionalidades que dependem do Serviço de Acessibilidade do Android — Limites de tempo de aplicações, o modo \"Todas as redes sociais\" e o bloqueio com oração — dependem de esse serviço permanecer ativado; desativá-lo nas definições do teu dispositivo fará com que essas funcionalidades deixem de funcionar.",
+  "terms_section6_title": "6. Uso por tua conta e responsabilidade",
+  "terms_section6_body": "Usas a aplicação por tua própria conta e risco. Ler estes termos é responsabilidade tua. Se optares por continuar sem os ler, aceita-los integralmente e assumes toda a responsabilidade pelo uso que fizeres da aplicação e por qualquer resultado decorrente disso.",
+  "terms_section7_title": "7. Os teus dados e a tua privacidade",
+  "terms_section7_body": "A aplicação armazena as tuas definições e os resultados da tua avaliação localmente no teu dispositivo. Isto inclui as aplicações que escolheres para os Limites de tempo ou o bloqueio com oração, e o histórico local de orações concluídas usado para mostrar a tua sequência. Não vende os teus dados pessoais. Os pedidos de rede são processados no próprio dispositivo para decidir o que bloquear; a aplicação não exige uma conta para funcionar.",
+  "terms_section8_title": "8. Permissões do dispositivo",
+  "terms_section8_body": "Para funcionar, a aplicação pode usar um serviço de VPN local para a filtragem de DNS e, se os ativares, o Serviço de Acessibilidade e as funcionalidades de administração de dispositivo do Android. O Serviço de Acessibilidade é usado para a proteção contra desinstalação, para aplicar os Limites de tempo de redes sociais/aplicações, e para o bloqueio com oração. Podes rever ou revogar estas permissões nas definições do teu dispositivo a qualquer momento, o que pode reduzir ou desativar a proteção correspondente.",
+  "terms_section9_title": "9. Limitação de responsabilidade",
+  "terms_section9_body": "Na máxima medida permitida por lei, o proprietário e programador da aplicação não será responsável por quaisquer danos diretos, indiretos ou incidentais decorrentes do uso, ou da incapacidade de uso, da aplicação, incluindo qualquer conteúdo que seja ou não bloqueado.",
+  "terms_section10_title": "10. Alterações a estes Termos",
+  "terms_section10_body": "Estes Termos podem ser atualizados à medida que a aplicação evolui. Continuar a usar a aplicação após uma atualização significa que aceitas os Termos revistos.",
+  "terms_section11_title": "11. Contacto e suporte",
+  "terms_section11_body": "Para dúvidas, relatos de erros ou suporte, contacta o proprietário e programador {name} através de {email}.",
+  "@terms_section11_body": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "email": { "type": "String" }
+    }
+  }
+}

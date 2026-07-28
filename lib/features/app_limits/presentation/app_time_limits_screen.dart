@@ -339,23 +339,22 @@ class _AppTimeLimitsScreenState extends ConsumerState<AppTimeLimitsScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: _card,
-        title: const Text('Reset daily budget?',
-            style:
-                TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(l.dev_reset_budget_title,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold)),
         content: Text(
-          'DEV: clears today\'s usage and the 24h lock for "${app.label}" so '
-          'it\'s usable again immediately.',
+          l.dev_reset_budget_body(app.label),
           style: const TextStyle(color: Color(0xFFB8C0D0), height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF888888))),
+            child: Text(l.common_cancel,
+                style: const TextStyle(color: Color(0xFF888888))),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Reset', style: TextStyle(color: _accent)),
+            child: Text(l.dev_reset_confirm, style: const TextStyle(color: _accent)),
           ),
         ],
       ),
@@ -438,9 +437,9 @@ class _AppTimeLimitsScreenState extends ConsumerState<AppTimeLimitsScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(minutes),
-                child: const Text(
-                  'Confirm',
-                  style: TextStyle(color: _accent, fontWeight: FontWeight.w700),
+                child: Text(
+                  l.common_confirm,
+                  style: const TextStyle(color: _accent, fontWeight: FontWeight.w700),
                 ),
               ),
             ],

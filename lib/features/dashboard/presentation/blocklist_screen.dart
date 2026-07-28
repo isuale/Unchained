@@ -123,7 +123,7 @@ class _DomainListViewState extends State<_DomainListView> {
     switch (result) {
       case DomainListResult.ok:
         _controller.clear();
-        msg = '"$raw" ✓';
+        msg = l.blocklist_add_success(raw);
       case DomainListResult.invalid:
         msg = l.blocklist_invalid;
       case DomainListResult.duplicate:

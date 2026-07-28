@@ -414,6 +414,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nav_blocking => 'Bloqueo';
 
   @override
+  String get nav_prayer => 'Oración';
+
+  @override
   String get nav_blocklist => 'Lista';
 
   @override
@@ -905,4 +908,330 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboarding_q8_a4 => 'Bien';
+
+  @override
+  String get footer_inspired_by => 'Inspirado en BlockerX';
+
+  @override
+  String get guard_card_title => 'Protección contra desinstalación';
+
+  @override
+  String get guard_explainer =>
+      'Cuando intentes forzar la detención o desinstalar la app, Be Unchained cubre la pantalla y te pide copiar 800 letras de la Escritura en cuatro minutos. Con el administrador de dispositivo activado, el sistema también se niega a desinstalar hasta que lo desactives aquí, lo cual está protegido por el mismo desafío.';
+
+  @override
+  String get guard_req_overlay => 'Mostrar sobre otras apps';
+
+  @override
+  String get guard_action_allow => 'Permitir';
+
+  @override
+  String get guard_req_accessibility => 'Vigilante de accesibilidad';
+
+  @override
+  String get guard_action_enable => 'Activar';
+
+  @override
+  String get guard_req_device_admin =>
+      'Administrador de dispositivo (bloqueo estricto)';
+
+  @override
+  String get guard_action_activate => 'Activar';
+
+  @override
+  String get guard_device_owner_note =>
+      'Propietario del dispositivo: la desinstalación queda bloqueada por completo.';
+
+  @override
+  String get guard_grant_both_hint =>
+      'Concede ambos permisos arriba para activar la protección.';
+
+  @override
+  String get guard_turn_on => 'Activar protección';
+
+  @override
+  String get guard_turn_off => 'Desactivar protección';
+
+  @override
+  String get payment_confirming_title => 'Confirmando tu pago…';
+
+  @override
+  String get payment_confirming_body =>
+      'Esto puede tardar unos segundos mientras Stripe nos avisa.';
+
+  @override
+  String get payment_not_confirmed_title => 'Aún no pudimos confirmar tu pago';
+
+  @override
+  String get payment_not_confirmed_body =>
+      'Si completaste el pago, asegúrate de que coincida con el correo que usaste en la página de pago de Stripe y vuelve a intentarlo.';
+
+  @override
+  String get payment_check_again => 'Comprobar de nuevo';
+
+  @override
+  String get common_email_hint => 'tucorreo@ejemplo.com';
+
+  @override
+  String get email_dialog_invalid =>
+      'Introduce una dirección de correo válida.';
+
+  @override
+  String get email_dialog_title => 'Tu correo';
+
+  @override
+  String get email_dialog_body =>
+      'Lo usaremos para confirmar tu pago con Stripe y desbloquear el plan en cuanto se complete.';
+
+  @override
+  String get common_continue => 'Continuar';
+
+  @override
+  String get owner_dialog_wrong_email => 'Correo incorrecto';
+
+  @override
+  String get owner_dialog_send_failed =>
+      'No se pudo enviar el código; inténtalo de nuevo';
+
+  @override
+  String get owner_dialog_resend_failed =>
+      'No se pudo reenviar el código; inténtalo de nuevo';
+
+  @override
+  String get owner_dialog_wrong_code => 'Código incorrecto o caducado';
+
+  @override
+  String get owner_dialog_title => 'Propietario';
+
+  @override
+  String get owner_dialog_email_hint_text =>
+      'Introduce el correo del propietario para continuar.';
+
+  @override
+  String get owner_dialog_email_field_hint => 'propietario@correo.com';
+
+  @override
+  String get owner_dialog_check_email_title => 'Revisa tu correo';
+
+  @override
+  String get owner_dialog_code_hint_text =>
+      'Introduce el código que acabamos de enviarte.';
+
+  @override
+  String get owner_dialog_resend_code => 'Reenviar código';
+
+  @override
+  String get owner_dialog_unlock => 'Desbloquear';
+
+  @override
+  String get owner_dialog_next => 'Siguiente';
+
+  @override
+  String get owner_entry_label => 'Propietario';
+
+  @override
+  String error_loading_settings(String error) {
+    return 'Error al cargar la configuración: $error';
+  }
+
+  @override
+  String get common_confirm => 'Confirmar';
+
+  @override
+  String get dev_reset_budget_title => '¿Reiniciar el presupuesto diario?';
+
+  @override
+  String dev_reset_budget_body(String label) {
+    return 'DEV: borra el uso de hoy y el bloqueo de 24h para \"$label\" para que vuelva a estar disponible de inmediato.';
+  }
+
+  @override
+  String dev_reset_budget_body_kept_history(String label) {
+    return 'DEV: borra el uso de hoy y el bloqueo de 24h para \"$label\" para que vuelva a estar disponible de inmediato. Se conserva el historial de días anteriores.';
+  }
+
+  @override
+  String get dev_reset_confirm => 'Reiniciar';
+
+  @override
+  String dev_reset_snackbar_success(String label) {
+    return 'Presupuesto de $label reiniciado';
+  }
+
+  @override
+  String get dev_reset_snackbar_failed => 'No se pudo reiniciar';
+
+  @override
+  String blocklist_add_success(String value) {
+    return '«$value» ✓';
+  }
+
+  @override
+  String get month_jan => 'ene';
+
+  @override
+  String get month_feb => 'feb';
+
+  @override
+  String get month_mar => 'mar';
+
+  @override
+  String get month_apr => 'abr';
+
+  @override
+  String get month_may => 'may';
+
+  @override
+  String get month_jun => 'jun';
+
+  @override
+  String get month_jul => 'jul';
+
+  @override
+  String get month_aug => 'ago';
+
+  @override
+  String get month_sep => 'sep';
+
+  @override
+  String get month_oct => 'oct';
+
+  @override
+  String get month_nov => 'nov';
+
+  @override
+  String get month_dec => 'dic';
+
+  @override
+  String get settings_section_about => 'Acerca de';
+
+  @override
+  String get settings_report_bug_title => 'Reportar un error';
+
+  @override
+  String settings_designed_by(String name) {
+    return 'Diseñado y desarrollado por\n$name';
+  }
+
+  @override
+  String get settings_section_language => 'Idioma';
+
+  @override
+  String get terms_title => 'Términos y Condiciones';
+
+  @override
+  String get terms_gate_banner =>
+      'Por favor, lee estos Términos y Condiciones antes de usar el panel de control. Si decides no leerlos, usas esta aplicación bajo tu entera responsabilidad.';
+
+  @override
+  String get terms_footer_note =>
+      'Al continuar, confirmas que has leído, entendido y aceptas estos Términos y Condiciones.';
+
+  @override
+  String get terms_agree_button => 'He leído y acepto';
+
+  @override
+  String get terms_continue_risk_button =>
+      'No quiero leer: continuar bajo mi propio riesgo';
+
+  @override
+  String get terms_dialog_title => '¿Continuar sin leer?';
+
+  @override
+  String get terms_dialog_body =>
+      'Se recomienda encarecidamente leer los Términos y Condiciones. Si decides continuar sin leerlos, lo haces bajo tu entera responsabilidad y los aceptas en su totalidad.';
+
+  @override
+  String get terms_dialog_go_back => 'Volver';
+
+  @override
+  String get terms_dialog_take_responsibility => 'Asumo la responsabilidad';
+
+  @override
+  String get terms_owner_credit_label => 'Propietario y desarrollador';
+
+  @override
+  String terms_owner_contact(String email) {
+    return '$email  (reportar un error)';
+  }
+
+  @override
+  String get terms_section1_title => '1. Aceptación de estos Términos';
+
+  @override
+  String get terms_section1_body =>
+      'Be Unchained («la aplicación») es una herramienta personal que te ayuda a bloquear contenido para adultos y contenido que distrae. Al usar la aplicación, aceptas estos Términos y Condiciones. Si no estás de acuerdo con alguna parte de ellos, no debes usar la aplicación.';
+
+  @override
+  String get terms_section2_title => '2. Finalidad y uso previsto';
+
+  @override
+  String get terms_section2_body =>
+      'La aplicación tiene como fin apoyar hábitos digitales saludables filtrando contenido a nivel de red en tu propio dispositivo, y ayudándote a gestionar y limitar el tiempo dedicado a aplicaciones que distraen. Es únicamente una ayuda de autoayuda y no sustituye el asesoramiento o tratamiento profesional, médico o psicológico.';
+
+  @override
+  String get terms_section3_title =>
+      '3. Redes sociales y límites de tiempo de uso';
+
+  @override
+  String get terms_section3_body =>
+      'Además de bloquear contenido para adultos, la aplicación puede imponer un límite de tiempo diario en Instagram Reels, YouTube Shorts, TikTok, Historias de Snapchat, o cualquier otra aplicación que elijas («Límites de tiempo de aplicaciones»). Esto funciona detectando la aplicación en tu pantalla mediante el Servicio de Accesibilidad de Android; la aplicación no monitorea tu actividad en ningún otro lugar ni la envía fuera de tu dispositivo. Si activas el modo «Todas las redes sociales», una vez que se agote tu límite diario de Instagram o YouTube, se bloqueará la aplicación entera por el resto del día, no solo los Reels o Shorts. En cuanto se agota cualquier límite diario, esa aplicación o feed queda bloqueado durante 24 horas completas como medida contra los intentos de evadir el límite, y este no se puede cambiar ni eliminar durante ese tiempo.';
+
+  @override
+  String get terms_section4_title =>
+      '4. Bloqueo de aplicaciones mediante oración (función opcional, de carácter religioso)';
+
+  @override
+  String get terms_section4_body =>
+      'La aplicación incluye una función opcional que bloquea las aplicaciones que elijas (o todas) detrás de una breve oración cristiana —una oración de acción de gracias o el Rosario— que debe completarse antes de que la aplicación vuelva a estar accesible durante un número determinado de horas. Esta función es opcional y debes activarla tú mismo; su contenido es de carácter religioso y se ofrece únicamente como una herramienta personal de responsabilidad, no como instrucción o consejo religioso. Dado que su contenido es específicamente cristiano, puedes desactivar la función por completo en cualquier momento —sea cual sea tu fe o si no tienes ninguna— usando el interruptor «Bloqueo con oración» al final de la pestaña de oración. Al desactivarla, se detiene todo bloqueo basado en oración y se elimina el contenido religioso de esa pestaña; esto no afecta al bloqueo de contenido ni a ninguna otra protección. También puedes dejarla activada y elegir exactamente a qué aplicaciones (si acaso) se aplica.';
+
+  @override
+  String get terms_section5_title => '5. Sin garantía de eficacia';
+
+  @override
+  String get terms_section5_body =>
+      'El bloqueo de contenido se basa en el filtrado de dominios a nivel de DNS. Ningún filtro es perfecto: es posible que algo de contenido no deseado llegue a pasar, y que ocasionalmente se bloquee contenido legítimo. La aplicación no puede garantizar que todo sitio o aplicación dañina quede bloqueada en todo momento. Las funciones que dependen del Servicio de Accesibilidad de Android —Límites de tiempo de aplicaciones, el modo «Todas las redes sociales» y el bloqueo con oración— requieren que ese servicio permanezca activado; desactivarlo en la configuración de tu dispositivo hará que esas funciones dejen de funcionar.';
+
+  @override
+  String get terms_section6_title => '6. Uso bajo tu propia responsabilidad';
+
+  @override
+  String get terms_section6_body =>
+      'Usas la aplicación bajo tu propia responsabilidad y riesgo. Leer estos términos es responsabilidad tuya. Si decides continuar sin leerlos, los aceptas en su totalidad y asumes toda la responsabilidad por el uso que hagas de la aplicación y cualquier resultado que se derive de ello.';
+
+  @override
+  String get terms_section7_title => '7. Tus datos y tu privacidad';
+
+  @override
+  String get terms_section7_body =>
+      'La aplicación almacena tu configuración y los resultados de tu evaluación localmente en tu dispositivo. Esto incluye las aplicaciones que elijas para los Límites de tiempo o el bloqueo con oración, y el historial local de oraciones completadas que se usa para mostrar tu racha. No vende tus datos personales. Las solicitudes de red se procesan en el propio dispositivo para decidir qué bloquear; la aplicación no requiere una cuenta para funcionar.';
+
+  @override
+  String get terms_section8_title => '8. Permisos del dispositivo';
+
+  @override
+  String get terms_section8_body =>
+      'Para funcionar, la aplicación puede usar un servicio VPN local para el filtrado de DNS y, si los activas, el Servicio de Accesibilidad y las funciones de administración de dispositivo de Android. El Servicio de Accesibilidad se usa para la protección contra desinstalación, para hacer cumplir los Límites de tiempo de redes sociales/aplicaciones, y para el bloqueo con oración. Puedes revisar o revocar estos permisos en la configuración de tu dispositivo en cualquier momento, lo cual puede reducir o desactivar la protección correspondiente.';
+
+  @override
+  String get terms_section9_title => '9. Limitación de responsabilidad';
+
+  @override
+  String get terms_section9_body =>
+      'En la máxima medida permitida por la ley, el propietario y desarrollador de la aplicación no será responsable de ningún daño directo, indirecto o incidental derivado del uso, o de la imposibilidad de uso, de la aplicación, incluyendo cualquier contenido que sea o no bloqueado.';
+
+  @override
+  String get terms_section10_title => '10. Cambios en estos Términos';
+
+  @override
+  String get terms_section10_body =>
+      'Estos Términos pueden actualizarse a medida que la aplicación evolucione. Seguir usando la aplicación después de una actualización significa que aceptas los Términos revisados.';
+
+  @override
+  String get terms_section11_title => '11. Contacto y soporte';
+
+  @override
+  String terms_section11_body(String name, String email) {
+    return 'Para preguntas, reportes de errores o soporte, contacta al propietario y desarrollador $name en $email.';
+  }
 }

@@ -43,7 +43,7 @@ class ProgressScreen extends ConsumerWidget {
         ),
         error: (e, _) => Center(
           child: Text(
-            'Error loading settings: $e',
+            l.error_loading_settings('$e'),
             style: const TextStyle(color: Colors.white),
           ),
         ),
@@ -106,12 +106,13 @@ class _HeroStreakCard extends StatelessWidget {
   final DateTime since;
   final AppLocalizations l;
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
+  List<String> _months(AppLocalizations l) => [
+        l.month_jan, l.month_feb, l.month_mar, l.month_apr,
+        l.month_may, l.month_jun, l.month_jul, l.month_aug,
+        l.month_sep, l.month_oct, l.month_nov, l.month_dec,
+      ];
 
-  String _shortDate(DateTime d) => '${_months[d.month - 1]} ${d.day}';
+  String _shortDate(DateTime d) => '${_months(l)[d.month - 1]} ${d.day}';
 
   @override
   Widget build(BuildContext context) {

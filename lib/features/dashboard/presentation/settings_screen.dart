@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unchained/features/dashboard/providers/blocking_settings_provider.dart';
+import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/domain/prayer_strings.dart';
+import 'package:unchained/features/prayer/domain/prayers.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 import 'package:unchained/shared/app_credits.dart';
 
@@ -115,7 +118,19 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 28),
             Text(
-              'ABOUT',
+              l.settings_section_language.toUpperCase(),
+              style: const TextStyle(
+                color: Color(0xFF666666),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _LanguageCard(currentLang: ref.watch(appLanguageProvider).asData?.value ?? Lang.es),
+            const SizedBox(height: 28),
+            Text(
+              l.settings_section_about.toUpperCase(),
               style: const TextStyle(
                 color: Color(0xFF666666),
                 fontSize: 12,
@@ -133,9 +148,9 @@ class SettingsScreen extends ConsumerWidget {
                   ListTile(
                     leading: const Icon(Icons.description_outlined,
                         color: Color(0xFF8AA6FF)),
-                    title: const Text(
-                      'Terms & Conditions',
-                      style: TextStyle(color: Colors.white),
+                    title: Text(
+                      l.terms_title,
+                      style: const TextStyle(color: Colors.white),
                     ),
                     trailing: const Icon(Icons.chevron_right,
                         color: Color(0xFF666666)),
@@ -145,9 +160,9 @@ class SettingsScreen extends ConsumerWidget {
                   ListTile(
                     leading: const Icon(Icons.bug_report_outlined,
                         color: Color(0xFF8AA6FF)),
-                    title: const Text(
-                      'Report a bug',
-                      style: TextStyle(color: Colors.white),
+                    title: Text(
+                      l.settings_report_bug_title,
+                      style: const TextStyle(color: Colors.white),
                     ),
                     subtitle: const Text(
                       AppCredits.supportEmail,
@@ -159,11 +174,11 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Center(
+            Center(
               child: Text(
-                'Designed & developed by\n${AppCredits.ownerName}',
+                l.settings_designed_by(AppCredits.ownerName),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF666666),
                   fontSize: 12,
                   height: 1.4,
@@ -172,6 +187,48 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Row of the three supported languages; tapping one sets the app-wide
+/// language (see [appLanguageProvider]). Each name is shown in its own
+/// language, not translated, per convention (a Spanish speaker still
+/// recognizes "English").
+class _LanguageCard extends ConsumerWidget {
+  const _LanguageCard({required this.currentLang});
+
+  final Lang currentLang;
+
+  static const _card = Color(0xFF0A0E18);
+  static const _accent = Color(0xFF1E5FFF);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Material(
+      color: _card,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (final l in Lang.values) ...[
+            if (l != Lang.values.first)
+              const Divider(height: 1, color: Color(0xFF1A1F2E)),
+            ListTile(
+              leading: Icon(Icons.language,
+                  color: l == currentLang ? _accent : const Color(0xFF666666)),
+              title: Text(
+                PS.langName(l),
+                style: const TextStyle(color: Colors.white),
+              ),
+              trailing: l == currentLang
+                  ? const Icon(Icons.check, color: _accent)
+                  : null,
+              onTap: () => ref.read(prayerRepositoryProvider).setLanguage(l),
+            ),
+          ],
+        ],
       ),
     );
   }

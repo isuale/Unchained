@@ -5,6 +5,7 @@ import 'package:unchained/features/dashboard/data/blocking_settings_repository.d
 import 'package:unchained/features/dashboard/widgets/plan_activation_overlay.dart';
 import 'package:unchained/features/plans/domain/entitlement_service.dart';
 import 'package:unchained/features/plans/domain/pending_activation.dart';
+import 'package:unchained/l10n/app_localizations.dart';
 
 const _accent = Color(0xFF1E5FFF);
 
@@ -152,6 +153,7 @@ class _ConfirmingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -161,19 +163,19 @@ class _ConfirmingView extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 4, color: _accent),
         ),
         const SizedBox(height: 24),
-        const Text(
-          'Confirming your payment…',
-          style: TextStyle(
+        Text(
+          l.payment_confirming_title,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 10),
-        const Text(
-          "This can take a few seconds while Stripe lets us know.",
+        Text(
+          l.payment_confirming_body,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF9AA3B2), height: 1.4),
+          style: const TextStyle(color: Color(0xFF9AA3B2), height: 1.4),
         ),
       ],
     );
@@ -195,27 +197,27 @@ class _NotConfirmedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Icon(Icons.hourglass_bottom, color: Color(0xFF9AA3B2), size: 48),
         const SizedBox(height: 18),
-        const Text(
-          "We couldn't confirm your payment yet",
+        Text(
+          l.payment_not_confirmed_title,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 10),
-        const Text(
-          'If you completed checkout, make sure this matches the email you '
-          'used on the Stripe payment page, then try again.',
+        Text(
+          l.payment_not_confirmed_body,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF9AA3B2), height: 1.4),
+          style: const TextStyle(color: Color(0xFF9AA3B2), height: 1.4),
         ),
         const SizedBox(height: 20),
         TextField(
@@ -225,7 +227,7 @@ class _NotConfirmedView extends StatelessWidget {
           keyboardType: TextInputType.emailAddress,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            hintText: 'you@example.com',
+            hintText: l.common_email_hint,
             hintStyle: const TextStyle(color: Color(0xFF666666)),
             filled: true,
             fillColor: const Color(0xFF0A0E18),
@@ -258,14 +260,14 @@ class _NotConfirmedView extends StatelessWidget {
                   child: CircularProgressIndicator(
                       strokeWidth: 2, color: Colors.white),
                 )
-              : const Text('Check again',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              : Text(l.payment_check_again,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
         ),
         const SizedBox(height: 8),
         TextButton(
           onPressed: busy ? null : onCancel,
-          child: const Text('Cancel',
-              style: TextStyle(color: Color(0xFF9AA3B2))),
+          child: Text(l.common_cancel,
+              style: const TextStyle(color: Color(0xFF9AA3B2))),
         ),
       ],
     );

@@ -26,7 +26,7 @@ class PrayerHomeScreen extends ConsumerWidget {
     final lockedApps = ref.watch(lockedAppsProvider).asData?.value ?? const [];
     final prayers = ref.watch(prayerLogProvider).asData?.value ?? const [];
     final lockAll = ref.watch(lockAllAppsProvider).asData?.value ?? false;
-    final lang = ref.watch(prayerLanguageProvider).asData?.value ?? Lang.es;
+    final lang = ref.watch(appLanguageProvider).asData?.value ?? Lang.es;
     final enabled = ref.watch(prayerLockEnabledProvider).asData?.value ?? true;
     // The native watchdog's config is synced from DashboardScreen, not here, so
     // it keeps working regardless of which tab is on screen.
