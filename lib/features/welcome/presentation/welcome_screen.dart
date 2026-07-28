@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/domain/prayer_strings.dart';
+import 'package:unchained/features/prayer/domain/prayers.dart';
 import 'package:unchained/l10n/app_localizations.dart';
 
-class WelcomeScreen extends StatelessWidget {
+/// First screen a brand-new user sees ("Get Started").
+///
+/// It carries the language picker because this is the earliest point the choice
+/// can be made: the app defaults to Spanish (see [appLanguageProvider]), so an
+/// English or Portuguese speaker would otherwise have to complete the whole
+/// onboarding questionnaire in a language they may not read before reaching the
+/// picker buried in Settings.
+class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Stack(
         children: [
@@ -73,7 +84,92 @@ class WelcomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          // Last in the Stack so it paints — and receives taps — above the
+          // centred content column, which spans the full screen.
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, right: 12),
+                child: _LanguagePicker(
+                  current: ref.watch(appLanguageProvider).asData?.value ?? Lang.es,
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Compact language control for the welcome screen: a translucent pill showing
+/// the current language, tapping it opens the three choices.
+///
+/// Each language is written in its own name (English / Español / Português)
+/// rather than translated — the same convention the Settings language card uses,
+/// since someone who can't read the current language still recognises their own.
+class _LanguagePicker extends ConsumerWidget {
+  const _LanguagePicker({required this.current});
+
+  final Lang current;
+
+  static const _accent = Color(0xFF1E5FFF);
+  static const _menu = Color(0xFF0A0E18);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<Lang>(
+      tooltip: AppLocalizations.of(context)!.welcome_language,
+      color: _menu,
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (lang) => ref.read(prayerRepositoryProvider).setLanguage(lang),
+      itemBuilder: (context) => [
+        for (final lang in Lang.values)
+          PopupMenuItem<Lang>(
+            value: lang,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    PS.langName(lang),
+                    style: TextStyle(
+                      color: lang == current ? _accent : Colors.white,
+                      fontWeight:
+                          lang == current ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ),
+                if (lang == current)
+                  const Icon(Icons.check, color: _accent, size: 18),
+              ],
+            ),
+          ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          // Readable over whatever part of the photo sits behind it.
+          color: Colors.black.withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.language, color: Colors.white, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              PS.langName(current),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down, color: Colors.white70, size: 20),
+          ],
+        ),
       ),
     );
   }

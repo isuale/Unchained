@@ -1798,6 +1798,24 @@ abstract class AppLocalizations {
   /// **'Desactivar protección'**
   String get guard_turn_off;
 
+  /// No description provided for @guard_status_partial.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa (limitada)'**
+  String get guard_status_partial;
+
+  /// No description provided for @guard_partial_warning.
+  ///
+  /// In es, this message translates to:
+  /// **'La protección está activa y sigue bloqueando la desinstalación, pero faltan permisos arriba, así que no está a máxima potencia. Concédelos, o desactívala abajo.'**
+  String get guard_partial_warning;
+
+  /// No description provided for @welcome_language.
+  ///
+  /// In es, this message translates to:
+  /// **'Idioma'**
+  String get welcome_language;
+
   /// No description provided for @payment_confirming_title.
   ///
   /// In es, this message translates to:

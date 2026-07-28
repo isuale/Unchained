@@ -960,6 +960,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get guard_turn_off => 'Desativar proteção';
 
   @override
+  String get guard_status_partial => 'Ativa (limitada)';
+
+  @override
+  String get guard_partial_warning =>
+      'A proteção está ativa e continua bloqueando a desinstalação, mas faltam permissões acima, então não está na força máxima. Conceda-as, ou desative abaixo.';
+
+  @override
+  String get welcome_language => 'Idioma';
+
+  @override
   String get payment_confirming_title => 'A confirmar o teu pagamento…';
 
   @override

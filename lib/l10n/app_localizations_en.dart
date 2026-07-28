@@ -946,6 +946,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guard_turn_off => 'Turn off protection';
 
   @override
+  String get guard_status_partial => 'On (limited)';
+
+  @override
+  String get guard_partial_warning =>
+      'Protection is on and still blocking uninstall, but permissions above are missing, so it isn\'t at full strength. Grant them, or turn it off below.';
+
+  @override
+  String get welcome_language => 'Language';
+
+  @override
   String get payment_confirming_title => 'Confirming your payment…';
 
   @override

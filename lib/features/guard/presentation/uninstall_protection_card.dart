@@ -26,6 +26,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
   static const Color _accent = Color(0xFF1E5FFF);
   static const Color _good = Color(0xFF34C759);
   static const Color _dim = Color(0xFF8893A5);
+  static const Color _warn = Color(0xFFFFB020);
 
   bool _loading = true;
   bool _overlay = false;
@@ -70,7 +71,19 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
     });
   }
 
+  /// Whether every supporting permission is granted, i.e. protection can run at
+  /// full strength.
+  ///
+  /// This is deliberately **not** the same question as "is protection on".
+  /// [_enabled] mirrors native `GuardState.enabled`, which is the *only* thing
+  /// [UninstallGuardService] checks before throwing up the scripture lock — so the
+  /// guard really does block uninstall even with a permission missing. Conflating
+  /// the two used to make this card report "Off" while the lock was actively firing,
+  /// and hide the turn-off button, leaving no way out from inside the app.
   bool get _ready => _overlay && _accessibility;
+
+  /// On, but a supporting permission is missing — honest middle state.
+  bool get _partial => _enabled && !_ready;
 
   Future<void> _turnOn() async {
     await UninstallGuardService.setGuardEnabled(true);
@@ -113,11 +126,20 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
               ),
               if (!_loading)
                 Text(
-                  _enabled && _ready
-                      ? l.dashboard_protection_active
-                      : l.dashboard_protection_off,
+                  // Reports the guard's real state, not "is everything perfect".
+                  // See [_ready] — saying "Off" while the lock is firing is a lie
+                  // the user can't act on.
+                  switch ((_enabled, _ready)) {
+                    (true, true) => l.dashboard_protection_active,
+                    (true, false) => l.guard_status_partial,
+                    _ => l.dashboard_protection_off,
+                  },
                   style: TextStyle(
-                    color: _enabled && _ready ? _good : _dim,
+                    color: switch ((_enabled, _ready)) {
+                      (true, true) => _good,
+                      (true, false) => _warn,
+                      _ => _dim,
+                    },
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -179,6 +201,25 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
                 ],
               ),
             ],
+            if (_partial) ...[
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: _warn, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l.guard_partial_warning,
+                      style: TextStyle(
+                        color: _warn.withValues(alpha: 0.9),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 16),
             _mainButton(l),
           ],
@@ -220,7 +261,12 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
   }
 
   Widget _mainButton(AppLocalizations l) {
-    if (!_ready) {
+    // Order matters: the "grant the permissions first" hint may only stand in for
+    // the button while protection is OFF. While it is ON the guard is enforcing
+    // regardless of the missing permission, so the turn-off route must stay
+    // reachable — otherwise the user is locked in with no in-app way out (which
+    // is exactly what happened when the overlay permission was denied).
+    if (!_ready && !_enabled) {
       return Text(
         l.guard_grant_both_hint,
         style: const TextStyle(color: _dim, fontStyle: FontStyle.italic),
