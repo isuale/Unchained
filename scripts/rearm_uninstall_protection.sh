@@ -20,8 +20,11 @@
 #
 set -uo pipefail
 
-APP_PKG="com.unchained.app"
-SVC="com.unchained.app/com.unchained.unchained.UninstallGuardService"
+APP_PKG="com.beunchained.app"
+# Derived from APP_PKG so a change to the app's identity can't leave this behind:
+# the left half is the installed package (applicationId), the right half is the
+# Kotlin class (namespace), and those two are deliberately different.
+SVC="${APP_PKG}/com.unchained.unchained.UninstallGuardService"
 
 # --- locate adb (PATH first, then the known SDK location) -------------------
 find_adb() {

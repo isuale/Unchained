@@ -29,7 +29,7 @@
 #
 set -uo pipefail
 
-APP_PKG="com.unchained.app"
+APP_PKG="com.beunchained.app"
 ACTION="com.unchained.unchained.DEV_GUARD"
 RECEIVER="${APP_PKG}/com.unchained.unchained.DevGuardReceiver"
 ADMIN="${APP_PKG}/com.unchained.unchained.UnchainedDeviceAdminReceiver"

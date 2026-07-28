@@ -15,7 +15,7 @@ import android.content.Intent
  * `com.android.settings` and shows our app label).
  *
  * If the app is additionally promoted to **device owner** (via
- * `adb shell dpm set-device-owner com.unchained.app/com.unchained.unchained.UnchainedDeviceAdminReceiver`
+ * `adb shell dpm set-device-owner com.beunchained.app/com.unchained.unchained.UnchainedDeviceAdminReceiver`
  * on a device with no accounts), [DevicePolicyManager.setUninstallBlocked] makes
  * the uninstall *impossible* — there is no deactivate door at all. See
  * [GuardAdmin] for the helper that drives both.
@@ -29,7 +29,7 @@ class UnchainedDeviceAdminReceiver : DeviceAdminReceiver() {
         "Deactivating this removes Be Unchained's uninstall protection. Stay the course."
 
     companion object {
-        /** The admin component, resolved against the runtime package (`com.unchained.app`). */
+        /** The admin component, resolved against the runtime package (`com.beunchained.app`). */
         fun component(context: Context): ComponentName =
             ComponentName(context.applicationContext, UnchainedDeviceAdminReceiver::class.java)
     }

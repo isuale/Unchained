@@ -36,8 +36,16 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.unchained.app"
+        // The app's permanent identity on Google Play. `com.unchained.app` could not
+        // be used: it is already registered to a different developer, which Play
+        // surfaces as a content-provider authority clash on
+        // `com.unchained.app.androidx-startup`. Once a build is published this value
+        // can never change — a different applicationId is a different app to both
+        // Android and Play, with its own installs, reviews and stored data.
+        // Note this is deliberately NOT the same as `namespace` above: namespace is
+        // the Kotlin/BuildConfig package (unchanged, so no source or the DEV_GUARD
+        // broadcast action moves), applicationId is the installed identity.
+        applicationId = "com.beunchained.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 26
