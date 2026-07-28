@@ -46,3 +46,10 @@ app.*.map.json
 
 # Cloudflare Wrangler dev cache (stripe-backend), also written to repo root
 .wrangler/
+
+# Account recovery/backup codes and any stray signing material left in the repo
+# root. These are credentials — a single accidental `git add .` would publish
+# them to GitHub permanently, so keep them un-committable by default.
+unchained-email-backupcodes
+*.p12
+*.keystore
