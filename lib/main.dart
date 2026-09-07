@@ -2,11 +2,13 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:unchained/core/router/app_router.dart';
 import 'package:unchained/features/guard/lock_visibility.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/features/prayer/data/app_lock_service.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/data/prayer_streak_widget_service.dart';
 import 'package:unchained/features/prayer/domain/prayers.dart';
 import 'package:unchained/features/prayer/presentation/prayer_gate_screen.dart';
 import 'package:unchained/l10n/app_localizations.dart';
@@ -51,6 +53,21 @@ void main() {
     );
   });
 
+  // Tapping the "Prayer Streak" home-screen widget opens straight into a
+  // voluntary prayer (see PrayerStreakWidgetProvider.kt's click PendingIntent).
+  // Both the live stream (app already running/backgrounded) and the initial
+  // launch check (app was killed, so this is a cold start) route the same way.
+  HomeWidget.widgetClicked.listen((uri) {
+    if (uri?.scheme == 'unchainedwidget' && uri?.host == 'streak') {
+      appRouter.go('/pray');
+    }
+  });
+  HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
+    if (uri?.scheme == 'unchainedwidget' && uri?.host == 'streak') {
+      appRouter.go('/pray');
+    }
+  });
+
   runApp(const ProviderScope(child: MyApp()));
   // Cold-start path: if the watchdog launched us specifically to show the lock
   // (or the prayer gate), pull that fact once the engine is ready — a pushed
@@ -88,6 +105,16 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Keeps the home-screen widget's streak number in sync: watch covers the
+    // very first read after a cold start, listen covers every change after
+    // that (WidgetRef.listen has no fireImmediately, so both are needed).
+    final streakForWidget = ref.watch(prayerStreakProvider);
+    ref.listen<int>(
+      prayerStreakProvider,
+      (previous, next) => PrayerStreakWidgetService.push(next),
+    );
+    PrayerStreakWidgetService.push(streakForWidget);
+
     // Defaults to Spanish (matches PrayerRepository.watchLanguage's default)
     // until the DB row resolves on first read.
     final lang = ref.watch(appLanguageProvider).asData?.value ?? Lang.es;

@@ -135,6 +135,23 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- Home-screen "Prayer Streak" widget: shows the current streak without
+             opening the app and plays a short flame-flicker burst whenever it
+             changes (see PrayerStreakWidgetProvider for why it can't animate
+             continuously — no widget host on Android can). -->
+        <receiver
+            android:name=".PrayerStreakWidgetProvider"
+            android:label="@string/prayer_streak_widget_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.unchained.unchained.WIDGET_FLAME_TICK" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_streak_widget_info" />
+        </receiver>
+
         <!-- Hard uninstall block. While this admin is active the system refuses to
              uninstall the app until it is deactivated; if the app is promoted to
              device owner it can block uninstall outright. -->

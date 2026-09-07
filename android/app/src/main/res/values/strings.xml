@@ -4,4 +4,5 @@
     <string name="device_admin_label">Be Unchained uninstall protection</string>
     <string name="device_admin_explanation">While this is active, Be Unchained cannot be uninstalled until you deactivate it here — the deliberate friction that keeps you accountable in a weak moment.</string>
     <string name="feed_guard_description">Enforces your daily time budgets for Instagram Reels, YouTube Shorts, TikTok and Snapchat Stories: it watches for those specific screens and backs you out once the day\'s limit is used. This service only watches for those screens — it does not read your content.</string>
+    <string name="prayer_streak_widget_label">Prayer Streak</string>
 </resources>
