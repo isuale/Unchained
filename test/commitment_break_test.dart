@@ -80,6 +80,35 @@ void main() {
           reason: 'every break already spent');
     });
 
+    test('Forever ignores any leftover day count from a previous plan', () {
+      // The shape a switch-to-Forever leaves behind: mode is forever, but the
+      // old plan's totalDays/breakCount are still sitting in the row. None of
+      // it may leak into what the user sees or into a break schedule.
+      final status = computeStatus(CommitmentMode.forever, 60, 1, start,
+          start.add(const Duration(days: 3)),
+          breaksUsed: 0);
+      expect(status.isPermanent, isTrue);
+      expect(status.isLocked, isTrue);
+      expect(status.daysLeft, 0, reason: 'Forever never counts down');
+      expect(status.nextBreakAt, isNull);
+      expect(nextBreakAvailableAt(CommitmentMode.forever, 60, 1, start), isNull,
+          reason: 'Forever must never schedule a break notification');
+    });
+
+    test('Forever only engages once the run is anchored', () {
+      // Why the repair re-anchors: with a null anchor computeStatus reports no
+      // commitment at all, which would hand the user a freely-toggleable
+      // protection switch the instant they moved to Forever.
+      expect(
+        computeStatus(CommitmentMode.forever, 0, 0, null, start).isLocked,
+        isFalse,
+      );
+      expect(
+        computeStatus(CommitmentMode.forever, 0, 0, start, start).isLocked,
+        isTrue,
+      );
+    });
+
     test('CommitmentStatus.nextBreakAt is set while locked, not while waiting',
         () {
       final locked = computeStatus(

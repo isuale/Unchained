@@ -271,6 +271,7 @@ class BlockingSettingsActions extends Notifier<void> {
     final repo = ref.read(blockingSettingsRepositoryProvider);
     var settings = await repo.getSettings();
     if (settings == null) return;
+    settings = await _repairForeverMismatch(repo, settings);
     final now = DateTime.now();
     var status = _statusFor(settings, now);
 
@@ -297,6 +298,38 @@ class BlockingSettingsActions extends Notifier<void> {
     if (status.isLocked && !settings.protectionEnabled) {
       await _rearmProtection(repo);
     }
+  }
+
+  /// Heals a row where the active plan is Forever but the stored commitment
+  /// still describes some earlier plan's countdown.
+  ///
+  /// This is the data a shipped bug left behind: switching plans while a
+  /// commitment was running deliberately refused to overwrite the schedule (so
+  /// a switch could not be used to escape a lock), and that guard wrongly
+  /// caught Forever too — which only ever *adds* commitment. Affected users are
+  /// left on the Forever plan while the dashboard counts down someone else's 60
+  /// days, and worse, that span would eventually expire into freedom they never
+  /// asked for.
+  ///
+  /// The activation path no longer creates this state (see
+  /// [PlanActivationOverlay]), but rows written before the fix still carry it,
+  /// so it is repaired here on every app start. Idempotent: once the mode reads
+  /// `forever` this does nothing.
+  Future<BlockingSetting> _repairForeverMismatch(
+    BlockingSettingsRepository repo,
+    BlockingSetting settings,
+  ) async {
+    if (settings.activePlan != 'forever') return settings;
+    final mode = commitmentModeFromString(settings.commitmentMode);
+    if (mode == CommitmentMode.forever) return settings;
+
+    final anchor = settings.commitmentStartedAt;
+    await repo.setCommitmentSchedule(CommitmentSchedule.forever);
+    // Keep a lock that was already running running. If there was no anchor the
+    // user simply hasn't started yet, and Forever engages when they first turn
+    // protection on — exactly as a fresh Forever activation behaves.
+    if (anchor != null) await repo.startCommitmentRun(anchor);
+    return await repo.getSettings() ?? settings;
   }
 
   Future<void> toggle(String field, bool value) {

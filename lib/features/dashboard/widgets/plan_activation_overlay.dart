@@ -19,6 +19,13 @@ class PlanActivationOverlay {
   /// stored — the running lock is left untouched so it keeps enforcing
   /// (protection stays un-toggleable) in the background under whichever
   /// plan you switch to, instead of being wiped by the switch.
+  ///
+  /// The one exception is [CommitmentMode.forever], which always applies. That
+  /// guard exists to stop a switch *weakening* a running lock; Forever can only
+  /// strengthen it (protection locked permanently, no breaks, no end date), so
+  /// refusing it was simply wrong — it left the header saying "Forever" while
+  /// the banner counted down the old plan's remaining days, and let that old
+  /// span expire into freedom the Forever user never asked for.
   static Future<void> show({
     required BuildContext context,
     required WidgetRef ref,
@@ -60,8 +67,21 @@ class PlanActivationOverlay {
     final previousPlan = settings?.activePlan;
 
     await ref.read(activePlanActionsProvider.notifier).setActivePlan(plan);
-    if (!stillCommitted) {
+
+    // Forever outranks whatever is running: it is strictly more commitment, so
+    // the "don't let a switch weaken a live lock" guard must not block it.
+    final toForever = schedule?.mode == CommitmentMode.forever;
+    if (!stillCommitted || toForever) {
       await repo.setCommitmentSchedule(schedule ?? CommitmentSchedule.none);
+      if (stillCommitted && toForever) {
+        // setCommitmentSchedule deliberately clears the run anchor, and with a
+        // null anchor computeStatus reports *no* commitment at all. Re-anchor in
+        // the same breath, or switching to Forever would briefly hand the user
+        // a freely-toggleable protection switch — the exact escape the guard
+        // above exists to prevent. The original anchor is kept rather than
+        // `now` so "committed since" stays truthful.
+        await repo.startCommitmentRun(settings?.commitmentStartedAt ?? now);
+      }
     }
     // Switching to a different plan than the one already active requires
     // re-accepting the Terms & Conditions before the control panel is
