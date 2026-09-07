@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filled portion of the milestone progress bar. Drawn white so it can be
+     retinted to the current streak tier's color, same trick as the flame. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFFFF" />
+    <corners android:radius="3dp" />
+</shape>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Card background, tier 4 ("unstoppable", 30+ days): the app's own brand
+     blue border — the signature payoff tier. See bg_0. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="135"
+        android:startColor="#0F1420"
+        android:endColor="#05070C" />
+    <corners android:radius="22dp" />
+    <stroke android:width="1dp" android:color="#401E5FFF" />
+</shape>

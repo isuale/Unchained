@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Soft radial halo behind the flame. Drawn white so
+     PrayerStreakWidgetProvider can retint it to the current streak tier's
+     color the same way it retints the flame itself. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:type="radial"
+        android:gradientRadius="40dp"
+        android:centerColor="#FFFFFFFF"
+        android:endColor="#00FFFFFF" />
+</shape>

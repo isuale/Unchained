@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Picked automatically (API 31+) instead of widget_prayer_streak.xml when the
+     launcher gives the widget too little width for the horizontal layout —
+     e.g. a single narrow column. Vertical stack so nothing wraps mid-word. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_prayer_streak_bg_0">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="10dp">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/widget_flame_glow"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:src="@drawable/widget_flame_glow" />
+
+            <ImageView
+                android:id="@+id/widget_flame"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_widget_flame"
+                android:contentDescription="@string/prayer_streak_widget_label" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/widget_streak_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#FFFFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            tools:text="12" />
+
+        <TextView
+            android:id="@+id/widget_streak_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#99FFFFFF"
+            android:textSize="9sp"
+            android:maxLines="1"
+            android:textStyle="bold"
+            android:gravity="center"
+            tools:text="DAY STREAK" />
+    </LinearLayout>
+</FrameLayout>

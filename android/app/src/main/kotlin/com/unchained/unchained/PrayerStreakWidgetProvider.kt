@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
+import android.util.SizeF
 import android.util.TypedValue
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -62,6 +63,34 @@ class PrayerStreakWidgetProvider : HomeWidgetProvider() {
             0xFF1E5FFF.toInt(),
         )
         private val TIER_BASE_DP = floatArrayOf(42f, 48f, 54f, 60f, 66f)
+        private val TIER_GLOW_DP = floatArrayOf(58f, 66f, 74f, 82f, 90f)
+        private val TIER_BG = intArrayOf(
+            R.drawable.widget_prayer_streak_bg_0,
+            R.drawable.widget_prayer_streak_bg_1,
+            R.drawable.widget_prayer_streak_bg_2,
+            R.drawable.widget_prayer_streak_bg_3,
+            R.drawable.widget_prayer_streak_bg_4,
+        )
+
+        // Mirrors streakMilestones in lib/features/dashboard/domain/streak_progress.dart
+        // (the Progress tab's milestone chips) — kept in sync by hand since
+        // native code can't share a Dart constant.
+        private val MILESTONES = intArrayOf(7, 14, 30, 60, 90, 180, 365)
+        private const val PROGRESS_TRACK_WIDTH_DP = 120f
+
+        private fun nextMilestone(streak: Int): Int? = MILESTONES.firstOrNull { it > streak }
+
+        private fun milestoneCaption(streak: Int): String {
+            val next = nextMilestone(streak) ?: return "LEGENDARY"
+            return "${next - streak} TO GO"
+        }
+
+        private fun milestoneProgress(streak: Int): Float {
+            val next = nextMilestone(streak) ?: return 1f
+            val base = MILESTONES.lastOrNull { it <= streak } ?: 0
+            val span = next - base
+            return if (span <= 0) 1f else (streak - base).toFloat() / span
+        }
 
         private fun streakLabel(streak: Int): String =
             if (streak <= 0) "START TODAY" else "DAY STREAK"
@@ -71,23 +100,87 @@ class PrayerStreakWidgetProvider : HomeWidgetProvider() {
                 ComponentName(context, PrayerStreakWidgetProvider::class.java),
             )
 
-        private fun buildViews(context: Context, streak: Int, frame: Int): RemoteViews {
+        // The horizontal (full) layout needs real width for its text column;
+        // below this, Android (API 31+) picks buildCompactViews instead. Below
+        // API 31 there's no such choice, so full is always used there — same
+        // as the flame-pulse/progress-bar-fill fallback already gated on S.
+        private val RESPONSIVE_BREAKPOINT = SizeF(230f, 110f)
+        private const val COMPACT_SIZE_FACTOR = 0.72f
+
+        /** Picks the best-fitting layout for the widget's actual placed size (API 31+). */
+        private fun buildResponsiveViews(context: Context, streak: Int, frame: Int): RemoteViews {
+            val full = buildFullViews(context, streak, frame)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return full
+            val compact = buildCompactViews(context, streak, frame)
+            return RemoteViews(linkedMapOf(SizeF(0f, 0f) to compact, RESPONSIVE_BREAKPOINT to full))
+        }
+
+        private fun buildCompactViews(context: Context, streak: Int, frame: Int): RemoteViews {
+            val tier = tierFor(streak)
+            val color = TIER_COLOR[tier]
+            val scale = FRAME_SCALE[frame.coerceIn(0, FRAME_COUNT - 1)]
+            val sizeDp = TIER_BASE_DP[tier] * COMPACT_SIZE_FACTOR * scale
+            val glowDp = TIER_GLOW_DP[tier] * COMPACT_SIZE_FACTOR
+
+            return RemoteViews(context.packageName, R.layout.widget_prayer_streak_compact).apply {
+                setInt(R.id.widget_root, "setBackgroundResource", TIER_BG[tier])
+                setTextViewText(R.id.widget_streak_number, streak.toString())
+                setTextViewText(R.id.widget_streak_label, streakLabel(streak))
+                setInt(R.id.widget_flame, "setColorFilter", color)
+                setInt(R.id.widget_flame_glow, "setColorFilter", color)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    setViewLayoutWidth(R.id.widget_flame, sizeDp, TypedValue.COMPLEX_UNIT_DIP)
+                    setViewLayoutHeight(R.id.widget_flame, sizeDp, TypedValue.COMPLEX_UNIT_DIP)
+                    setViewLayoutWidth(R.id.widget_flame_glow, glowDp, TypedValue.COMPLEX_UNIT_DIP)
+                    setViewLayoutHeight(R.id.widget_flame_glow, glowDp, TypedValue.COMPLEX_UNIT_DIP)
+                }
+
+                val openApp = HomeWidgetLaunchIntent.getActivity(
+                    context,
+                    MainActivity::class.java,
+                    Uri.parse("unchainedwidget://streak"),
+                )
+                setOnClickPendingIntent(R.id.widget_root, openApp)
+            }
+        }
+
+        private fun buildFullViews(context: Context, streak: Int, frame: Int): RemoteViews {
             val tier = tierFor(streak)
             val color = TIER_COLOR[tier]
             val scale = FRAME_SCALE[frame.coerceIn(0, FRAME_COUNT - 1)]
             val sizeDp = TIER_BASE_DP[tier] * scale
+            val glowDp = TIER_GLOW_DP[tier]
+            val progress = milestoneProgress(streak).coerceIn(0f, 1f)
 
             return RemoteViews(context.packageName, R.layout.widget_prayer_streak).apply {
+                // The whole card's border warms up with the tier too, not just
+                // the flame — a single-int setter, so it works via RemoteViews.
+                setInt(R.id.widget_root, "setBackgroundResource", TIER_BG[tier])
+
                 setTextViewText(R.id.widget_streak_number, streak.toString())
                 setTextViewText(R.id.widget_streak_label, streakLabel(streak))
+                setTextViewText(R.id.widget_milestone_caption, milestoneCaption(streak))
+                setInt(R.id.widget_milestone_caption, "setTextColor", color)
+
                 setInt(R.id.widget_flame, "setColorFilter", color)
+                setInt(R.id.widget_flame_glow, "setColorFilter", color)
+                setInt(R.id.widget_progress_fill, "setColorFilter", color)
 
                 // setViewLayoutWidth/Height (API 31+) is what actually makes the
-                // flame pulse; below that it still shows the right tier size and
-                // color, just without the burst animation.
+                // flame pulse and the progress bar fill; below that it still
+                // shows the right tier size/color/border, just without the
+                // burst animation or an accurate bar width.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     setViewLayoutWidth(R.id.widget_flame, sizeDp, TypedValue.COMPLEX_UNIT_DIP)
                     setViewLayoutHeight(R.id.widget_flame, sizeDp, TypedValue.COMPLEX_UNIT_DIP)
+                    setViewLayoutWidth(R.id.widget_flame_glow, glowDp, TypedValue.COMPLEX_UNIT_DIP)
+                    setViewLayoutHeight(R.id.widget_flame_glow, glowDp, TypedValue.COMPLEX_UNIT_DIP)
+                    setViewLayoutWidth(
+                        R.id.widget_progress_fill,
+                        PROGRESS_TRACK_WIDTH_DP * progress,
+                        TypedValue.COMPLEX_UNIT_DIP,
+                    )
                 }
 
                 val openApp = HomeWidgetLaunchIntent.getActivity(
@@ -114,16 +207,41 @@ class PrayerStreakWidgetProvider : HomeWidgetProvider() {
             return PendingIntent.getBroadcast(context, widgetId * 100 + frame, intent, flags)
         }
 
-        /** Schedules frames 1..FRAME_COUNT-1; frame 0 is drawn immediately by the caller. */
+        /**
+         * Schedules frames 1..FRAME_COUNT-1; frame 0 is drawn immediately by the
+         * caller. Exact timing isn't essential for a flicker burst, so this
+         * degrades to an inexact alarm rather than crash when the "Alarms &
+         * reminders" special access hasn't been granted — same fallback
+         * BreakNotifier uses for its (actually time-sensitive) alarms.
+         */
         private fun scheduleBurst(context: Context, widgetId: Int) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val exact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+                alarmManager.canScheduleExactAlarms()
             for (frame in 1 until FRAME_COUNT) {
                 val triggerAt = SystemClock.elapsedRealtime() + FRAME_INTERVAL_MS * frame
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    triggerAt,
-                    tickPendingIntent(context, widgetId, frame),
-                )
+                val pendingIntent = tickPendingIntent(context, widgetId, frame)
+                try {
+                    if (exact) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            triggerAt,
+                            pendingIntent,
+                        )
+                    } else {
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            triggerAt,
+                            pendingIntent,
+                        )
+                    }
+                } catch (e: SecurityException) {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        triggerAt,
+                        pendingIntent,
+                    )
+                }
             }
         }
     }
@@ -136,7 +254,7 @@ class PrayerStreakWidgetProvider : HomeWidgetProvider() {
     ) {
         val streak = widgetData.getInt("streak_days", 0)
         appWidgetIds.forEach { widgetId ->
-            appWidgetManager.updateAppWidget(widgetId, buildViews(context, streak, 0))
+            appWidgetManager.updateAppWidget(widgetId, buildResponsiveViews(context, streak, 0))
             scheduleBurst(context, widgetId)
         }
     }
@@ -148,7 +266,7 @@ class PrayerStreakWidgetProvider : HomeWidgetProvider() {
             val frame = intent.getIntExtra(EXTRA_FRAME, 0)
             val streak = HomeWidgetPlugin.getData(context).getInt("streak_days", 0)
             AppWidgetManager.getInstance(context)
-                .updateAppWidget(widgetId, buildViews(context, streak, frame))
+                .updateAppWidget(widgetId, buildResponsiveViews(context, streak, frame))
             return
         }
         super.onReceive(context, intent)
