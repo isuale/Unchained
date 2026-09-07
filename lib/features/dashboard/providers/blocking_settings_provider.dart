@@ -176,6 +176,7 @@ class BlockingSettingsActions extends Notifier<void> {
       ),
       breakAvailableNow: status.isBreakAvailable,
       breakEndsAt: status.isBreak ? status.breakUntil : null,
+      breakDuration: CommitmentStatus.breakDuration,
       breaksLeft: status.breaksLeft,
       breaksTotal: settings.commitmentBreakCount,
       texts: {

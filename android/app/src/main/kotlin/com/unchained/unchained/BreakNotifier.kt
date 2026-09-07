@@ -59,6 +59,7 @@ object BreakNotifier {
     private const val KEY_BREAK_ENDS_AT = "break_ends_at"
     private const val KEY_BREAKS_LEFT = "breaks_left"
     private const val KEY_BREAKS_TOTAL = "breaks_total"
+    private const val KEY_BREAK_DURATION = "break_duration_ms"
 
     /**
      * The `next_break_at` instant whose "unlocked" notification has already been
@@ -89,6 +90,16 @@ object BreakNotifier {
     /** How long before the break expires the "wrap up" warning fires. */
     private const val ENDING_SOON_MS = 5 * 60 * 1000L
 
+    /**
+     * A "5 minutes left" warning only means something on a break long enough for
+     * five minutes to be a meaningful slice of it. On a short break — the
+     * one-minute break `CommitmentStatus.testMode` produces, or any future short
+     * one — the warning would fire the instant the break started and the card
+     * would open on "5 minutes left" instead of "break in progress". Below this
+     * length the warning is simply skipped.
+     */
+    private const val MIN_BREAK_FOR_WARNING_MS = 2 * ENDING_SOON_MS
+
     /** Brand accent used for the notification tint. */
     private val COLOR_ACCENT = Color.parseColor("#1E5FFF")
     private val COLOR_GREEN = Color.parseColor("#00D26A")
@@ -110,6 +121,7 @@ object BreakNotifier {
         nextBreakAt: Long,
         breakAvailableNow: Boolean,
         breakEndsAt: Long,
+        breakDurationMs: Long,
         breaksLeft: Int,
         breaksTotal: Int,
         texts: Map<String, String>,
@@ -120,6 +132,7 @@ object BreakNotifier {
             putLong(KEY_BREAK_ENDS_AT, breakEndsAt)
             putInt(KEY_BREAKS_LEFT, breaksLeft)
             putInt(KEY_BREAKS_TOTAL, breaksTotal)
+            putLong(KEY_BREAK_DURATION, breakDurationMs)
             for ((k, v) in texts) putString(TEXT_PREFIX + k, v)
             apply()
         }
@@ -145,9 +158,10 @@ object BreakNotifier {
         if (endsAt > now) {
             NotificationManagerCompat.from(context).cancel(ID_AVAILABLE)
             NotificationManagerCompat.from(context).cancel(ID_ENDED)
-            showRunning(context, endsAt, endingSoon = endsAt - now <= ENDING_SOON_MS)
-            if (endsAt - now > ENDING_SOON_MS) {
-                setAlarm(context, REQ_ENDING_SOON, endsAt - ENDING_SOON_MS,
+            val lead = warningLead(prefs.getLong(KEY_BREAK_DURATION, 0L))
+            showRunning(context, endsAt, endingSoon = lead > 0 && endsAt - now <= lead)
+            if (lead > 0 && endsAt - now > lead) {
+                setAlarm(context, REQ_ENDING_SOON, endsAt - lead,
                     BreakAlarmReceiver.KIND_ENDING_SOON)
             }
             setAlarm(context, REQ_ENDED, endsAt, BreakAlarmReceiver.KIND_ENDED)
@@ -404,6 +418,16 @@ object BreakNotifier {
     // ------------------------------------------------------------------ prefs
 
     fun breakEndsAt(context: Context): Long = prefs(context).getLong(KEY_BREAK_ENDS_AT, 0L)
+
+    /**
+     * How long before the end the "wrap up" warning should fire, or 0 to skip it
+     * entirely because the break is too short for the warning to make sense.
+     */
+    fun warningLead(breakDurationMs: Long): Long =
+        if (breakDurationMs >= MIN_BREAK_FOR_WARNING_MS) ENDING_SOON_MS else 0L
+
+    fun breakDurationMs(context: Context): Long =
+        prefs(context).getLong(KEY_BREAK_DURATION, 0L)
 
     private fun text(context: Context, key: String, fallback: String): String =
         prefs(context).getString(TEXT_PREFIX + key, null)?.takeIf { it.isNotBlank() } ?: fallback

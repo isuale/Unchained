@@ -36,9 +36,11 @@ class BreakAlarmReceiver : BroadcastReceiver() {
 
             KIND_ENDING_SOON -> {
                 val endsAt = BreakNotifier.breakEndsAt(context)
+                val lead = BreakNotifier.warningLead(BreakNotifier.breakDurationMs(context))
                 // A break that was already ended early (user re-armed protection)
-                // must not resurrect its countdown card.
-                if (endsAt > System.currentTimeMillis()) {
+                // must not resurrect its countdown card, and a break too short to
+                // warrant a warning must not show one.
+                if (lead > 0 && endsAt > System.currentTimeMillis()) {
                     BreakNotifier.showRunning(context, endsAt, endingSoon = true)
                 }
             }

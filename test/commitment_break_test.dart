@@ -9,6 +9,17 @@ import 'package:unchained/features/dashboard/domain/commitment.dart';
 void main() {
   final start = DateTime(2026, 9, 1, 12, 0);
 
+  /// How much real time [n] plan-days are worth.
+  ///
+  /// [CommitmentStatus.testMode] reinterprets every "day" as a minute so the
+  /// whole lock → break → re-lock cycle can be watched by hand in a few
+  /// minutes. These tests go through this helper rather than hardcoding
+  /// `Duration(days:)`, so they stay true — and keep testing the real thing —
+  /// whichever way that switch is set.
+  Duration planDays(int n) => CommitmentStatus.testMode
+      ? Duration(minutes: n)
+      : Duration(days: n);
+
   /// Every case is checked from both sides: locked one minute earlier,
   /// available one second later.
   void expectBoundary(CommitmentMode mode, int days, int breaks, int used) {
@@ -41,7 +52,7 @@ void main() {
     test('splits the span evenly: 30 days / 2 breaks earns one every 10 days',
         () {
       expect(nextBreakAvailableAt(CommitmentMode.fixed, 30, 2, start),
-          start.add(const Duration(days: 10)));
+          start.add(planDays(10)));
     });
 
     test('a spent break pushes the next one out by its own 30 minutes', () {
@@ -49,7 +60,7 @@ void main() {
       // of *protected* time in — which is 20 days plus one break of wall clock.
       expect(
         nextBreakAvailableAt(CommitmentMode.fixed, 30, 2, start, breaksUsed: 1),
-        start.add(const Duration(days: 20) + CommitmentStatus.breakDuration),
+        start.add(planDays(20) + CommitmentStatus.breakDuration),
       );
     });
 
@@ -71,13 +82,13 @@ void main() {
 
     test('CommitmentStatus.nextBreakAt is set while locked, not while waiting',
         () {
-      final locked = computeStatus(CommitmentMode.fixed, 30, 2, start,
-          start.add(const Duration(days: 1)));
+      final locked = computeStatus(
+          CommitmentMode.fixed, 30, 2, start, start.add(planDays(1)));
       expect(locked.isLocked, isTrue);
-      expect(locked.nextBreakAt, start.add(const Duration(days: 10)));
+      expect(locked.nextBreakAt, start.add(planDays(10)));
 
-      final waiting = computeStatus(CommitmentMode.fixed, 30, 2, start,
-          start.add(const Duration(days: 11)));
+      final waiting = computeStatus(
+          CommitmentMode.fixed, 30, 2, start, start.add(planDays(11)));
       expect(waiting.isBreakAvailable, isTrue);
       expect(waiting.nextBreakAt, isNull,
           reason: 'a break already waiting is not a *next* break');

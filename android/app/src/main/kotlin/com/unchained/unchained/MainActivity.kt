@@ -130,6 +130,8 @@ class MainActivity : FlutterActivity() {
                             breakAvailableNow =
                                 call.argument<Boolean>("breakAvailableNow") ?: false,
                             breakEndsAt = call.argument<Number>("breakEndsAt")?.toLong() ?: 0L,
+                            breakDurationMs =
+                                call.argument<Number>("breakDurationMs")?.toLong() ?: 0L,
                             breaksLeft = call.argument<Int>("breaksLeft") ?: 0,
                             breaksTotal = call.argument<Int>("breaksTotal") ?: 0,
                             texts = texts,

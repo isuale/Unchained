@@ -28,7 +28,9 @@ class BreakNotificationsBridge {
   /// [nextBreakAt] is when the next break unlocks (null when none is coming),
   /// [breakAvailableNow] means one is already earned and waiting, and
   /// [breakEndsAt] is the expiry of a break the user has already claimed —
-  /// which outranks both, exactly as in `computeStatus`.
+  /// which outranks both, exactly as in `computeStatus`. [breakDuration] is how
+  /// long a whole break lasts, which native needs to decide whether a
+  /// "5 minutes left" warning makes sense for a break this short.
   ///
   /// Anything not described by these arguments is cancelled natively, so this is
   /// safe (and intended) to call on every settings change.
@@ -36,6 +38,7 @@ class BreakNotificationsBridge {
     required DateTime? nextBreakAt,
     required bool breakAvailableNow,
     required DateTime? breakEndsAt,
+    required Duration breakDuration,
     required int breaksLeft,
     required int breaksTotal,
     required Map<String, String> texts,
@@ -45,6 +48,9 @@ class BreakNotificationsBridge {
         'nextBreakAt': nextBreakAt?.millisecondsSinceEpoch ?? 0,
         'breakAvailableNow': breakAvailableNow,
         'breakEndsAt': breakEndsAt?.millisecondsSinceEpoch ?? 0,
+        // Native decides from this whether a "5 minutes left" warning is
+        // meaningful at all — it isn't on a break shorter than ten minutes.
+        'breakDurationMs': breakDuration.inMilliseconds,
         'breaksLeft': breaksLeft,
         'breaksTotal': breaksTotal,
         'texts': texts,
