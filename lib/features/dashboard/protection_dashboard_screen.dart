@@ -851,6 +851,10 @@ class _CommitmentBanner extends StatelessWidget {
     final permanent = status.isPermanent;
     final accent =
         locked ? const Color(0xFF1E5FFF) : ProtectionDashboardScreen.green;
+    // A break lands wherever the plan's protected time divides evenly, which is
+    // not a date the user can work out. Show it rather than leaving them to
+    // guess — the same instant the native notifier sets its alarm for.
+    final nextBreak = locked ? status.nextBreakAt : null;
     final String title;
     final String subtitle;
     if (permanent) {
@@ -906,6 +910,29 @@ class _CommitmentBanner extends StatelessWidget {
                   style: const TextStyle(
                       color: Color(0xFF888888), fontSize: 12),
                 ),
+                if (nextBreak != null) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.notifications_active_outlined,
+                          size: 13,
+                          color: ProtectionDashboardScreen.green
+                              .withValues(alpha: 0.9)),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          l.commitment_next_break_sub(_shortDate(nextBreak)),
+                          style: TextStyle(
+                            color: ProtectionDashboardScreen.green
+                                .withValues(alpha: 0.9),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

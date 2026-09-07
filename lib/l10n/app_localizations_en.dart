@@ -1250,4 +1250,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String terms_section11_body(String name, String email) {
     return 'For questions, bug reports, or support, contact the owner and developer $name at $email.';
   }
+
+  @override
+  String get break_notif_channel_name => 'Commitment breaks';
+
+  @override
+  String get break_notif_channel_desc =>
+      'Tells you the moment your 30-minute break unlocks, how long is left, and when protection comes back on.';
+
+  @override
+  String get break_notif_available_title => '🔓 Your break just unlocked';
+
+  @override
+  String get break_notif_available_body =>
+      'Turn protection off in the app whenever you want it. The 30 minutes only start when you do — this waits as long as you need.';
+
+  @override
+  String break_notif_available_sub(int left, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      left,
+      locale: localeName,
+      other: '$left of $total breaks left',
+      one: '1 of $total breaks left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get break_notif_running_title => '⏳ Break in progress';
+
+  @override
+  String get break_notif_running_body =>
+      'Protection is off. The shield goes back up by itself when the countdown hits zero.';
+
+  @override
+  String get break_notif_ending_soon_title => '⏳ 5 minutes left of your break';
+
+  @override
+  String get break_notif_ending_soon_body =>
+      'Time to wrap up — protection comes back on by itself.';
+
+  @override
+  String get break_notif_ended_title => '🛡️ Break over · shield back up';
+
+  @override
+  String get break_notif_ended_body =>
+      'Your commitment is running again. Well done for coming back.';
+
+  @override
+  String get break_notif_ended_fail_title => '🛡️ Your break is over';
+
+  @override
+  String get break_notif_ended_fail_body =>
+      'Protection could not turn itself back on. Open Be Unchained to put your shield back up.';
+
+  @override
+  String get break_notif_action_open => 'Open';
+
+  @override
+  String commitment_next_break_sub(String date) {
+    return 'Your next break unlocks on $date — we\'ll send you a notification';
+  }
 }

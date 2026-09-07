@@ -2313,6 +2313,96 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Para preguntas, reportes de errores o soporte, contacta al propietario y desarrollador {name} en {email}.'**
   String terms_section11_body(String name, String email);
+
+  /// No description provided for @break_notif_channel_name.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausas del compromiso'**
+  String get break_notif_channel_name;
+
+  /// No description provided for @break_notif_channel_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'Te avisa en el momento exacto en que se desbloquea tu pausa de 30 minutos, cuánto te queda y cuándo vuelve la protección.'**
+  String get break_notif_channel_desc;
+
+  /// No description provided for @break_notif_available_title.
+  ///
+  /// In es, this message translates to:
+  /// **'🔓 Tu pausa se acaba de desbloquear'**
+  String get break_notif_available_title;
+
+  /// No description provided for @break_notif_available_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Desactiva la protección en la app cuando quieras usarla. Los 30 minutos empiezan solo cuando tú decidas: esta pausa te espera el tiempo que haga falta.'**
+  String get break_notif_available_body;
+
+  /// No description provided for @break_notif_available_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'{left, plural, =1{Queda 1 de {total} pausas} other{Quedan {left} de {total} pausas}}'**
+  String break_notif_available_sub(int left, int total);
+
+  /// No description provided for @break_notif_running_title.
+  ///
+  /// In es, this message translates to:
+  /// **'⏳ Pausa en curso'**
+  String get break_notif_running_title;
+
+  /// No description provided for @break_notif_running_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La protección está desactivada. El escudo vuelve a subir solo cuando la cuenta llegue a cero.'**
+  String get break_notif_running_body;
+
+  /// No description provided for @break_notif_ending_soon_title.
+  ///
+  /// In es, this message translates to:
+  /// **'⏳ Te quedan 5 minutos de pausa'**
+  String get break_notif_ending_soon_title;
+
+  /// No description provided for @break_notif_ending_soon_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Ve cerrando: la protección se activa sola en unos minutos.'**
+  String get break_notif_ending_soon_body;
+
+  /// No description provided for @break_notif_ended_title.
+  ///
+  /// In es, this message translates to:
+  /// **'🛡️ Pausa terminada · escudo arriba'**
+  String get break_notif_ended_title;
+
+  /// No description provided for @break_notif_ended_body.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu compromiso vuelve a correr. Bien hecho por regresar.'**
+  String get break_notif_ended_body;
+
+  /// No description provided for @break_notif_ended_fail_title.
+  ///
+  /// In es, this message translates to:
+  /// **'🛡️ Tu pausa ha terminado'**
+  String get break_notif_ended_fail_title;
+
+  /// No description provided for @break_notif_ended_fail_body.
+  ///
+  /// In es, this message translates to:
+  /// **'La protección no pudo activarse sola. Abre Be Unchained para volver a subir tu escudo.'**
+  String get break_notif_ended_fail_body;
+
+  /// No description provided for @break_notif_action_open.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir'**
+  String get break_notif_action_open;
+
+  /// No description provided for @commitment_next_break_sub.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu próxima pausa se desbloquea el {date} · te avisamos con una notificación'**
+  String commitment_next_break_sub(String date);
 }
 
 class _AppLocalizationsDelegate

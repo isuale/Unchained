@@ -1266,4 +1266,66 @@ class AppLocalizationsPt extends AppLocalizations {
   String terms_section11_body(String name, String email) {
     return 'Para dúvidas, relatos de erros ou suporte, contacta o proprietário e programador $name através de $email.';
   }
+
+  @override
+  String get break_notif_channel_name => 'Pausas do compromisso';
+
+  @override
+  String get break_notif_channel_desc =>
+      'Avisa você no momento exato em que a sua pausa de 30 minutos é liberada, quanto tempo falta e quando a proteção volta.';
+
+  @override
+  String get break_notif_available_title =>
+      '🔓 Sua pausa acabou de ser liberada';
+
+  @override
+  String get break_notif_available_body =>
+      'Desligue a proteção no app quando quiser usá-la. Os 30 minutos só começam quando você decidir — esta pausa espera o tempo que for preciso.';
+
+  @override
+  String break_notif_available_sub(int left, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      left,
+      locale: localeName,
+      other: 'Restam $left de $total pausas',
+      one: 'Resta 1 de $total pausas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get break_notif_running_title => '⏳ Pausa em andamento';
+
+  @override
+  String get break_notif_running_body =>
+      'A proteção está desligada. O escudo sobe sozinho quando a contagem chegar a zero.';
+
+  @override
+  String get break_notif_ending_soon_title => '⏳ Faltam 5 minutos da sua pausa';
+
+  @override
+  String get break_notif_ending_soon_body =>
+      'Vá finalizando — a proteção volta sozinha.';
+
+  @override
+  String get break_notif_ended_title => '🛡️ Pausa encerrada · escudo de volta';
+
+  @override
+  String get break_notif_ended_body =>
+      'Seu compromisso está rodando de novo. Muito bem por voltar.';
+
+  @override
+  String get break_notif_ended_fail_title => '🛡️ Sua pausa terminou';
+
+  @override
+  String get break_notif_ended_fail_body =>
+      'A proteção não conseguiu voltar sozinha. Abra o Be Unchained para levantar o escudo novamente.';
+
+  @override
+  String get break_notif_action_open => 'Abrir';
+
+  @override
+  String commitment_next_break_sub(String date) {
+    return 'Sua próxima pausa é liberada em $date — enviaremos uma notificação';
+  }
 }

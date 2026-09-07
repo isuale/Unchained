@@ -14,6 +14,12 @@
     <!-- Lets BootReceiver hear ACTION_BOOT_COMPLETED so protection survives a
          phone restart instead of silently staying off. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Commitment breaks land at an instant nobody picks (wherever the plan's
+         protected time divides evenly), so BreakNotifier wakes the phone with an
+         alarm to announce one. Exact where the OS grants it; BreakNotifier falls
+         back to setAndAllowWhileIdle when Android 14+ withholds it, so the
+         feature never depends on this being granted. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:label="Be Unchained"
@@ -119,6 +125,15 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- Fires at the three moments of a commitment break (unlocked, five
+             minutes left, over) to post the phone notification — and, at the end,
+             to put protection back up. Not exported: only our own AlarmManager
+             PendingIntents reach it. -->
+        <receiver
+            android:name=".BreakAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
         <!-- Hard uninstall block. While this admin is active the system refuses to
              uninstall the app until it is deactivated; if the app is promoted to

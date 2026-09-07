@@ -103,6 +103,7 @@ class CommitmentStatus {
     this.isPermanent = false,
     this.breaksUsed = 0,
     this.breaksTotal = 0,
+    this.nextBreakAt,
   });
 
   /// TEMPORARY TEST MODE — set back to false before committing.
@@ -138,6 +139,13 @@ class CommitmentStatus {
   /// Breaks already claimed, and how many the plan grants in total.
   final int breaksUsed;
   final int breaksTotal;
+
+  /// When the next break unlocks, or null if none is coming (Forever, no breaks
+  /// configured, all spent, or one already waiting). See [nextBreakAvailableAt].
+  ///
+  /// Exists so the user is never left guessing: the dashboard shows the date and
+  /// the native notifier sets its alarm from the same value.
+  final DateTime? nextBreakAt;
 
   /// Breaks still to come, including one that is available right now.
   int get breaksLeft {
@@ -260,6 +268,12 @@ CommitmentStatus computeStatus(
         ? CommitmentPhase.breakAvailable
         : CommitmentPhase.locked,
     mode: mode,
+    // Only meaningful while locked — when a break is already waiting, the next
+    // one is not on the clock yet.
+    nextBreakAt: earned > breaksUsed
+        ? null
+        : nextBreakAvailableAt(mode, totalDays, breakCount, startedAt,
+            breaksUsed: breaksUsed),
     // The realistic finish date: the protected time still owed, plus the
     // wall-clock the remaining breaks will add on top.
     lockUntil: now.add(remaining + brk * (breakCount - breaksUsed).clamp(0, breakCount)),
@@ -276,4 +290,48 @@ int _ceilDays(Duration d) {
   }
   final days = (d.inMinutes / (60 * 24)).ceil();
   return days < 1 ? 1 : days;
+}
+
+/// The wall-clock instant the *next* break becomes available, or null when no
+/// break is coming (no commitment, the Forever plan, a plan with no breaks, or
+/// every break already spent).
+///
+/// This is the whole reason the break notification can exist. [computeStatus]
+/// answers "is a break available *right now*", which only helps while the app
+/// is open — and a break lands wherever the plan's protected time happens to
+/// divide evenly (a 30-day / 2-break plan earns one every ten days, to the
+/// minute), so the odds of the user watching at that moment are near zero.
+/// Turning the same maths inside out gives a future timestamp we can hand to
+/// Android's alarm scheduler and let the phone do the waiting.
+///
+/// Derivation: [computeStatus] grants break number `n` once *served* protected
+/// time reaches `n * segmentLength`, where served time excludes the breaks
+/// already taken. With `k = breaksUsed` breaks already spent, the next one is
+/// number `k + 1`, so:
+///
+///     startedAt + breakDuration * k + segmentLength * (k + 1)
+///
+/// The `breakDuration * k` term is the wall-clock the spent breaks pushed the
+/// whole schedule forward by; without it the estimate drifts earlier by 30
+/// minutes per break taken.
+///
+/// The result can be in the past — that means the break is already available
+/// and the caller should surface it immediately rather than schedule anything.
+DateTime? nextBreakAvailableAt(
+  CommitmentMode mode,
+  int totalDays,
+  int breakCount,
+  DateTime? startedAt, {
+  int breaksUsed = 0,
+}) {
+  if (startedAt == null) return null;
+  if (mode != CommitmentMode.fixed && mode != CommitmentMode.cycle) return null;
+  if (breakCount <= 0 || breaksUsed >= breakCount) return null;
+
+  final segLen = _segmentLength(totalDays, breakCount);
+  if (segLen.inSeconds <= 0) return null;
+
+  return startedAt
+      .add(CommitmentStatus.breakDuration * breaksUsed)
+      .add(segLen * (breaksUsed + 1));
 }

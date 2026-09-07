@@ -38,5 +38,9 @@ class BootReceiver : BroadcastReceiver() {
 
     private fun restoreProtection(context: Context) {
         BlockingService.restoreIfDesired(context, "boot")
+        // A restart wipes every pending AlarmManager alarm, so the "your break
+        // just unlocked" wake-up would silently never arrive. Put them back from
+        // the schedule BreakNotifier mirrors into SharedPreferences.
+        BreakNotifier.rescheduleAfterReboot(context)
     }
 }

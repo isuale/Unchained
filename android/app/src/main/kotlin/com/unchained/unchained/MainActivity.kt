@@ -25,6 +25,7 @@ class MainActivity : FlutterActivity() {
     private val appLimitsChannelName = "unchained/app_limits"
     private val appsChannelName = "unchained/apps"
     private val appLockChannelName = "unchained/applock"
+    private val breaksChannelName = "unchained/breaks"
     private var pendingPrepareResult: MethodChannel.Result? = null
 
     private var guardChannel: MethodChannel? = null
@@ -110,6 +111,35 @@ class MainActivity : FlutterActivity() {
                             mapOf("day" to day, "count" to count)
                         }
                     )
+                    else -> result.notImplemented()
+                }
+            }
+
+        // Commitment-break notifications. Dart owns the maths (commitment.dart)
+        // and the wording (the ARB files); native owns the alarms, because the
+        // moment a break unlocks usually arrives with the app closed.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, breaksChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "sync" -> {
+                        @Suppress("UNCHECKED_CAST")
+                        val texts = (call.argument<Map<String, String>>("texts")) ?: emptyMap()
+                        BreakNotifier.sync(
+                            applicationContext,
+                            nextBreakAt = call.argument<Number>("nextBreakAt")?.toLong() ?: 0L,
+                            breakAvailableNow =
+                                call.argument<Boolean>("breakAvailableNow") ?: false,
+                            breakEndsAt = call.argument<Number>("breakEndsAt")?.toLong() ?: 0L,
+                            breaksLeft = call.argument<Int>("breaksLeft") ?: 0,
+                            breaksTotal = call.argument<Int>("breaksTotal") ?: 0,
+                            texts = texts,
+                        )
+                        result.success(true)
+                    }
+                    "cancelAll" -> {
+                        BreakNotifier.cancelAll(applicationContext)
+                        result.success(true)
+                    }
                     else -> result.notImplemented()
                 }
             }

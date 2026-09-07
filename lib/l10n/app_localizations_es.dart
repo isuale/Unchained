@@ -1259,4 +1259,66 @@ class AppLocalizationsEs extends AppLocalizations {
   String terms_section11_body(String name, String email) {
     return 'Para preguntas, reportes de errores o soporte, contacta al propietario y desarrollador $name en $email.';
   }
+
+  @override
+  String get break_notif_channel_name => 'Pausas del compromiso';
+
+  @override
+  String get break_notif_channel_desc =>
+      'Te avisa en el momento exacto en que se desbloquea tu pausa de 30 minutos, cuánto te queda y cuándo vuelve la protección.';
+
+  @override
+  String get break_notif_available_title =>
+      '🔓 Tu pausa se acaba de desbloquear';
+
+  @override
+  String get break_notif_available_body =>
+      'Desactiva la protección en la app cuando quieras usarla. Los 30 minutos empiezan solo cuando tú decidas: esta pausa te espera el tiempo que haga falta.';
+
+  @override
+  String break_notif_available_sub(int left, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      left,
+      locale: localeName,
+      other: 'Quedan $left de $total pausas',
+      one: 'Queda 1 de $total pausas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get break_notif_running_title => '⏳ Pausa en curso';
+
+  @override
+  String get break_notif_running_body =>
+      'La protección está desactivada. El escudo vuelve a subir solo cuando la cuenta llegue a cero.';
+
+  @override
+  String get break_notif_ending_soon_title => '⏳ Te quedan 5 minutos de pausa';
+
+  @override
+  String get break_notif_ending_soon_body =>
+      'Ve cerrando: la protección se activa sola en unos minutos.';
+
+  @override
+  String get break_notif_ended_title => '🛡️ Pausa terminada · escudo arriba';
+
+  @override
+  String get break_notif_ended_body =>
+      'Tu compromiso vuelve a correr. Bien hecho por regresar.';
+
+  @override
+  String get break_notif_ended_fail_title => '🛡️ Tu pausa ha terminado';
+
+  @override
+  String get break_notif_ended_fail_body =>
+      'La protección no pudo activarse sola. Abre Be Unchained para volver a subir tu escudo.';
+
+  @override
+  String get break_notif_action_open => 'Abrir';
+
+  @override
+  String commitment_next_break_sub(String date) {
+    return 'Tu próxima pausa se desbloquea el $date · te avisamos con una notificación';
+  }
 }

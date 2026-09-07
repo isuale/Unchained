@@ -72,7 +72,9 @@
   "dashboard_streak": "{days} días protegido",
   "@dashboard_streak": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "dashboard_protection_title": "Protección",
@@ -104,13 +106,17 @@
   "feed_guard_locked_sublabel": "Bloqueado · quedan {time}",
   "@feed_guard_locked_sublabel": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "feed_guard_locked_message": "Límite diario alcanzado. Bloqueado por 24 horas — se desbloquea en {time}.",
   "@feed_guard_locked_message": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "feed_guard_locked_refused": "No se puede cambiar — todavía en su bloqueo de 24 horas.",
@@ -130,7 +136,9 @@
   "app_limits_manage_row_sublabel_count": "{count} apps limitadas",
   "@app_limits_manage_row_sublabel_count": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "app_limits_search_hint": "Buscar apps…",
@@ -143,7 +151,9 @@
   "app_limits_remove_body": "{app} ya no tendrá un límite de tiempo diario.",
   "@app_limits_remove_body": {
     "placeholders": {
-      "app": { "type": "String" }
+      "app": {
+        "type": "String"
+      }
     }
   },
   "app_limits_remove_confirm": "Quitar",
@@ -170,7 +180,13 @@
   "blocklist_allow_sub": "Los sitios que añadas aquí nunca se bloquean. Las webs populares y seguras ya están permitidas automáticamente.",
   "blocklist_builtin": "Predefinido",
   "blocklist_builtin_summary": "{count} sitios porno conocidos se bloquean automáticamente",
-  "@blocklist_builtin_summary": { "placeholders": { "count": { "type": "int" } } },
+  "@blocklist_builtin_summary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "blocklist_add_block_hint": "Añade un sitio para bloquear (ej. ejemplo.com)",
   "blocklist_add_allow_hint": "Añade un sitio para desbloquear (ej. ejemplo.com)",
   "blocklist_add": "Añadir",
@@ -179,14 +195,32 @@
   "blocklist_invalid": "Introduce un sitio válido como ejemplo.com",
   "blocklist_duplicate": "Ese sitio ya está en la lista",
   "blocklist_blocked_added": "{domain} ahora está bloqueado",
-  "@blocklist_blocked_added": { "placeholders": { "domain": { "type": "String" } } },
+  "@blocklist_blocked_added": {
+    "placeholders": {
+      "domain": {
+        "type": "String"
+      }
+    }
+  },
   "blocklist_allowed_added": "{domain} ahora está permitido",
-  "@blocklist_allowed_added": { "placeholders": { "domain": { "type": "String" } } },
+  "@blocklist_allowed_added": {
+    "placeholders": {
+      "domain": {
+        "type": "String"
+      }
+    }
+  },
   "blocklist_remove": "Eliminar",
   "stub_progress_title": "Progreso",
   "progress_days_label": "días protegido",
   "progress_since": "desde {date}",
-  "@progress_since": { "placeholders": { "date": { "type": "String" } } },
+  "@progress_since": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "progress_weekly_section": "Progreso semanal",
   "progress_milestones_section": "Hitos",
   "progress_off_title": "La protección está desactivada",
@@ -194,8 +228,12 @@
   "progress_week_tooltip": "Semana {week}: {days}/7 días",
   "@progress_week_tooltip": {
     "placeholders": {
-      "week": { "type": "int" },
-      "days": { "type": "int" }
+      "week": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
     }
   },
   "progress_journey_section": "Días protegido vs. tentaciones",
@@ -203,21 +241,57 @@
   "progress_journey_legend_days": "Días protegido",
   "progress_journey_legend_temptations": "Tentaciones",
   "progress_journey_down": "A medida que crece tu racha, las tentaciones bajaron {percent}%",
-  "@progress_journey_down": { "placeholders": { "percent": { "type": "int" } } },
+  "@progress_journey_down": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "progress_journey_up": "Las tentaciones subieron {percent}% — no aflojes",
-  "@progress_journey_up": { "placeholders": { "percent": { "type": "int" } } },
+  "@progress_journey_up": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "progress_journey_flat": "Se mantiene estable mientras crece tu racha",
   "progress_journey_building": "Sigue así — la relación aparece después de una semana",
   "progress_journey_tooltip_day": "Día {day} protegido",
-  "@progress_journey_tooltip_day": { "placeholders": { "day": { "type": "int" } } },
+  "@progress_journey_tooltip_day": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
   "progress_journey_tooltip_blocked": "{count} bloqueadas",
-  "@progress_journey_tooltip_blocked": { "placeholders": { "count": { "type": "int" } } },
+  "@progress_journey_tooltip_blocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "progress_trends_section": "Tus tendencias",
   "progress_blocked_trend_title": "Tentaciones bloqueadas",
   "progress_trend_down": "Bajó {percent}% respecto a tu primera semana",
-  "@progress_trend_down": { "placeholders": { "percent": { "type": "int" } } },
+  "@progress_trend_down": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "progress_trend_up": "Subió {percent}% respecto a tu primera semana",
-  "@progress_trend_up": { "placeholders": { "percent": { "type": "int" } } },
+  "@progress_trend_up": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "progress_trend_flat": "Se mantiene estable",
   "progress_trend_need_data": "Sigue así — tu tendencia aparecerá después de una semana",
   "progress_trend_unit_blocked": "bloqueados",
@@ -237,40 +311,52 @@
   "commitment_warning_body": "La Protección quedará ACTIVADA y NO podrás desactivarla durante {days} días. Ese es el punto: te quita la decisión en un momento de debilidad. Después tendrás una pausa corta y volverá a bloquearse por aún más tiempo. ¿Estás seguro?",
   "@commitment_warning_body": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "commitment_warning_confirm": "Comprométeme",
   "commitment_locked_banner": "Comprometido · quedan {days} días",
   "@commitment_locked_banner": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "commitment_locked_sub": "La Protección no se puede desactivar hasta el {date}",
   "@commitment_locked_sub": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "commitment_break_banner": "Pausa abierta · quedan {minutes} min",
   "@commitment_break_banner": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "commitment_break_sub": "La protección se vuelve a activar sola cuando termine la pausa.",
   "commitment_break_available_banner": "{count, plural, =1{Tienes 1 pausa disponible} other{Tienes {count} pausas disponibles}}",
   "@commitment_break_available_banner": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "commitment_break_available_sub": "Desactiva la protección cuando quieras usarla: dura 30 min y luego se vuelve a activar sola.",
   "commitment_locked_toast": "Bloqueado por {days} días más. Te comprometiste a esto.",
   "@commitment_locked_toast": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "commitment_cannot_leave": "No puedes salir mientras la Protección está bloqueada.",
@@ -279,13 +365,17 @@
   "commitment_warning_fixed_body": "La Protección quedará ACTIVADA y no podrás desactivarla durante {days} días (salvo en las pausas). Cuando termine el periodo, volverás a controlarla. ¿Estás seguro?",
   "@commitment_warning_fixed_body": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "commitment_warning_cycle_body": "La Protección quedará ACTIVADA en un ciclo de {days} días que se repite para siempre. Solo podrás desactivarla durante las pausas. ¿Estás seguro?",
   "@commitment_warning_cycle_body": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "commitment_forever_banner": "Comprometido para siempre",
@@ -294,13 +384,17 @@
   "schedule_summary_days": "{days} días de protección",
   "@schedule_summary_days": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "schedule_summary_breaks": "{count} pausas de 30 min",
   "@schedule_summary_breaks": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "schedule_summary_no_breaks": "Sin pausas",
@@ -324,8 +418,12 @@
   "onboarding_question_progress": "Pregunta {current} de {total}",
   "@onboarding_question_progress": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "onboarding_q1_text": "¿Qué edad tenías cuando viste pornografía por primera vez?",
@@ -411,7 +509,9 @@
   "error_loading_settings": "Error al cargar la configuración: {error}",
   "@error_loading_settings": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "common_confirm": "Confirmar",
@@ -419,27 +519,35 @@
   "dev_reset_budget_body": "DEV: borra el uso de hoy y el bloqueo de 24h para \"{label}\" para que vuelva a estar disponible de inmediato.",
   "@dev_reset_budget_body": {
     "placeholders": {
-      "label": { "type": "String" }
+      "label": {
+        "type": "String"
+      }
     }
   },
   "dev_reset_budget_body_kept_history": "DEV: borra el uso de hoy y el bloqueo de 24h para \"{label}\" para que vuelva a estar disponible de inmediato. Se conserva el historial de días anteriores.",
   "@dev_reset_budget_body_kept_history": {
     "placeholders": {
-      "label": { "type": "String" }
+      "label": {
+        "type": "String"
+      }
     }
   },
   "dev_reset_confirm": "Reiniciar",
   "dev_reset_snackbar_success": "Presupuesto de {label} reiniciado",
   "@dev_reset_snackbar_success": {
     "placeholders": {
-      "label": { "type": "String" }
+      "label": {
+        "type": "String"
+      }
     }
   },
   "dev_reset_snackbar_failed": "No se pudo reiniciar",
   "blocklist_add_success": "«{value}» ✓",
   "@blocklist_add_success": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "month_jan": "ene",
@@ -459,7 +567,9 @@
   "settings_designed_by": "Diseñado y desarrollado por\n{name}",
   "@settings_designed_by": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "settings_section_language": "Idioma",
@@ -476,7 +586,9 @@
   "terms_owner_contact": "{email}  (reportar un error)",
   "@terms_owner_contact": {
     "placeholders": {
-      "email": { "type": "String" }
+      "email": {
+        "type": "String"
+      }
     }
   },
   "terms_section1_title": "1. Aceptación de estos Términos",
@@ -503,8 +615,44 @@
   "terms_section11_body": "Para preguntas, reportes de errores o soporte, contacta al propietario y desarrollador {name} en {email}.",
   "@terms_section11_body": {
     "placeholders": {
-      "name": { "type": "String" },
-      "email": { "type": "String" }
+      "name": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "break_notif_channel_name": "Pausas del compromiso",
+  "break_notif_channel_desc": "Te avisa en el momento exacto en que se desbloquea tu pausa de 30 minutos, cuánto te queda y cuándo vuelve la protección.",
+  "break_notif_available_title": "🔓 Tu pausa se acaba de desbloquear",
+  "break_notif_available_body": "Desactiva la protección en la app cuando quieras usarla. Los 30 minutos empiezan solo cuando tú decidas: esta pausa te espera el tiempo que haga falta.",
+  "break_notif_available_sub": "{left, plural, =1{Queda 1 de {total} pausas} other{Quedan {left} de {total} pausas}}",
+  "@break_notif_available_sub": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "break_notif_running_title": "⏳ Pausa en curso",
+  "break_notif_running_body": "La protección está desactivada. El escudo vuelve a subir solo cuando la cuenta llegue a cero.",
+  "break_notif_ending_soon_title": "⏳ Te quedan 5 minutos de pausa",
+  "break_notif_ending_soon_body": "Ve cerrando: la protección se activa sola en unos minutos.",
+  "break_notif_ended_title": "🛡️ Pausa terminada · escudo arriba",
+  "break_notif_ended_body": "Tu compromiso vuelve a correr. Bien hecho por regresar.",
+  "break_notif_ended_fail_title": "🛡️ Tu pausa ha terminado",
+  "break_notif_ended_fail_body": "La protección no pudo activarse sola. Abre Be Unchained para volver a subir tu escudo.",
+  "break_notif_action_open": "Abrir",
+  "commitment_next_break_sub": "Tu próxima pausa se desbloquea el {date} · te avisamos con una notificación",
+  "@commitment_next_break_sub": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
     }
   }
 }

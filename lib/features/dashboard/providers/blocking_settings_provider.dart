@@ -1,13 +1,18 @@
 import 'dart:async';
+import 'dart:ui' show Locale;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unchained/core/database/app_database.dart';
 import 'package:unchained/features/blocking/blocking_service.dart';
 import 'package:unchained/features/dashboard/data/blocking_settings_repository.dart';
+import 'package:unchained/features/dashboard/data/break_notifications_bridge.dart';
 import 'package:unchained/features/dashboard/data/feed_guard_bridge.dart';
 import 'package:unchained/features/dashboard/domain/commitment.dart';
 import 'package:unchained/features/dashboard/providers/domain_lists_provider.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
+import 'package:unchained/features/prayer/data/prayer_repository.dart';
+import 'package:unchained/features/prayer/domain/prayers.dart';
+import 'package:unchained/l10n/app_localizations.dart';
 
 final blockingSettingsProvider = StreamProvider<BlockingSetting>((ref) {
   return ref.watch(blockingSettingsRepositoryProvider).watchSettings();
@@ -131,6 +136,78 @@ class BlockingSettingsActions extends Notifier<void> {
     _reconcileWithNative().then((_) => _reconcileCommitment());
     _syncUserLists();
     _syncFeedGuardTargets();
+    // Every event that can move a break — starting a run, claiming one, ending
+    // one, a cycle restarting, the plan being cleared — writes the settings row,
+    // so listening to the row is enough to keep the native alarms honest.
+    ref.listen(blockingSettingsProvider, (_, next) {
+      final settings = next.asData?.value;
+      if (settings != null) _syncBreakNotifications(settings);
+    }, fireImmediately: true);
+  }
+
+  /// Hands the current break schedule (and the wording for it, in the user's
+  /// chosen language) to the native alarm scheduler.
+  ///
+  /// Native, not Dart, has to own the moment itself: a break unlocks wherever
+  /// the plan's protected time divides evenly, which is almost never a moment
+  /// the user has the app open for. See `BreakNotifier.kt`.
+  Future<void> _syncBreakNotifications(BlockingSetting settings) async {
+    final mode = commitmentModeFromString(settings.commitmentMode);
+    final startedAt = settings.commitmentStartedAt;
+
+    // Nothing to announce: no plan, not started yet, Forever (no breaks at all),
+    // or a Monthly plan the user configured with zero breaks.
+    if (mode == CommitmentMode.none ||
+        startedAt == null ||
+        settings.commitmentBreakCount <= 0) {
+      await BreakNotificationsBridge.cancelAll();
+      return;
+    }
+
+    final status = _statusFor(settings, DateTime.now());
+    final l = _localizations();
+    await BreakNotificationsBridge.sync(
+      nextBreakAt: nextBreakAvailableAt(
+        mode,
+        settings.commitmentTotalDays,
+        settings.commitmentBreakCount,
+        startedAt,
+        breaksUsed: settings.commitmentBreaksUsed,
+      ),
+      breakAvailableNow: status.isBreakAvailable,
+      breakEndsAt: status.isBreak ? status.breakUntil : null,
+      breaksLeft: status.breaksLeft,
+      breaksTotal: settings.commitmentBreakCount,
+      texts: {
+        'channelName': l.break_notif_channel_name,
+        'channelDesc': l.break_notif_channel_desc,
+        'availableTitle': l.break_notif_available_title,
+        'availableBody': l.break_notif_available_body,
+        'availableSub': l.break_notif_available_sub(
+            status.breaksLeft, settings.commitmentBreakCount),
+        'runningTitle': l.break_notif_running_title,
+        'runningBody': l.break_notif_running_body,
+        'endingSoonTitle': l.break_notif_ending_soon_title,
+        'endingSoonBody': l.break_notif_ending_soon_body,
+        'endedTitle': l.break_notif_ended_title,
+        'endedBody': l.break_notif_ended_body,
+        'endedFailTitle': l.break_notif_ended_fail_title,
+        'endedFailBody': l.break_notif_ended_fail_body,
+        'actionOpen': l.break_notif_action_open,
+      },
+    );
+  }
+
+  /// The notification strings must follow the language the user picked *in the
+  /// app* (a database setting), not the phone's system locale — so they are
+  /// looked up here rather than kept in Android string resources.
+  AppLocalizations _localizations() {
+    final lang = ref.read(appLanguageProvider).asData?.value ?? Lang.es;
+    return lookupAppLocalizations(switch (lang) {
+      Lang.en => const Locale('en'),
+      Lang.es => const Locale('es'),
+      Lang.pt => const Locale('pt'),
+    });
   }
 
   /// Pushes the current Social feed enable/limit config to the native
