@@ -3,8 +3,16 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // NOTE: `id("kotlin-android")` is deliberately NOT applied here. Starting with AGP 9
+    // the Android plugin compiles Kotlin itself ("built-in Kotlin") and applying the
+    // Kotlin Gradle Plugin (KGP) on top of it is a hard build error. Flutter warns about
+    // it today and will fail on it later, so we already declare only AGP. While we are
+    // still on AGP 8.x the Flutter Gradle Plugin applies KGP for us behind the scenes
+    // (it is available on the classpath from android/settings.gradle.kts), so Kotlin
+    // sources keep compiling exactly as before. Once we move to AGP 9 / Flutter 3.47+,
+    // finish the migration by flipping `android.builtInKotlin=true` in gradle.properties.
+    // Guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers
+    // The Flutter Gradle Plugin must be applied after the Android Gradle Plugin.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -29,10 +37,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -77,6 +81,17 @@ android {
                 signingConfigs.getByName("debug")
             }
         }
+    }
+}
+
+// Kotlin's bytecode target, kept in lockstep with the Java `compileOptions` above.
+// This replaces the old `kotlinOptions { jvmTarget = ... }` block that used to live
+// inside `android { }`: that DSL belongs to the Kotlin Gradle Plugin and is gone under
+// built-in Kotlin, whereas this top-level `kotlin { compilerOptions { } }` block is the
+// form that works both today and after the AGP 9 migration.
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
