@@ -21,7 +21,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # build that was later discarded. Code 1 was consumed by an earlier upload to
 # this app entry, so the first shippable build is code 2. The part before "+"
 # is the version users see and can stay 1.0.0 for launch.
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ^3.11.5

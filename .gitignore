@@ -53,3 +53,6 @@ app.*.map.json
 unchained-email-backupcodes
 *.p12
 *.keystore
+*.jks
+*.p12
+*.pem
