@@ -94,7 +94,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
   void _setType(String type) {
     _type = type;
     _duration = Duration(minutes: fullMinutesFor(type));
-    _minSeconds = minMinutesFor(type) * 60;
+    _minSeconds = minSecondsFor(type);
     _secondsLeft = _duration.inSeconds;
     _set = type == 'rosary'
         ? mysterySetForWeekday(DateTime.now().weekday)
@@ -557,7 +557,7 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
               ? PS.completedHint(lang)
               : _canFinish
                   ? PS.canFinishNow(lang)
-                  : PS.prayAtLeast(lang, _minSeconds ~/ 60),
+                  : PS.prayAtLeast(lang, _minSeconds),
           style: GoogleFonts.inter(color: _dim, fontSize: 12),
           textAlign: TextAlign.center,
         ),

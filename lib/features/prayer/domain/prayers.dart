@@ -28,7 +28,7 @@ class PrayerStep {
 /// to one language.
 class PrayerGuide {
   const PrayerGuide(
-      this.type, this.title, this.minutes, this.minMinutes, this.steps);
+      this.type, this.title, this.minutes, this.minSeconds, this.steps);
 
   /// Stored on each PrayerLog row: 'rosary' | 'thanksgiving'.
   final String type;
@@ -37,16 +37,16 @@ class PrayerGuide {
   /// Full session length, in minutes (the countdown).
   final int minutes;
 
-  /// Minimum minutes prayed before the finish button unlocks. Equal to
+  /// Minimum seconds prayed before the finish button unlocks. Equal to
   /// [minutes] for the Rosary (no early exit — you pray the whole thing).
-  final int minMinutes;
+  final int minSeconds;
 
   final List<PrayerStep> steps;
 }
 
 /// The Rosary's session lengths are fixed regardless of language/mysteries.
 int fullMinutesFor(String type) => type == 'thanksgiving' ? 5 : 20;
-int minMinutesFor(String type) => type == 'thanksgiving' ? 2 : 20;
+int minSecondsFor(String type) => type == 'thanksgiving' ? 90 : 20 * 60;
 
 // --- Core prayers ---------------------------------------------------------
 
@@ -365,7 +365,7 @@ PrayerGuide buildRosary(Lang lang, MysterySet set) {
     ));
   }
   steps.add(PrayerStep(tr(_hSalve, lang), tr(_hailHolyQueen, lang)));
-  return PrayerGuide('rosary', tr(_rosaryTitle, lang), 20, 20, steps);
+  return PrayerGuide('rosary', tr(_rosaryTitle, lang), 20, minSecondsFor('rosary'), steps);
 }
 
 const _psalm100 = {
@@ -422,7 +422,8 @@ PrayerGuide buildThanksgiving(Lang lang) {
     PrayerStep(tr(_hThanks, lang), tr(_thanksClosing, lang)),
     PrayerStep(tr(_hGloryFatima, lang), tr(_gloryBe, lang)),
   ];
-  return PrayerGuide('thanksgiving', tr(_thanksTitle, lang), 5, 2, steps);
+  return PrayerGuide(
+      'thanksgiving', tr(_thanksTitle, lang), 5, minSecondsFor('thanksgiving'), steps);
 }
 
 /// Build a guide by type. [set] is used only for the Rosary; when null the

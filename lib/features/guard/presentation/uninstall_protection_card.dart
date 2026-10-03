@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unchained/features/guard/presentation/scripture_lock_screen.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
+import 'package:unchained/shared/accessibility_disclosure_dialog.dart';
 
 /// Settings card that sets up and reflects the state of uninstall protection.
 ///
@@ -174,7 +175,11 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
               done: _accessibility,
               label: l.guard_req_accessibility,
               actionLabel: l.guard_action_enable,
-              onAction: UninstallGuardService.openAccessibilitySettings,
+              onAction: () => openAccessibilityWithDisclosure(
+                context,
+                AccessibilityPurpose.guard,
+                UninstallGuardService.openAccessibilitySettings,
+              ),
             ),
             const SizedBox(height: 10),
             _requirement(

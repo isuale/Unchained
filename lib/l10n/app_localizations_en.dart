@@ -1311,4 +1311,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String commitment_next_break_sub(String date) {
     return 'Your next break unlocks on $date — we\'ll send you a notification';
   }
+
+  @override
+  String get a11y_disclosure_title => 'Accessibility permission';
+
+  @override
+  String get a11y_disclosure_intro =>
+      'Be Unchained uses Android\'s Accessibility Service (AccessibilityService API) to make this feature work. Please read how before you continue.';
+
+  @override
+  String get a11y_disclosure_purpose_guard =>
+      'Uninstall protection and prayer app lock: the service detects when Be Unchained\'s App info, uninstall, Play Store or Accessibility settings screen is opened — or an app you chose to lock — and covers it with the Scripture or prayer challenge.';
+
+  @override
+  String get a11y_disclosure_purpose_limits =>
+      'Social feed limits and App time limits: the service detects when Instagram Reels, YouTube Shorts, TikTok, Snapchat Stories or an app you added is on screen, so it can count your daily time and close it once the limit is used.';
+
+  @override
+  String get a11y_disclosure_data =>
+      'What it reads: only which app is in front and the on-screen labels needed to recognise those screens. It does not record what you type, and nothing it sees is stored, sent off your device or shared with anyone.';
+
+  @override
+  String get a11y_disclosure_next =>
+      'If you agree, Android\'s Accessibility settings will open so you can turn the service on. You can turn it off there at any time.';
+
+  @override
+  String get a11y_disclosure_decline => 'No thanks';
+
+  @override
+  String get a11y_disclosure_agree => 'Agree';
 }

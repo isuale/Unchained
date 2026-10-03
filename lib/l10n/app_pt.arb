@@ -637,5 +637,13 @@
   "break_notif_ended_fail_title": "🛡️ Sua pausa terminou",
   "break_notif_ended_fail_body": "A proteção não conseguiu voltar sozinha. Abra o Be Unchained para levantar o escudo novamente.",
   "break_notif_action_open": "Abrir",
-  "commitment_next_break_sub": "Sua próxima pausa é liberada em {date} — enviaremos uma notificação"
+  "commitment_next_break_sub": "Sua próxima pausa é liberada em {date} — enviaremos uma notificação",
+  "a11y_disclosure_title": "Permissão de acessibilidade",
+  "a11y_disclosure_intro": "O Be Unchained usa o Serviço de Acessibilidade do Android (API AccessibilityService) para esta função funcionar. Lê como antes de continuar.",
+  "a11y_disclosure_purpose_guard": "Proteção contra desinstalação e bloqueio de apps com oração: o serviço deteta quando o ecrã de Informações da app, desinstalação, Play Store ou definições de Acessibilidade do Be Unchained é aberto — ou uma app que escolheste bloquear — e cobre-o com o desafio da Escritura ou de oração.",
+  "a11y_disclosure_purpose_limits": "Limites de redes sociais e limites de tempo de apps: o serviço deteta quando o Instagram Reels, YouTube Shorts, TikTok, Snapchat Stories ou uma app que adicionaste está no ecrã, para contar o teu tempo diário e fechá-la quando o limite acabar.",
+  "a11y_disclosure_data": "O que lê: apenas qual app está à frente e as etiquetas no ecrã necessárias para reconhecer esses ecrãs. Não regista o que escreves, e nada do que vê é guardado, enviado para fora do teu dispositivo ou partilhado com ninguém.",
+  "a11y_disclosure_next": "Se aceitares, as definições de Acessibilidade do Android vão abrir para ativares o serviço. Podes desativá-lo lá a qualquer momento.",
+  "a11y_disclosure_decline": "Não, obrigado",
+  "a11y_disclosure_agree": "Aceito"
 }

@@ -6,6 +6,7 @@ import 'package:unchained/features/app_limits/application/app_limits_provider.da
 import 'package:unchained/features/app_limits/data/app_limits_bridge.dart';
 import 'package:unchained/features/prayer/data/installed_apps_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
+import 'package:unchained/shared/accessibility_disclosure_dialog.dart';
 
 /// Lets the user pick ANY app on the phone and give it its own daily minute
 /// budget — the generalized counterpart to the Social section's fixed
@@ -516,9 +517,11 @@ class _PermissionBannerState extends State<_PermissionBanner>
             ),
           ),
           TextButton(
-            onPressed: () async {
-              await AppLimitsBridge.openAccessibilitySettings();
-            },
+            onPressed: () => openAccessibilityWithDisclosure(
+              context,
+              AccessibilityPurpose.limits,
+              AppLimitsBridge.openAccessibilitySettings,
+            ),
             child: Text(l.app_limits_permission_enable,
                 style: const TextStyle(color: Color(0xFF1E5FFF))),
           ),

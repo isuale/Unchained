@@ -2403,6 +2403,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Tu próxima pausa se desbloquea el {date} · te avisamos con una notificación'**
   String commitment_next_break_sub(String date);
+
+  /// No description provided for @a11y_disclosure_title.
+  ///
+  /// In es, this message translates to:
+  /// **'Permiso de accesibilidad'**
+  String get a11y_disclosure_title;
+
+  /// No description provided for @a11y_disclosure_intro.
+  ///
+  /// In es, this message translates to:
+  /// **'Be Unchained usa el Servicio de Accesibilidad de Android (API AccessibilityService) para que esta función funcione. Lee cómo antes de continuar.'**
+  String get a11y_disclosure_intro;
+
+  /// No description provided for @a11y_disclosure_purpose_guard.
+  ///
+  /// In es, this message translates to:
+  /// **'Protección contra desinstalación y bloqueo de apps con oración: el servicio detecta cuándo se abre la pantalla de Información de la app, desinstalación, Play Store o ajustes de Accesibilidad de Be Unchained — o una app que elegiste bloquear — y la cubre con el desafío de la Escritura o de oración.'**
+  String get a11y_disclosure_purpose_guard;
+
+  /// No description provided for @a11y_disclosure_purpose_limits.
+  ///
+  /// In es, this message translates to:
+  /// **'Límites de redes sociales y límites de tiempo de apps: el servicio detecta cuándo Instagram Reels, YouTube Shorts, TikTok, Snapchat Stories o una app que añadiste está en pantalla, para contar tu tiempo diario y cerrarla cuando se agote el límite.'**
+  String get a11y_disclosure_purpose_limits;
+
+  /// No description provided for @a11y_disclosure_data.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué lee: solo qué app está al frente y las etiquetas en pantalla necesarias para reconocer esas pantallas. No registra lo que escribes, y nada de lo que ve se guarda, sale de tu dispositivo ni se comparte con nadie.'**
+  String get a11y_disclosure_data;
+
+  /// No description provided for @a11y_disclosure_next.
+  ///
+  /// In es, this message translates to:
+  /// **'Si aceptas, se abrirán los ajustes de Accesibilidad de Android para que actives el servicio. Puedes desactivarlo allí en cualquier momento.'**
+  String get a11y_disclosure_next;
+
+  /// No description provided for @a11y_disclosure_decline.
+  ///
+  /// In es, this message translates to:
+  /// **'No, gracias'**
+  String get a11y_disclosure_decline;
+
+  /// No description provided for @a11y_disclosure_agree.
+  ///
+  /// In es, this message translates to:
+  /// **'Acepto'**
+  String get a11y_disclosure_agree;
 }
 
 class _AppLocalizationsDelegate

@@ -73,12 +73,16 @@ class PS {
   static String thanksSub(Lang l) => _p(l, 'Psalms and gratitude · 5 min', 'Salmos y gratitud · 5 min', 'Salmos e gratidão · 5 min');
 
   // Gate
-  static String prayAtLeast(Lang l, int minutes) => _p(
-        l,
-        'Pray for at least $minutes minutes. The timer pauses if you leave the app.',
-        'Ora al menos $minutes minutos. El tiempo se pausa si sales de la app.',
-        'Reza pelo menos $minutes minutos. O tempo pausa se saíres da app.',
-      );
+  static String prayAtLeast(Lang l, int seconds) {
+    final m = seconds ~/ 60, s = seconds % 60;
+    final span = s == 0 ? null : '$m:${s.toString().padLeft(2, '0')} min';
+    return _p(
+      l,
+      'Pray for at least ${span ?? '$m minutes'}. The timer pauses if you leave the app.',
+      'Ora al menos ${span ?? '$m minutos'}. El tiempo se pausa si sales de la app.',
+      'Reza pelo menos ${span ?? '$m minutos'}. O tempo pausa se saíres da app.',
+    );
+  }
   static String canFinishNow(Lang l) => _p(l, 'You may finish whenever you wish. The timer pauses if you leave.', 'Puedes terminar cuando quieras. El tiempo se pausa si sales.', 'Podes terminar quando quiseres. O tempo pausa se saíres.');
   static String completedHint(Lang l) => _p(l, 'Prayer complete. Tap Amen to continue.', 'Oración completada. Pulsa Amén para continuar.', 'Oração concluída. Toca Amém para continuar.');
   static String amen(Lang l) => _p(l, 'Amen', 'Amén', 'Amém');

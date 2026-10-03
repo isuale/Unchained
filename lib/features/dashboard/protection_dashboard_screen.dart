@@ -18,6 +18,7 @@ import 'package:unchained/features/guard/presentation/scripture_lock_screen.dart
 import 'package:unchained/features/guard/presentation/uninstall_protection_card.dart';
 import 'package:unchained/features/guard/uninstall_guard_service.dart';
 import 'package:unchained/l10n/app_localizations.dart';
+import 'package:unchained/shared/accessibility_disclosure_dialog.dart';
 
 class ProtectionDashboardScreen extends ConsumerWidget {
   const ProtectionDashboardScreen({super.key});
@@ -1023,9 +1024,11 @@ class _FeedGuardPermissionBannerState
             ),
           ),
           TextButton(
-            onPressed: () async {
-              await FeedGuardBridge.openAccessibilitySettings();
-            },
+            onPressed: () => openAccessibilityWithDisclosure(
+              context,
+              AccessibilityPurpose.limits,
+              FeedGuardBridge.openAccessibilitySettings,
+            ),
             child: Text(l.app_limits_permission_enable,
                 style: const TextStyle(color: Color(0xFF1E5FFF))),
           ),
