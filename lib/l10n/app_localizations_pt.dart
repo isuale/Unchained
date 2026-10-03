@@ -1357,4 +1357,8 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get a11y_disclosure_agree => 'Aceito';
+
+  @override
+  String get guard_auto_armed =>
+      'A proteção contra desinstalação está ativada.';
 }

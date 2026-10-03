@@ -1340,4 +1340,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get a11y_disclosure_agree => 'Agree';
+
+  @override
+  String get guard_auto_armed => 'Uninstall protection is on.';
 }

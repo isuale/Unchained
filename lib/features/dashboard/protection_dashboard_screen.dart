@@ -107,7 +107,8 @@ class _DashboardBody extends ConsumerWidget {
         builder: (_) => const SafeArea(
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: SingleChildScrollView(child: UninstallProtectionCard()),
+            child: SingleChildScrollView(
+                child: UninstallProtectionCard(armWhenReady: true)),
           ),
         ),
       );

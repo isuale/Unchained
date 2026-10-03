@@ -2451,6 +2451,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Acepto'**
   String get a11y_disclosure_agree;
+
+  /// No description provided for @guard_auto_armed.
+  ///
+  /// In es, this message translates to:
+  /// **'La protección contra desinstalación está activada.'**
+  String get guard_auto_armed;
 }
 
 class _AppLocalizationsDelegate

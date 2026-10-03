@@ -645,5 +645,6 @@
   "a11y_disclosure_data": "O que lê: apenas qual app está à frente e as etiquetas no ecrã necessárias para reconhecer esses ecrãs. Não regista o que escreves, e nada do que vê é guardado, enviado para fora do teu dispositivo ou partilhado com ninguém.",
   "a11y_disclosure_next": "Se aceitares, as definições de Acessibilidade do Android vão abrir para ativares o serviço. Podes desativá-lo lá a qualquer momento.",
   "a11y_disclosure_decline": "Não, obrigado",
-  "a11y_disclosure_agree": "Aceito"
+  "a11y_disclosure_agree": "Aceito",
+  "guard_auto_armed": "A proteção contra desinstalação está ativada."
 }

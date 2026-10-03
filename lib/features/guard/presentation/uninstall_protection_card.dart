@@ -15,7 +15,13 @@ import 'package:unchained/shared/accessibility_disclosure_dialog.dart';
 /// Turning protection *off* is deliberately not free — it routes through the same
 /// scripture lock, so a weak moment can't quietly undo the guard.
 class UninstallProtectionCard extends StatefulWidget {
-  const UninstallProtectionCard({super.key});
+  const UninstallProtectionCard({super.key, this.armWhenReady = false});
+
+  /// Opened because the user asked to turn protection on: switch the guard on
+  /// by itself as soon as every required permission is granted, instead of
+  /// leaving a final "Turn on protection" tap that's easy to miss (granting the
+  /// permissions and closing the sheet used to leave the guard off).
+  final bool armWhenReady;
 
   @override
   State<UninstallProtectionCard> createState() => _UninstallProtectionCardState();
@@ -36,9 +42,15 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
   bool _deviceOwner = false;
   bool _enabled = false;
 
+  /// See [UninstallProtectionCard.armWhenReady]. Cleared once the user turns
+  /// protection off from this card, so a passed disable challenge isn't
+  /// immediately undone by the next refresh.
+  late bool _armOnReady;
+
   @override
   void initState() {
     super.initState();
+    _armOnReady = widget.armWhenReady;
     WidgetsBinding.instance.addObserver(this);
     _refresh();
   }
@@ -70,6 +82,17 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
       _enabled = enabled;
       _loading = false;
     });
+    if (_armOnReady && _ready && !_enabled) {
+      _armOnReady = false;
+      await _turnOn();
+      if (!mounted || !_enabled) return;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.guard_auto_armed),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   /// Whether every supporting permission is granted, i.e. protection can run at
@@ -94,6 +117,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
   }
 
   Future<void> _turnOff() async {
+    _armOnReady = false;
     // Pass the scripture challenge to disable; the lock flips the flag itself.
     await context.push('/lock', extra: LockMode.disable);
     await _refresh();
