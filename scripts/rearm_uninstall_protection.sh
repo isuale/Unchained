@@ -72,6 +72,19 @@ if ! "$ADB" shell pm list packages 2>/dev/null | grep -q "package:${APP_PKG}$"; 
   exit 0
 fi
 
+# A brand-new install (first == last install time) never had the watchdog on —
+# the user hasn't seen the in-app accessibility disclosure yet. Switching it on
+# behind their back would skip that consent (and spoil Play review recordings),
+# so the automatic hook only re-arms *updates*, where Android just disabled it.
+if [ "$MODE" = "--hook" ]; then
+  PKG_DUMP="$("$ADB" shell dumpsys package "$APP_PKG" 2>/dev/null | tr -d '\r')"
+  FIRST="$(printf '%s\n' "$PKG_DUMP" | grep -m1 'firstInstallTime=' | sed 's/.*firstInstallTime=//')"
+  LAST="$(printf '%s\n' "$PKG_DUMP" | grep -m1 'lastUpdateTime=' | sed 's/.*lastUpdateTime=//')"
+  if [ -n "$FIRST" ] && [ "$FIRST" = "$LAST" ]; then
+    exit 0
+  fi
+fi
+
 # --- re-enable the accessibility watchdog (merge-safe) ----------------------
 CURRENT="$("$ADB" shell settings get secure enabled_accessibility_services 2>/dev/null | tr -d '\r')"
 WAS_ON=0
