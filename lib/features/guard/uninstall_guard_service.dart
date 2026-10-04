@@ -43,6 +43,19 @@ class UninstallGuardService {
     }
   }
 
+  /// Ask native to switch protection on by itself the instant every permission is
+  /// granted — from the watchdog, while the user is still in system Settings —
+  /// instead of only when they come back to the app. `false` cancels the request.
+  static Future<bool> setArmPending(bool pending) async {
+    try {
+      final r = await _channel.invokeMethod<bool>('setArmPending', pending);
+      return r ?? false;
+    } catch (e, st) {
+      debugPrint('UninstallGuardService.setArmPending failed: $e\n$st');
+      return false;
+    }
+  }
+
   static Future<bool> openAccessibilitySettings() =>
       _invokeBool('openAccessibilitySettings');
 

@@ -38,6 +38,9 @@ class UninstallGuardService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         Log.d(TAG, "service connected; guardEnabled=${GuardState.isEnabled(this)}")
+        // The user just switched this service on in Settings. If they did that from
+        // the turn-on sheet, protection goes live right now — not when they return.
+        if (GuardState.armIfPendingAndReady(this)) Log.d(TAG, "ARMED on connect")
         // Second line of defence for restoring protection after a reboot. The
         // system binds accessibility services at boot even on OEMs that suppress
         // BOOT_COMPLETED for non-allowlisted apps, so this catches restarts the
@@ -47,6 +50,10 @@ class UninstallGuardService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
+
+        // Covers the other grant order: service already on, overlay granted last.
+        // The overlay toggle itself produces window events, so this fires instantly.
+        if (GuardState.armIfPendingAndReady(this)) Log.d(TAG, "ARMED on event")
 
         val type = event.eventType
         if (type != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED &&

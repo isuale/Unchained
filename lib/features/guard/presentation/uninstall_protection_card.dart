@@ -52,11 +52,24 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
     super.initState();
     _armOnReady = widget.armWhenReady;
     WidgetsBinding.instance.addObserver(this);
-    _refresh();
+    _init();
+  }
+
+  Future<void> _init() async {
+    // Hand the arm request to native too: the watchdog then turns protection on
+    // the moment the last permission is granted in Settings, so there's no
+    // unguarded gap before the user gets back to this sheet.
+    if (_armOnReady && !await UninstallGuardService.isGuardEnabled()) {
+      await UninstallGuardService.setArmPending(true);
+    }
+    await _refresh();
   }
 
   @override
   void dispose() {
+    // Sheet closed without finishing setup: drop the request rather than
+    // surprising the user by arming later from some unrelated permission grant.
+    if (_armOnReady) UninstallGuardService.setArmPending(false);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -82,9 +95,10 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
       _enabled = enabled;
       _loading = false;
     });
-    if (_armOnReady && _ready && !_enabled) {
+    if (_armOnReady && _ready) {
       _armOnReady = false;
-      await _turnOn();
+      // Usually native already armed it from the watchdog; this is the fallback.
+      if (!_enabled) await _turnOn();
       if (!mounted || !_enabled) return;
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
@@ -117,6 +131,7 @@ class _UninstallProtectionCardState extends State<UninstallProtectionCard>
   }
 
   Future<void> _turnOff() async {
+    if (_armOnReady) UninstallGuardService.setArmPending(false);
     _armOnReady = false;
     // Pass the scripture challenge to disable; the lock flips the flag itself.
     await context.push('/lock', extra: LockMode.disable);

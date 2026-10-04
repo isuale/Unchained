@@ -159,6 +159,12 @@ class MainActivity : FlutterActivity() {
                         GuardState.setEnabled(this, call.arguments as? Boolean ?: false)
                         result.success(true)
                     }
+                    "setArmPending" -> {
+                        GuardState.setArmPending(this, call.arguments as? Boolean ?: false)
+                        // The permissions may already be there (service on, overlay granted).
+                        GuardState.armIfPendingAndReady(this)
+                        result.success(true)
+                    }
                     "openAccessibilitySettings" -> {
                         // Grace so our own deep-link to enable the service isn't re-gated.
                         GuardState.grantGrace()
@@ -482,7 +488,9 @@ class MainActivity : FlutterActivity() {
             // Returned from the device-admin grant screen. Keep the watchdog standing
             // down a moment longer (the window transition back to us can still surface
             // the Settings page), and, if we are device owner, clamp the OS-level block.
-            GuardState.grantGrace()
+            // Only a short beat: the full GRACE_MS here left protection asleep for a
+            // whole minute after the user had finished setting it up.
+            GuardState.grantGrace(POST_ADMIN_GRACE_MS)
             if (resultCode == Activity.RESULT_OK && GuardState.isEnabled(this)) {
                 GuardAdmin.lockUninstall(this, true)
             }
@@ -490,6 +498,7 @@ class MainActivity : FlutterActivity() {
     }
 
     companion object {
+        private const val POST_ADMIN_GRACE_MS = 3_000L
         const val EXTRA_SHOW_LOCK = "com.unchained.unchained.SHOW_LOCK"
         const val EXTRA_SHOW_PRAYER = "com.unchained.unchained.SHOW_PRAYER"
         const val EXTRA_PRAYER_PACKAGE = "com.unchained.unchained.PRAYER_PACKAGE"
