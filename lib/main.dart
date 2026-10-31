@@ -43,15 +43,7 @@ void main() {
   });
   // Prayer app-locker: the native watchdog calls this when a locked app is
   // opened, and we raise the prayer gate in enforced mode over it.
-  AppLockService.registerPrayerHandler((package) {
-    appRouter.push(
-      '/pray',
-      extra: PrayerGateArgs(
-        mode: PrayerGateMode.enforced,
-        triggerPackage: package,
-      ),
-    );
-  });
+  AppLockService.registerPrayerHandler(_raiseEnforcedPrayerGate);
 
   // Tapping the "Prayer Streak" home-screen widget opens straight into a
   // voluntary prayer (see PrayerStreakWidgetProvider.kt's click PendingIntent).
@@ -59,12 +51,12 @@ void main() {
   // launch check (app was killed, so this is a cold start) route the same way.
   HomeWidget.widgetClicked.listen((uri) {
     if (uri?.scheme == 'unchainedwidget' && uri?.host == 'streak') {
-      appRouter.go('/pray');
+      if (!prayerGateOpen) appRouter.go('/pray');
     }
   });
   HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
     if (uri?.scheme == 'unchainedwidget' && uri?.host == 'streak') {
-      appRouter.go('/pray');
+      if (!prayerGateOpen) appRouter.go('/pray');
     }
   });
 
@@ -80,16 +72,22 @@ void main() {
       return;
     }
     final package = await AppLockService.consumePendingPrayer();
-    if (package != null) {
-      appRouter.push(
-        '/pray',
-        extra: PrayerGateArgs(
-          mode: PrayerGateMode.enforced,
-          triggerPackage: package,
-        ),
-      );
-    }
+    if (package != null) _raiseEnforcedPrayerGate(package);
   });
+}
+
+/// Raises the prayer gate for a locked app, unless one is already up. Native
+/// has already brought the app forward, so an open gate just carries on from
+/// where the user was instead of restarting.
+void _raiseEnforcedPrayerGate(String? package) {
+  if (prayerGateOpen) return;
+  appRouter.push(
+    '/pray',
+    extra: PrayerGateArgs(
+      mode: PrayerGateMode.enforced,
+      triggerPackage: package,
+    ),
+  );
 }
 
 /// Maps the app-wide [Lang] setting to the [Locale] the localizations system

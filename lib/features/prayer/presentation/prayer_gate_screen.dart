@@ -10,6 +10,7 @@ import 'package:unchained/features/prayer/data/app_lock_service.dart';
 import 'package:unchained/features/prayer/data/prayer_repository.dart';
 import 'package:unchained/features/prayer/domain/prayer_strings.dart';
 import 'package:unchained/features/prayer/domain/prayers.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 /// Why the gate is up.
 enum PrayerGateMode {
@@ -40,7 +41,8 @@ class PrayerGateArgs {
 /// Full-screen, back-proof prayer session. A countdown runs while the screen is
 /// foreground (it pauses if the app is backgrounded, so leaving freezes
 /// progress). The Rosary must be prayed in full; thanksgiving unlocks its
-/// finish button after a 2-minute minimum for those who pray faster.
+/// finish button after a 2-minute minimum for those who pray faster. The screen
+/// is kept awake throughout: someone reading a prayer isn't touching the phone.
 class PrayerGateScreen extends ConsumerStatefulWidget {
   const PrayerGateScreen({super.key, required this.args});
 
@@ -84,6 +86,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
     _needsChoice = widget.args.prayerType == null;
     _setType(widget.args.prayerType ?? 'rosary');
 
+    prayerGateOpen = true;
+    WakelockPlus.enable();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scriptureLockActive.value = true;
@@ -111,6 +115,8 @@ class _PrayerGateScreenState extends ConsumerState<PrayerGateScreen>
 
   @override
   void dispose() {
+    prayerGateOpen = false;
+    WakelockPlus.disable();
     WidgetsBinding.instance.removeObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scriptureLockActive.value = false;
