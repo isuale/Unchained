@@ -21,48 +21,67 @@
   <div class="legal">
     <a href="index.html" class="back-link">← Back to Be Unchained</a>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 22 July 2026</p>
+    <p class="updated">Last updated: 16 November 2026</p>
 
-    <p>This Privacy Policy explains how the <strong>Be Unchained</strong> Android application ("Be Unchained", "the app", "we") handles your information. Be Unchained is a content-blocking and accountability app. Protecting your privacy is central to how it is built: <strong>the app has no user accounts and no servers of its own, and it does not transmit your personal data anywhere.</strong></p>
+    <p>This Privacy Policy explains how the <strong>Be Unchained</strong> Android application ("Be Unchained", "the app", "we") handles your information. Be Unchained is a content-blocking and accountability app, and privacy is central to how it is built: <strong>the app has no user accounts, your browsing is filtered entirely on your phone, and what you browse is never recorded or sent anywhere.</strong> The only personal information that ever leaves your device is the email address you give us if you buy a paid plan, as described in section 4.</p>
 
     <h2>1. Information we do <em>not</em> collect</h2>
-    <p>Be Unchained does not require you to create an account, sign in, or provide your name, email address or phone number. We do not collect, store on a server, or sell your browsing history, the list of sites you visit, or your personal identity. There is no analytics or advertising tracking in the app.</p>
+    <p>Be Unchained does not require you to create an account or sign in, and it never asks for your name or phone number. We do not collect, store on a server, or sell your browsing history, the list of sites or apps you use, your questionnaire answers, or what appears on your screen. There is no analytics, advertising or tracking code in the app.</p>
 
     <h2>2. Information processed on your device</h2>
     <p>To do its job, Be Unchained processes the following <strong>locally on your phone only</strong>. This information never leaves your device:</p>
     <ul>
-      <li><strong>Onboarding answers &amp; your recovery plan</strong> — your questionnaire responses and the plan/commitment settings you choose, stored in a local database on the device.</li>
-      <li><strong>App settings</strong> — which blocking features you have enabled and your protection preferences.</li>
-      <li><strong>Network requests, in real time</strong> — the app runs a local VPN to inspect DNS lookups and block requests to adult or blocked domains. These lookups are evaluated on the device as they happen and are <strong>not recorded, stored or sent anywhere</strong>. Traffic that is not blocked is passed through to your normal DNS provider untouched.</li>
+      <li><strong>Onboarding answers &amp; your recovery plan</strong>: your questionnaire responses, the plan and commitment settings you choose, and your acceptance of these terms, stored in a local database on the device.</li>
+      <li><strong>App settings</strong>: which blocking features you have enabled, your custom blocklist and allowlist, the apps you chose to lock or time-limit, and their daily time budgets.</li>
+      <li><strong>Progress</strong>: your streaks, prayer history and a daily count of how many requests were blocked, used to show your progress in the app and in its home-screen widget.</li>
+      <li><strong>Network requests, in real time</strong>: the app runs a local VPN that inspects DNS lookups (the "address book" requests your phone makes before opening a site) and blocks requests to adult or blocked domains. Lookups are checked on the device as they happen and are <strong>not recorded, stored or sent to us</strong>. Lookups that are not blocked are forwarded to your network's normal DNS provider, or, if that is unreachable, to a public DNS service (Cloudflare 1.1.1.1 or Google 8.8.8.8), exactly as your phone would do without the app.</li>
+      <li><strong>Installed apps</strong>: when you pick apps to lock or time-limit, the app reads the list of apps on your phone so you can choose from it. This list stays on your device.</li>
     </ul>
 
     <h2>3. Permissions and why they are used</h2>
     <ul>
-      <li><strong>VPN service</strong> — used solely to filter DNS requests on-device so blocked content cannot load. Be Unchained does not route your traffic through any external server and does not monitor the contents of your connections.</li>
-      <li><strong>Accessibility service</strong> — used solely to detect when the user is attempting to disable or uninstall the app's protection, so the commitment lock can be presented. It reads on-screen window information only for this purpose and does not log, transmit or store the content of your screen.</li>
-      <li><strong>Device administrator</strong> — used solely to prevent the app from being uninstalled while a protection commitment is active, supporting the accountability feature you opt into.</li>
-      <li><strong>Display over other apps</strong> — used to show the lock screen that enforces your commitment.</li>
-      <li><strong>Run at startup</strong> — used to restore your protection after the phone reboots.</li>
+      <li><strong>VPN service</strong>: used solely to filter DNS requests on the device so blocked content cannot load. Be Unchained does not route your traffic through any server of ours and does not look at the contents of your connections.</li>
+      <li><strong>Accessibility services</strong>: Be Unchained uses two accessibility services, and only if you turn them on:
+        <ul>
+          <li><em>Uninstall protection &amp; prayer lock</em>: detects when you open the screens used to force-stop, uninstall or disable the app, or (if you enabled the prayer lock) an app you chose to lock, so the challenge or prayer screen can be shown.</li>
+          <li><em>Feed &amp; app time limits</em>: detects when Instagram Reels, YouTube Shorts, TikTok, Snapchat Stories or an app you chose is on screen, to count time against the daily budget you set and close it when the budget is used up.</li>
+        </ul>
+        These services look only at which screen or app is showing. They do not record what you type, and nothing they see is stored or sent off your device.</li>
+      <li><strong>Device administrator</strong>: used solely to prevent the app from being uninstalled while a protection commitment you chose is active.</li>
+      <li><strong>Display over other apps</strong>: used to show the lock and challenge screens that enforce your commitment.</li>
+      <li><strong>Notifications &amp; alarms</strong>: used to tell you when a commitment break starts or is about to end. These notifications are created on the device.</li>
+      <li><strong>Run at startup</strong>: used to restore your protection after the phone restarts.</li>
+      <li><strong>Internet</strong>: used to forward DNS lookups as described above, to check the status of a paid subscription (section 4), and to download the app's fonts.</li>
     </ul>
-    <p>These permissions exist to enforce the protection <em>you</em> set up. They are not used for surveillance and no data gathered through them is sent off the device.</p>
+    <p>These permissions exist to enforce the protection <em>you</em> set up. They are not used for surveillance.</p>
 
     <h2>4. Payments</h2>
-    <p>Paid plans are purchased and billed through <strong>Google Play Billing</strong>. Be Unchained never sees or stores your card or payment details — that information is handled entirely by Google under Google's own privacy policy. We only receive confirmation from Google that a subscription is active.</p>
+    <p>The free trial requires no payment and no personal information. If you buy a paid plan:</p>
+    <ul>
+      <li>The app asks for your <strong>email address</strong> and opens a secure checkout page run by <strong>Stripe</strong>, our payment processor. Your card or payment details are entered on Stripe's page and are handled by Stripe under <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's Privacy Policy</a>. We never see or store your card details.</li>
+      <li>Stripe tells our payment server when a subscription starts, changes or ends. The server stores your <strong>email address</strong> together with your plan, its status and its renewal date, so the app can confirm that your plan is active. The app sends your email address to this server to check that status.</li>
+      <li>Our payment server runs on <strong>Cloudflare</strong>, which processes these requests on our behalf.</li>
+    </ul>
+    <p>Your email address is used only to process and confirm your subscription and to contact you about it if needed. It is not used for marketing and is never linked to anything you do in the app.</p>
 
-    <h2>5. Children</h2>
+    <h2>5. Fonts</h2>
+    <p>The app downloads its fonts from Google Fonts the first time they are needed. Like any web request, this lets Google see your device's IP address. No other information is sent. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</p>
+
+    <h2>6. Children</h2>
     <p>Be Unchained is intended for use by adults, or by minors with the involvement of a parent or guardian, and is not directed at children under 13. We do not knowingly collect personal information from children.</p>
 
-    <h2>6. Data sharing</h2>
-    <p>Because your data stays on your device, there is nothing for us to share with third parties. We do not sell, rent or trade your information.</p>
+    <h2>7. Data sharing</h2>
+    <p>We do not sell, rent or trade your information. The only third parties that process personal information on our behalf are Stripe (payments) and Cloudflare (hosting our payment server), and only for paid plans as described in section 4.</p>
 
-    <h2>7. Data retention and deletion</h2>
-    <p>All app data lives on your device. You can erase it at any time by clearing the app's storage in Android settings or uninstalling the app (subject to any active commitment lock you enabled).</p>
+    <h2>8. Data retention and deletion</h2>
+    <p>Data on your device stays there. You can erase it at any time by clearing the app's storage in Android settings or uninstalling the app (subject to any active commitment lock you enabled).</p>
+    <p>If you bought a paid plan, we keep your email address and subscription record for as long as your subscription is active and afterwards as long as needed for accounting and legal obligations. You can ask us to access or delete this information by emailing us (section 10). Stripe keeps its own payment records under its own policy.</p>
 
-    <h2>8. Changes to this policy</h2>
+    <h2>9. Changes to this policy</h2>
     <p>We may update this policy as the app evolves. Material changes will be reflected on this page with a new "Last updated" date.</p>
 
-    <h2>9. Contact</h2>
-    <p>Questions about your privacy? Email us at <a href="mailto:imblueale@gmail.com">imblueale@gmail.com</a>.</p>
+    <h2>10. Contact</h2>
+    <p>Questions about your privacy, or a request to access or delete your data? Email us at <a href="mailto:imblueale@gmail.com">imblueale@gmail.com</a>.</p>
   </div>
 </body>
 </html>
