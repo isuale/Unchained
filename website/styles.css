@@ -306,3 +306,8 @@ footer { border-top: 1px solid var(--line); padding: 40px 0 48px; color: var(--m
   .link i { display: none; }
   .js .reveal:not(.in) { opacity: 1; }
 }
+
+/* ---------- creator credit ---------- */
+.made { color: var(--muted); }
+.maker { color: var(--text); font-weight: 600; }
+.nowrap { white-space: nowrap; }
