@@ -42,7 +42,7 @@ flutter build apk                            # release build (applicationId: com
 flutter build appbundle                      # .aab for the Play Store (signed with the upload key)
 ```
 
-`test/widget_test.dart` is the stale default Flutter counter test and does **not** match this app (no counter widget) — it will fail if run. Replace it before relying on `flutter test`.
+The real tests are pure-logic unit tests (`commitment_test.dart`, `commitment_break_test.dart`, `streak_progress_test.dart`, `addiction_trends_test.dart`); run them by file. `test/widget_test.dart` is the stale default Flutter counter test and does **not** match this app (no counter widget) — it will fail if run. Replace it before relying on `flutter test`.
 
 ## Release signing
 
@@ -61,7 +61,29 @@ Debug-signed output says `CN=Android Debug`; correctly signed output says `CN=Be
 
 ## Architecture
 
-State management is **Riverpod 3** (`Notifier`/`NotifierProvider`, `StreamProvider`, `FutureProvider`). Navigation is **go_router** with a flat route table in `lib/core/router/app_router.dart` (initial route `/splash`). Persistence is **Drift** (SQLite). Models use **freezed**. There is no backend — everything is local.
+State management is **Riverpod 3** (`Notifier`/`NotifierProvider`, `StreamProvider`, `FutureProvider`). Navigation is **go_router** with a flat route table in `lib/core/router/app_router.dart` (initial route `/splash`). Persistence is **Drift** (SQLite). Models use **freezed**. App state is local; the only network dependency is the payments/owner-verification backend (see *Payments backend* below).
+
+### Dart ↔ native channels
+Almost every protective feature is enforced in Kotlin (`android/app/src/main/kotlin/com/unchained/unchained/`), because it must keep working while the Flutter app is closed. Each has its own `MethodChannel`, all registered in `MainActivity.kt`, and each Dart bridge follows the same shape: every call is wrapped in try/catch and returns a safe default (`false`/empty) instead of throwing.
+
+| Channel | Dart bridge | Native side |
+|---|---|---|
+| `unchained/blocking` | `features/blocking/blocking_service.dart` | `BlockingService.kt` (VPN/DNS), `BlockingStats.kt`, `BootReceiver.kt` (restart tunnel after reboot) |
+| `unchained/guard` | `features/guard/uninstall_guard_service.dart` | `UninstallGuardService.kt`, `GuardAdmin.kt`, `GuardState.kt` |
+| `unchained/applock` | `features/prayer/data/app_lock_service.dart` | `AppLockState.kt`, enforced by `UninstallGuardService.kt` |
+| `unchained/apps` | `features/prayer/data/installed_apps_service.dart` | `InstalledApps.kt` |
+| `unchained/feed_guard` | `features/dashboard/data/feed_guard_bridge.dart` | `FeedGuardService.kt`, `FeedGuardState.kt` |
+| `unchained/app_limits` | `features/app_limits/data/app_limits_bridge.dart` | same `FeedGuardService.kt`, keyed by package name |
+| `unchained/breaks` | `features/dashboard/data/break_notifications_bridge.dart` | `BreakNotifier.kt`, `BreakAlarmReceiver.kt` |
+
+Native state the watchdogs need while the app is closed lives in SharedPreferences mirrors on the Kotlin side (pushed from Dart), not in the Drift DB.
+
+- **Feed guard / App Time Limits:** a second `AccessibilityService` that enforces daily minute budgets. DNS blocking can't tell Instagram from Reels, so this one inspects the foreground node tree. The four built-in feeds (Reels, Shorts, TikTok, Snapchat Stories) use per-app detection, and Reels/Shorts match on undocumented resource-ids that can change between app versions. User-picked apps are timed as a whole app.
+- **Prayer app-locker** (`features/prayer`, routes `/pray`, `/apps`): locked apps raise a prayer gate. Completing a prayer opens a timed unlock window (`AppLockState`). It also feeds a home-screen streak widget (`PrayerStreakWidgetProvider.kt` via `home_widget`).
+- **Commitment breaks:** `BreakAlarmReceiver` is the only break code that runs with the app closed: no Flutter engine and no DB, just `BreakNotifier`'s SharedPreferences mirror.
+
+### Dev-only compile flag
+`lib/core/dev_flags.dart`: `kDevTools = bool.fromEnvironment('DEV_TOOLS')`, default false. It gates hidden test affordances such as resetting a feed's daily budget. Turn it on only for local test builds with `flutter install --dart-define=DEV_TOOLS=true -d <device-id>`. Release builds tree-shake that code away.
 
 ### Layout convention
 Code is organized by feature under `lib/features/<feature>/`, each split into `presentation/` (screens + widgets), `application/` (Riverpod notifiers/state), `domain/` (models, pure logic, static data), and `data/` (repositories). Cross-cutting code lives in `lib/core/` (database, router, i18n). `lib/shared/` is for shared widgets.
@@ -106,6 +128,8 @@ Two behaviours worth keeping if this code is touched:
 - **`install` uses `adb install -r`, never `flutter install`.** `flutter install` uninstalls the old copy first; with the guard *up* that uninstall fails harmlessly and it falls back to in-place replacement, but with the guard *down* it succeeds and **wipes the DB** (onboarding history, active plan, terms acceptance, commitment-lock anchor).
 - **Admin removal and admin granting use opposite mechanisms.** `dpm remove-active-admin` is refused for a non-test admin, so `unlock` gives the role back through the app's own `removeActiveAdmin()`; the app can only *request* admin via a system consent dialog, so `relock` re-grants it with `dpm set-active-admin` from the adb shell (which holds `MANAGE_DEVICE_ADMINS`). Each side uses its working half, which is what makes the cycle hands-free.
 
+`.claude/settings.json` has a `PostToolUse` Bash hook that runs `scripts/rearm_uninstall_protection.sh --hook` after any install command. Android turns off an app's accessibility services on every reinstall, so this script turns the watchdog back on over adb and reports all three layers. Run it with no arguments to get a full status report.
+
 Verify a real install by `lastUpdateTime` advancing while `firstInstallTime` stays put (`adb shell dumpsys package com.beunchained.app`) — that pair proves both "the install took effect" and "app data survived".
 
 ### Commitment lock
@@ -116,11 +140,22 @@ Verify a real install by `lastUpdateTime` advancing while `firstInstallTime` sta
 ### Terms & Conditions gate
 `lib/features/legal/presentation/terms_screen.dart` (route `/terms`) is not a router redirect — `splash_screen.dart` decides on every cold start: a returning user (`settings.activePlan != null`) goes to `/dashboard` if `settings.termsAccepted`, else `/terms`. In gate mode (`isGate: true`, the default) the screen is undismissable (no system-back exit) and holds a `wakelock_plus` lock so the screen can't sleep out from under the reader; it ends only via "Agree" or "Continue at own risk". Opened from Settings instead, `isGate: false` makes it a plain read-only view.
 
-### Password-gated plan switching
-`lib/features/plans/presentation/widgets/plan_password_dialog.dart` holds a hardcoded password (`_planChangePassword`) so a tester can't weaken protection by switching off the plan the onboarding questionnaire recommended. `all_plans_screen.dart` skips the dialog when the tapped plan **is** the recommended one, and requires it for any other plan.
+### Payments & owner unlock
+Paid plans go through Stripe via a Cloudflare Worker in `stripe-backend/` (`src/index.js`; see its README for one-time setup, secrets, and endpoints). The app reaches it at `StripeCheckout.backendBaseUrl` (`features/plans/domain/stripe_checkout.dart`). `EntitlementService` polls `GET /v1/entitlement?email=`, and a failed request counts as "not active yet" and is never thrown.
+
+The old hardcoded plan-change password dialog has been removed. The developer now bypasses payment with the **owner unlock** (`owner_entry_button.dart` → `owner_unlock_dialog.dart`): the app checks the typed email locally against `OwnerAccess.ownerEmail`, then the Worker emails a one-time code (`/v1/owner/request-code`, `/v1/owner/verify-code`, sent with Resend) and validates it on the server.
+
+```bash
+cd stripe-backend && npm install
+npx wrangler dev      # local
+npx wrangler deploy   # deploy
+npx wrangler tail     # live logs
+```
+
+`website/` is a static marketing site with legal pages (`index`, `paid`, `privacy`, `terms`). It has no build step.
 
 ### Persistence (Drift)
-`lib/core/database/app_database.dart` defines two tables and `schemaVersion = 6` (bump it and add an `onUpgrade` branch for any schema change — this has grown steadily as commitment-lock, terms-acceptance, and custom-list columns were added, so check the current value before assuming it's still low):
+`lib/core/database/app_database.dart` defines the tables, with `schemaVersion` at 15 as of 2026-11 (bump it and add an `onUpgrade` branch for any schema change; check the current value first because it changes often). The core tables are:
 - `UserAssessments` — append-only history of onboarding results.
 - `BlockingSettings` — a **singleton row pinned to `id = 1`**. `_ensureSettingsRow()` runs in `onCreate`, `onUpgrade`, and `beforeOpen` to guarantee the row exists. Repositories always query `id == 1`. Besides the feature toggles, it stores the commitment fields (`commitmentMode`/`commitmentTotalDays`/`commitmentBreakCount`/`commitmentCycle`), `activePlan`, `termsAccepted`, and the custom `customBlocklist`/`customAllowlist` text columns.
 
