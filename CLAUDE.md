@@ -152,7 +152,15 @@ npx wrangler deploy   # deploy
 npx wrangler tail     # live logs
 ```
 
-`website/` is a static marketing site with legal pages (`index`, `paid`, `privacy`, `terms`). It has no build step.
+`website/` is a static marketing site with legal pages (`index`, `paid`, `privacy`, `terms`). It has no build step. The privacy policy and terms describe what the app actually does (Stripe payments, the email stored by the Worker, both accessibility services, Google Fonts runtime fetch). When you change data handling, permissions or billing in the app, update them to match.
+
+**Website hosting & deploy.** beunchained.app is served by Apache on the user's home Fedora server, `doli-family-server` (LAN `192.168.1.212`, docroot `/var/www/html`), behind Cloudflare. SSH uses the alias `ssh doli-server` (see `~/.ssh/config`), which logs in as `isuale`. That account has **no passwordless sudo**, and `/var/www/html` is root-owned, so Claude can stage files but the user must run the `sudo` steps. The server also runs blockchain nodes: touch only the web folder and its config, and never restart services or install packages.
+
+1. Stage: `rsync -av --exclude 'server/' website/ doli-server:site-new/`
+2. The user runs `sudo cp -r ~/site-new/. /var/www/html/ && sudo restorecon -Rv /var/www/html`. Use `cp`, not `mv`: SELinux labels must come from the web folder.
+3. Verify against `http://192.168.1.212/` (Apache directly) and `https://beunchained.app/` (through Cloudflare).
+
+Caching: HTML is sent with `Cache-Control: no-cache` by `website/server/beunchained-cache.conf`, installed at `/etc/httpd/conf.d/`. The stylesheet is linked as `styles.css?v=<date>`. **Bump that `v=` value in all three HTML pages whenever `styles.css` changes**, otherwise Cloudflare and browsers keep serving the old CSS for hours.
 
 ### Persistence (Drift)
 `lib/core/database/app_database.dart` defines the tables, with `schemaVersion` at 15 as of 2026-11 (bump it and add an `onUpgrade` branch for any schema change; check the current value first because it changes often). The core tables are:
